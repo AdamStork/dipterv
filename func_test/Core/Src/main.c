@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -46,13 +47,16 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+char* buff = "Hello\n";
+uint8_t buff2 = 0xFF;
+uint8_t buffer[128];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void UART_encode(void);
+void UART_decode(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -89,6 +93,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
@@ -96,14 +101,25 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+//  DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
+  buffer[0] = 0x48;
+  buffer[1] = 0x65;
+  buffer[2] = 0x6c;
+  buffer[3] = 0x6c;
+  buffer[4] = 0x6f;
+  buffer[5] = 0x5c;
+  buffer[6] = 0x6e;
   while (1)
   {
     /* USER CODE END WHILE */
-
+	HAL_UART_Transmit_DMA(&huart2,buffer,7);
+	HAL_Delay(500);
+	HAL_UART_Transmit_DMA(&huart2,buffer,7);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
+
 
 /**
   * @brief System Clock Configuration
@@ -149,7 +165,17 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void UART_encode(void)
+{
+//	Command cmd = Command_init_zero;
+//	pb_ostream_t stream_out = pb_ostream_from_buffer(buffer, sizeof(buffer));
+//    UART_msg message_out = UART_msg_init_zero;
+//    pb_ostream_t stream_out = pb_ostream_from_buffer(buffer, sizeof(buffer));
+//    strcpy( message_out.cmd1, "Sending");
+//    strcpy( message_out.cmd2, "data...\n\r");
+//    status = pb_encode(&stream_out, UART_msg_fields, &message_out);
+//    message_length = stream_out.bytes_written;
+}
 /* USER CODE END 4 */
 
 /**
