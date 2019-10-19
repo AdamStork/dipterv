@@ -23,6 +23,7 @@
 #include "dma.h"
 #include "usart.h"
 #include "gpio.h"
+#include <string.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -47,7 +48,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-char* buff = "Hello\n";
+char* buff = "Hello\r\n";
 uint8_t buff2 = 0xFF;
 uint8_t buffer[128];
 /* USER CODE END PV */
@@ -55,8 +56,7 @@ uint8_t buffer[128];
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-void UART_encode(void);
-void UART_decode(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -112,9 +112,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	HAL_UART_Transmit_DMA(&huart2,buffer,7);
-	HAL_Delay(500);
-	HAL_UART_Transmit_DMA(&huart2,buffer,7);
+//	HAL_UART_Transmit_DMA(&huart2,buffer,7);
+	HAL_UART_Transmit(&huart2,(uint8_t*)buff,strlen(buff), HAL_MAX_DELAY);
+	HAL_Delay(1000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
