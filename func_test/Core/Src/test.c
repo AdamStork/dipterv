@@ -15,6 +15,7 @@
 extern char* buff;
 uint8_t buffer[128];
 uint8_t buffer_string[128];
+uint8_t rx_buffer[128];
 uint8_t status;
 size_t message_length;
 
@@ -40,4 +41,10 @@ void UART_encode(void)
 //    message_length = stream_out.bytes_written;
 }
 
-void UART_decode(void);
+// parameternek megkaphatna rx_buffert, return: status..
+void UART_decode(void)
+{
+	UART_msg message_in = UART_msg_init_zero;
+	pb_istream_t stream_in = pb_istream_from_buffer(rx_buffer, sizeof(rx_buffer));
+	status = pb_decode(&stream_in, UART_msg_fields,&message_in);
+}
