@@ -25,6 +25,8 @@
 #include "gpio.h"
 #include <string.h>
 
+#include "test.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -49,8 +51,8 @@
 
 /* USER CODE BEGIN PV */
 char* buff = "Hello\r\n";
-uint8_t buff2 = 0xFF;
-uint8_t buffer[128];
+extern uint8_t buffer[128];
+extern uint8_t buffer_string[128];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -78,7 +80,6 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -102,20 +103,23 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 //  DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
-  buffer[0] = 0x48;
-  buffer[1] = 0x65;
-  buffer[2] = 0x6c;
-  buffer[3] = 0x6c;
-  buffer[4] = 0x6f;
-  buffer[5] = 0x5c;
-  buffer[6] = 0x6e;
+//  buffer[0] = 0x48;
+//  buffer[1] = 0x65;
+//  buffer[4] = 0x6f;
+//  buffer[5] = 0x5c;
+//  buffer[6] = 0x6e;
+  UART_encode();
   while (1)
   {
     /* USER CODE END WHILE */
 //	HAL_UART_Transmit_DMA(&huart2,buffer,7);
-	HAL_UART_Transmit(&huart2,(uint8_t*)buff,strlen(buff), HAL_MAX_DELAY);
-	HAL_Delay(1000);
-    /* USER CODE BEGIN 3 */
+	HAL_UART_Transmit(&huart2,buffer,sizeof(buffer), HAL_MAX_DELAY);
+//	HAL_UART_Transmit(&huart2,buffer, strlen((char *)buffer), HAL_MAX_DELAY);
+//	HAL_UART_Transmit(&huart2,(uint8_t*)buff,strlen(buff), HAL_MAX_DELAY);
+	HAL_Delay(3000);
+	HAL_UART_Transmit(&huart2,buffer_string,strlen((char*)buffer_string), HAL_MAX_DELAY);
+	HAL_Delay(3000);
+	/* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
@@ -165,17 +169,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void UART_encode(void)
-{
-//	Command cmd = Command_init_zero;
-//	pb_ostream_t stream_out = pb_ostream_from_buffer(buffer, sizeof(buffer));
-//    UART_msg message_out = UART_msg_init_zero;
-//    pb_ostream_t stream_out = pb_ostream_from_buffer(buffer, sizeof(buffer));
-//    strcpy( message_out.cmd1, "Sending");
-//    strcpy( message_out.cmd2, "data...\n\r");
-//    status = pb_encode(&stream_out, UART_msg_fields, &message_out);
-//    message_length = stream_out.bytes_written;
-}
+
 /* USER CODE END 4 */
 
 /**

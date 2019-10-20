@@ -46,3 +46,15 @@ message Command{
  required CommandTypeEnum commandType = 1;
  optional int64 commandValue = 2;
 }
+
+
+message UART_msg {
+required string cmd1 = 1;
+required string cmd2 = 2;
+}
+
+
+message SimpleMessage {
+    required int32 lucky_number = 1;
+}
+
