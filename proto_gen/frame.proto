@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message Frame {
+	string startFrame = 1;
+	int32 length = 2;
+	string pb = 3;
+	string endFrame = 4;
+	string escaping = 5;
+}

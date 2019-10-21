@@ -24,7 +24,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include <string.h>
-
+#include <stdbool.h>
 #include "test.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -53,6 +53,8 @@
 char* buff = "Hello\r\n";
 extern uint8_t buffer[128];
 extern uint8_t buffer_string[128];
+extern uint8_t rx_buffer[128];
+uint8_t rx_tx = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -112,14 +114,26 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-//	HAL_UART_Transmit_DMA(&huart2,buffer,7);
-	HAL_UART_Transmit(&huart2,buffer,sizeof(buffer), HAL_MAX_DELAY);
-//	HAL_UART_Transmit(&huart2,buffer, strlen((char *)buffer), HAL_MAX_DELAY);
-//	HAL_UART_Transmit(&huart2,(uint8_t*)buff,strlen(buff), HAL_MAX_DELAY);
-	HAL_Delay(3000);
-	HAL_UART_Transmit(&huart2,buffer_string,strlen((char*)buffer_string), HAL_MAX_DELAY);
-	HAL_Delay(3000);
-	/* USER CODE BEGIN 3 */
+	  if(rx_tx)
+	  {
+		//	HAL_UART_Transmit_DMA(&huart2,buffer,7);
+			HAL_UART_Transmit(&huart2,buffer,sizeof(buffer), HAL_MAX_DELAY);
+			HAL_Delay(3000);
+			HAL_UART_Transmit(&huart2,buffer_string,strlen((char*)buffer_string), HAL_MAX_DELAY);
+			HAL_Delay(3000);
+	  }
+	  else
+	  {
+		  uint8_t fos = 0;
+		  fos = HAL_UART_Receive(&huart2,rx_buffer, 15, 5000);
+		  if(fos == 0)
+		  {
+			 UART_decode();
+		  }
+
+		  HAL_Delay(3000);
+	  }
+//	/* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }

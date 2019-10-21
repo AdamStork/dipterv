@@ -10,6 +10,7 @@
 #include "pb_encode.h"
 #include "pb_decode.h"
 #include "sensor.pb.h"
+#include "simple.pb.h"
 #include <stdbool.h>
 
 extern char* buff;
@@ -44,7 +45,10 @@ void UART_encode(void)
 // parameternek megkaphatna rx_buffert, return: status..
 void UART_decode(void)
 {
-	UART_msg message_in = UART_msg_init_zero;
+//	UART_msg message_in = UART_msg_init_zero;
+	SimpleMessage message_in = SimpleMessage_init_zero;
 	pb_istream_t stream_in = pb_istream_from_buffer(rx_buffer, sizeof(rx_buffer));
-	status = pb_decode(&stream_in, UART_msg_fields,&message_in);
+	status = pb_decode(&stream_in, SimpleMessage_fields,&message_in);
+	char msg[] ="Hello";
+	strcmp(msg, message_in.data);
 }
