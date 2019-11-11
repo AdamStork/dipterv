@@ -7,8 +7,10 @@
 
 #ifndef INC_TEST_H_
 #define INC_TEST_H_
+//#include <stdbool.h>
+#include "functional_test.pb.h"
 
-void UART_encode(void);
-void UART_decode(void);
+bool encode_message(uint8_t* pBuffer);
+bool decode_message(uint8_t* pBuffer, Command* msg);
 
 #endif /* INC_TEST_H_ */
