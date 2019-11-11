@@ -53,7 +53,7 @@
 char* buff = "Hello\r\n";
 extern uint8_t buffer[128];
 extern uint8_t buffer_string[128];
-extern uint8_t rx_buffer[128];
+extern uint8_t rx_buffer[5];
 uint8_t rx_tx = 0;
 /* USER CODE END PV */
 
@@ -117,15 +117,15 @@ int main(void)
 	  if(rx_tx)
 	  {
 		//	HAL_UART_Transmit_DMA(&huart2,buffer,7);
-			HAL_UART_Transmit(&huart2,buffer,sizeof(buffer), HAL_MAX_DELAY);
-			HAL_Delay(3000);
+//			HAL_UART_Transmit(&huart2,buffer_string,sizeof(buffer_string), HAL_MAX_DELAY);
+//			HAL_Delay(3000);
 			HAL_UART_Transmit(&huart2,buffer_string,strlen((char*)buffer_string), HAL_MAX_DELAY);
 			HAL_Delay(3000);
 	  }
 	  else
 	  {
 		  uint8_t fos = 0;
-		  fos = HAL_UART_Receive(&huart2,rx_buffer, 15, 5000);
+		  fos = HAL_UART_Receive(&huart2,rx_buffer, 2, HAL_MAX_DELAY);
 		  if(fos == 0)
 		  {
 			 UART_decode();

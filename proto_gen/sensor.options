@@ -1,3 +1,0 @@
-SensorDataArray.array max_count:10
-UART_msg.cmd1 max_size:40
-UART_msg.cmd2 max_size:40

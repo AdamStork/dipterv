@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-message SimpleMessage {
-	string startChar = 1;
-	string data = 2;
-	string endChar = 3;
-}
