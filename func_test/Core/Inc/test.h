@@ -13,4 +13,6 @@
 bool encode_message(uint8_t* pBuffer);
 bool decode_message(uint8_t* pBuffer, Command* msg);
 
+void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize);
+
 #endif /* INC_TEST_H_ */

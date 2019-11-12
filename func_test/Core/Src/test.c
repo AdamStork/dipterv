@@ -51,3 +51,15 @@ bool decode_message(uint8_t* pBuffer, Command* message_in)
 	return status;
 }
 
+/** @brief 	Init buffer with zeros
+ *  @param	pBuffer: pointer to buffer
+ *  @param 	pSize: size of pBuffer
+ */
+void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize)
+{
+	for(int i = 0; i<pSize; i++){
+		pBuffer[i] = 0;
+	}
+
+}
+
