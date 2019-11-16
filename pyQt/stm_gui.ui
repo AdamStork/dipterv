@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>341</width>
-    <height>168</height>
+    <height>179</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>CalculateTax</string>
+   <string>STM functional tester</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLabel" name="port_label">
@@ -46,11 +46,23 @@
     <property name="focusPolicy">
      <enum>Qt::WheelFocus</enum>
     </property>
+    <property name="toolTip">
+     <string/>
+    </property>
+    <property name="statusTip">
+     <string/>
+    </property>
+    <property name="whatsThis">
+     <string/>
+    </property>
     <property name="text">
      <string/>
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+    <property name="placeholderText">
+     <string>COM9</string>
     </property>
    </widget>
    <widget class="QPushButton" name="connect_button">
@@ -58,7 +70,7 @@
      <rect>
       <x>230</x>
       <y>10</y>
-      <width>75</width>
+      <width>81</width>
       <height>23</height>
      </rect>
     </property>
@@ -90,6 +102,32 @@
     </property>
     <property name="text">
      <string>Send command</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="command_output">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>130</y>
+      <width>191</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="close_button">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>40</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Close port</string>
     </property>
    </widget>
   </widget>
