@@ -37,6 +37,9 @@ int main(void)
 			  case CommandTypeEnum_ADC_test:
 				  break;
 			  case CommandTypeEnum_I2C_test:
+				  // perif_init()
+				  // perif_test()
+				  // perif_uninit()
 				  break;
 			  case CommandTypeEnum_SPI_test:
 				  break;
