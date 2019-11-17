@@ -21,6 +21,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_it.h"
+#include "link_layer.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -42,6 +43,14 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
+link_layer_t linkLayerRx;
+extern uint8_t receiveByte;
+extern uint8_t receiveBuffer[128];
+extern uint8_t receiveBufferLen;
+extern bool frameReady;
+
+link_layer_t linkLayerTx;
+
 
 /* USER CODE END PV */
 
@@ -208,7 +217,10 @@ void DMA1_Stream5_IRQHandler(void)
   /* USER CODE END DMA1_Stream5_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_rx);
   /* USER CODE BEGIN DMA1_Stream5_IRQn 1 */
-
+  link_parse_byte(&linkLayerRx, receiveByte);
+  if(link_get_valid_frame(&linkLayerRx,receiveBuffer, &receiveBufferLen)){
+	  frameReady = true;
+  }
   /* USER CODE END DMA1_Stream5_IRQn 1 */
 }
 
@@ -222,7 +234,7 @@ void DMA1_Stream6_IRQHandler(void)
   /* USER CODE END DMA1_Stream6_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_tx);
   /* USER CODE BEGIN DMA1_Stream6_IRQn 1 */
-
+  // todo:transmit framing
   /* USER CODE END DMA1_Stream6_IRQn 1 */
 }
 

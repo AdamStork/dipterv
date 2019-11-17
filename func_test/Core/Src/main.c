@@ -10,6 +10,13 @@
 #include <stdbool.h>
 #include "test.h"
 #include "functional_test.pb.h"
+#include "link_layer.h"
+
+bool frameReady = false;
+uint8_t receiveByte;
+uint8_t receiveBuffer[128];
+uint8_t receiveBufferLen;
+
 
 
 void SystemClock_Config(void);
@@ -22,13 +29,14 @@ int main(void)
   MX_DMA_Init();
   MX_USART2_UART_Init();
   Command message_in = Command_init_zero;
-  uint8_t receiveBuffer[128];
   buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
   bool messageDecodeSuccessful = false;
 //  message_in = Command_init_zero;
-  while (1)
-  {
-	  if(HAL_UART_Receive(&huart2,receiveBuffer, sizeof(receiveBuffer), HAL_MAX_DELAY) == 0 ){
+  while (1){
+	  HAL_UART_Receive_DMA(&huart2,(uint8_t*)&receiveByte, 1);
+	  // HAL_receive --> link_parse_byte() --> link_get_valid_frame()
+	  if(frameReady){
+		  frameReady = false;
 		  messageDecodeSuccessful = decode_message(receiveBuffer, &message_in);
 		  if(messageDecodeSuccessful){
 			  switch(message_in.commandType){
@@ -44,6 +52,7 @@ int main(void)
 			  case CommandTypeEnum_SPI_test:
 				  break;
 			  case CommandTypeEnum_LED_test:
+				  HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
 				  break;
 			  case CommandTypeEnum_GPIO_test:
 				  break;
