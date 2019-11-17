@@ -4,6 +4,26 @@
 void buffer_write(link_layer_t *handler, uint8_t byte);
 void buffer_reset(link_layer_t *handler);
 
+/*************************** RECEIVE ******************************/
+/** @brief Resets receive buffer state variables**/
+void buffer_reset(link_layer_t *handler)
+{
+    handler->frame_ready = 0;
+    handler->receive_buffer_index = 0;
+    handler->escape_next = false;
+}
+
+/** @brief Add one byte to receive buffer **/
+void buffer_write(link_layer_t *handler, uint8_t byte)
+{
+    handler->receive_buffer[handler->receive_buffer_index] = byte;
+    ++(handler->receive_buffer_index);
+}
+
+/**  @brief Analyze incoming frame byte-by-byte and signals, if data field is ready for analyzing
+ *	 @param handler: pointer to link layer handler
+ *	 @param byte: received byte
+ *	 **/
 void link_parse_byte(link_layer_t *handler, uint8_t byte)
 {
 		switch	(handler->state){
@@ -42,6 +62,9 @@ void link_parse_byte(link_layer_t *handler, uint8_t byte)
 		}
 }
 
+/** @brief Copy message to given buffer if parsing was successful
+ * @param	frame: pointer to buffer to copy the message to
+ * @param	length: buffer length is given with a pointer**/
 bool link_get_valid_frame(link_layer_t *handler, uint8_t *frame, uint8_t *length)
 {
     bool is_frame_ready = (bool)handler->frame_ready;
@@ -53,6 +76,23 @@ bool link_get_valid_frame(link_layer_t *handler, uint8_t *frame, uint8_t *length
     return is_frame_ready;
 }
 
+
+
+
+/*********************************** TRANSMIT **********************************/
+/** @brief Give function pointer to send out data with **/
+void link_set_phy_write_fn(link_layer_t *handler, void (*fn)(uint8_t*, uint8_t))
+{
+    handler->write_phy = fn;
+}
+
+
+/**@brief 	Frames and sends the data made with protocol buffer
+ * @details An ESC character is included if data contains START, END or ESC
+ * @param 	handler: pointer to link layer handler
+ * @param	data: pointer to protocol buffer data field, which will be framed
+ * @param	length: length of protocol buffer data field
+ * **/
 void link_write(link_layer_t *handler, uint8_t *data, uint8_t length)
 {
     uint8_t tx_buffer_i = 0;
@@ -81,22 +121,4 @@ void link_write(link_layer_t *handler, uint8_t *data, uint8_t length)
 
     // Send the message to the physical layer
     handler->write_phy(handler->tx_buffer, tx_buffer_i);
-}
-
-void link_set_phy_write_fn(link_layer_t *handler, void (*fn)(uint8_t*, uint8_t))
-{
-    handler->write_phy = fn;
-}
-
-void buffer_write(link_layer_t *handler, uint8_t byte)
-{
-    handler->receive_buffer[handler->receive_buffer_index] = byte;
-    ++(handler->receive_buffer_index);
-}
-
-void buffer_reset(link_layer_t *handler)
-{
-    handler->frame_ready = 0;
-    handler->receive_buffer_index = 0;
-    handler->escape_next = false;
 }
