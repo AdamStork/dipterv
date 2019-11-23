@@ -218,7 +218,8 @@ void DMA1_Stream5_IRQHandler(void)
   HAL_DMA_IRQHandler(&hdma_usart2_rx);
   /* USER CODE BEGIN DMA1_Stream5_IRQn 1 */
   link_parse_byte(&linkLayerRx, receiveByte);
-  if(link_get_valid_frame(&linkLayerRx,receiveBuffer, &receiveBufferLen)){
+  if(linkLayerRx.frame_ready){
+//  if(link_get_valid_frame(&linkLayerRx,receiveBuffer, &receiveBufferLen)){
 	  frameReady = true;
   }
   /* USER CODE END DMA1_Stream5_IRQn 1 */

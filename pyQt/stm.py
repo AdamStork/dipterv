@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import serial
 import functional_test_pb2
+import link_layer
 
 qtcreator_file  = "D:/Work/dipterv/pyQt/stm_gui.ui" # Enter file here.
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtcreator_file)
@@ -19,6 +20,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.connect_button.clicked.connect(self.connect)
         self.command_button.clicked.connect(self.send_command)
         self.close_button.clicked.connect(self.close_port)
+
     def connect(self):
         try:
             global ser
@@ -30,6 +32,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 is_port_open = 'Error opening port'
         self.connection_output.setText(is_port_open)
+
     def close_port(self):
         if ser.is_open:
             try:
@@ -40,11 +43,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             is_port_open = 'Port is not open'
         self.connection_output.setText(is_port_open)
+
     def send_command(self):
         global ser
         cmd = functional_test_pb2.Command()
-        cmd.commandType = functional_test_pb2.CommandTypeEnum.I2C_test
+        cmd.commandType = functional_test_pb2.CommandTypeEnum.LED_test
         pb = cmd.SerializeToString()
+#       print(len(pb))
         try:
             ser.write(pb)
             command_send_success = 'Command sent'
@@ -54,7 +59,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 command_send_success = 'Port is not open'
         self.command_output.setText(command_send_success)
-
 
 
 if __name__ == "__main__":

@@ -21,7 +21,6 @@ typedef struct link_layer
     uint8_t receive_buffer[MSG_LENGTH_MAX];
     uint8_t receive_buffer_index;
     uint8_t tx_buffer[MSG_LENGTH_MAX];
-    bool escape_next;
     volatile sig_atomic_t frame_ready;
     void (*write_phy) (uint8_t *data, uint8_t length);
     UnEscapingState state;

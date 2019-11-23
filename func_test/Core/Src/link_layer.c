@@ -10,7 +10,6 @@ void buffer_reset(link_layer_t *handler)
 {
     handler->frame_ready = 0;
     handler->receive_buffer_index = 0;
-    handler->escape_next = false;
 }
 
 /** @brief Add one byte to receive buffer **/

@@ -1,3 +1,3 @@
 {
-    "files": ["stm.py","stm_gui.ui","functional_test_pb2.py"]
+    "files": ["functional_test_pb2.py","stm.py","stm_gui.ui","link_layer.py"]
 }
