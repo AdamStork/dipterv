@@ -34,8 +34,15 @@ class link_layer:
     def link_send_data(self, pb_data):
         self.tx_buffer.clear()
         self.tx_buffer = [self.BYTE_START]
-        for i in bytes(data):
+        for i in bytes(pb_data):
             if i in self.BYTES_TO_ESCAPE:
-                tx_buffer.append(i)
-        tx_buffer.append(self.BYTE_END)
+                self.tx_buffer.append(self.BYTE_ESC)
+            self.tx_buffer.append(i)    
+        self.tx_buffer.append(self.BYTE_END)
 
+##LL = link_layer()
+##LL.escape_happened
+##data = "Z0~0"
+##data = data.encode()
+##LL.link_send_data(data)
+##print(LL.tx_buffer)

@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import serial
 import functional_test_pb2
-import link_layer
+from link_layer import link_layer
 
 qtcreator_file  = "D:/Work/dipterv/pyQt/stm_gui.ui" # Enter file here.
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtcreator_file)
@@ -20,6 +20,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.connect_button.clicked.connect(self.connect)
         self.command_button.clicked.connect(self.send_command)
         self.close_button.clicked.connect(self.close_port)
+
+    def __call__(self):
+        return self        
 
     def connect(self):
         try:
@@ -49,7 +52,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         cmd = functional_test_pb2.Command()
         cmd.commandType = functional_test_pb2.CommandTypeEnum.LED_test
         pb = cmd.SerializeToString()
-#       print(len(pb))
+        LL = link_layer()
+        LL.link_send_data(pb)   # frame data
+        print(LL.tx_buffer)
         try:
             ser.write(pb)
             command_send_success = 'Command sent'
@@ -66,3 +71,4 @@ if __name__ == "__main__":
     window = MyWindow()
     window.show()
     sys.exit(app.exec_())
+    
