@@ -14,6 +14,7 @@
 
 bool frameReady = false;
 uint8_t receiveByte;
+uint8_t transmitByte;
 uint8_t receiveBuffer[128];
 uint8_t receiveBufferLen;
 
@@ -31,10 +32,9 @@ int main(void)
   Command message_in = Command_init_zero;
   buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
   bool messageDecodeSuccessful = false;
-//  message_in = Command_init_zero;
+
   while (1){
 	  HAL_UART_Receive_DMA(&huart2,(uint8_t*)&receiveByte, 1);
-	  // HAL_receive --> link_parse_byte() --> link_get_valid_frame()
 	  if(frameReady){
 		  frameReady = false;
 		  messageDecodeSuccessful = decode_message(receiveBuffer, &message_in);
@@ -53,6 +53,9 @@ int main(void)
 				  break;
 			  case CommandTypeEnum_LED_test:
 				  HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+				  transmitByte = true;
+				  // transmitByte --> protobuf --> framing --> protobuf
+//				  HAL_UART_Transmit_DMA(&huart2,,1);
 				  break;
 			  case CommandTypeEnum_GPIO_test:
 				  break;

@@ -56,7 +56,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         LL.link_send_data(pb)   # frame data
         print(LL.tx_buffer)
         try:
-            ser.write(pb)
+            ser.write(LL.tx_buffer)
             command_send_success = 'Command sent'
         except serial.serialutil.SerialException:
             if ser.is_open:
