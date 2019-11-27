@@ -10,10 +10,11 @@
 //#include <stdbool.h>
 #include "functional_test.pb.h"
 
-bool encode_message(uint8_t* pBuffer);
+bool encode_message(uint8_t* pBuffer,Command* message_out);
 bool decode_message(uint8_t* pBuffer, Command* msg);
 
 void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize);
+void buffer_send(uint8_t* pBuffer, uint8_t pSize);
 
 void i2c_init(void);
 void i2c_test(void);
