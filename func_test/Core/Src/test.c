@@ -65,5 +65,5 @@ void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize)
 
 void buffer_send(uint8_t* pBuffer, uint8_t pSize)
 {
-	HAL_UART_Transmit_DMA(&huart2,pBuffer, pSize);
+	HAL_UART_Transmit(&huart2,pBuffer, pSize, HAL_MAX_DELAY);
 }

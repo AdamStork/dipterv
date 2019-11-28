@@ -35,6 +35,7 @@ int main(void)
   Command message_out = Command_init_zero;
   buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
   bool messageDecodeSuccessful = false;
+  bool testToggle = false;
 
   while (1){
 	  HAL_UART_Receive_DMA(&huart2,(uint8_t*)&receiveByte, 1);
@@ -56,8 +57,14 @@ int main(void)
 				  break;
 			  case CommandTypeEnum_LED_test:
 				  HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-				  transmitByte = true;
-				  message_out.commandType = CommandTypeEnum_LED_test;
+				  if(testToggle){
+					  message_out.commandType = CommandTypeEnum_LED_test;
+					  testToggle = false;
+				  }
+				  else{
+					  message_out.commandType = CommandTypeEnum_GPIO_test;
+					  testToggle = true;
+				  }
 				  encode_message(transmitBuffer,&message_out);
 				  link_set_phy_write_fn(&linkLayer,&buffer_send);
 				  link_write(&linkLayer,transmitBuffer,strlen((char*)transmitBuffer));

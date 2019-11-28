@@ -17,7 +17,7 @@ class link_layer:
         self.received_frames = queue.Queue()
 
     """ Unframe data using start, end, escape bytes """
-    def link_receive_data(self, data):
+    def link_unframe_data(self, data):
         for i in data:
             if i == self.BYTE_START:
                 self.rx_buffer.clear()
@@ -31,7 +31,7 @@ class link_layer:
             else:
                 self.rx_buffer.append(i)
     """ Frame data with start, end, escape bytes """
-    def link_send_data(self, pb_data):
+    def link_frame_data(self, pb_data):
         self.tx_buffer.clear()
         self.tx_buffer = [self.BYTE_START]
         for i in bytes(pb_data):

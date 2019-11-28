@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>341</width>
-    <height>179</height>
+    <height>240</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -94,7 +94,7 @@
    <widget class="QPushButton" name="command_button">
     <property name="geometry">
      <rect>
-      <x>80</x>
+      <x>100</x>
       <y>80</y>
       <width>161</width>
       <height>41</height>
@@ -107,9 +107,9 @@
    <widget class="QLabel" name="command_output">
     <property name="geometry">
      <rect>
-      <x>80</x>
+      <x>100</x>
       <y>130</y>
-      <width>191</width>
+      <width>161</width>
       <height>21</height>
      </rect>
     </property>
@@ -128,6 +128,29 @@
     </property>
     <property name="text">
      <string>Close port</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="response_output">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>160</y>
+      <width>161</width>
+      <height>41</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>160</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Response (hex)</string>
     </property>
    </widget>
   </widget>
