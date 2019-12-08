@@ -11,6 +11,7 @@
 #include "test.h"
 #include "functional_test.pb.h"
 #include "link_layer.h"
+#include "i2c.h"
 
 bool frameReady = false;
 uint8_t receiveByte;
@@ -31,6 +32,7 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART2_UART_Init();
+  MX_I2C1_Init();
   Command message_in = Command_init_zero;
   Command message_out = Command_init_zero;
   buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
