@@ -1,0 +1,146 @@
+syntax = "proto2";
+
+// Command types
+enum CommandTypeEnum{
+  STOP_CURRENT_TEST = 0;
+  ADC_test = 1;
+  I2C_test = 2;
+  SPI_test = 4;
+  LED_test = 6;
+  GPIO_test = 7;
+  TIMER_SINGLE_SHOT = 8;
+  RTC_test = 9;
+  PWM = 10;
+}
+
+// I2C options - descriptionben megadni melyik i2c interfeszt konfigolja fel
+message i2cTest{
+ required  bool direction = 1; 			// 1: read, 0: write
+ required  uint32 regAddr = 2;
+ optional   uint32 regData = 3;
+}
+
+
+// SPI options
+enum spiDirection{
+	FULL_DUPLEX_MASTER = 0;
+	FULL_DUPLEX_SLAVE = 1;
+	HALF_DUPLEX_MASTER = 2;
+	HALF_DUPLEX_SLAVE = 3;
+	RECEIVE_ONLY_MASTER = 4;
+	RECEIVE_ONLY_SLAVE = 5;
+	TRANSMIT_ONLY_MASTER = 6;
+	TRANSMIT_ONLY_SLAVE = 7;
+}
+
+message spiTest{
+ required  spiDirection direction = 1; 			
+ optional  uint32 regData = 2;
+ optional	uint32 	spiMode = 3;  // 0..3 spimodes
+}
+
+
+
+// GPIO options
+enum gpioPin{
+	PA0 = 0;
+	PA1 = 1;
+	PA2 = 2;
+	PA3 = 3;
+	PA4 = 4;
+	PA5 = 5;
+	PA6 = 6;
+	PA7 = 7;
+	PA8 = 8;
+	PA9 = 9;
+	PA10 = 10;
+	PA11 = 11;
+	PA12 = 12;
+	PA13 = 13;
+	PA14 = 14;
+	PA15 = 15;
+	PB0 = 20;
+	PB1 = 21;
+	PB2 = 22;
+	PB3 = 23;
+	PB4 = 24;
+	PB5 = 25;
+	PB6 = 26;
+	PB7 = 27;
+	PB8 = 28;
+	PB9 = 29;
+	PB10 = 30;
+	PB11 = 31;
+	PB12 = 32;
+	PB13 = 33;
+	PB14 = 34;
+	PB15 = 35;
+	PC0 = 40;
+	PC1 = 41;
+	PC2 = 42;
+	PC3 = 43;
+	PC4 = 44;
+	PC5 = 45;
+	PC6 = 46;
+	PC7 = 47;
+	PC8 = 48;
+	PC9 = 49;
+	PC10 = 50;
+	PC11 = 51;
+	PC12 = 52;
+	PC13 = 53;
+	PC14 = 54;
+	PC15 = 55;
+}
+
+enum gpioDirection{
+	GPIO_INPUT = 0;
+	GPIO_OUTPUT = 1;
+}
+
+enum gpioPinState{
+	LOW = 0;
+	HIGH = 1;
+}
+
+message gpioTest{
+ required gpioPin pin = 1;
+ required gpioDirection direction = 2;  // vhogy jelezni egy IT rutin ledvillantassal ha input
+ required gpioPinState pinState = 3;
+}
+
+// Timer options
+message timerTest{
+ required gpioDirection direction = 1;
+ required gpioPinState pinState = 2;
+}
+
+// PWM options
+message pwmTest{
+ required gpioPin pin = 1;
+ required uint32 frequency = 2;
+ required uint32 dutyCycle = 3;
+}
+
+
+// LED test options - only if LED is connected directly for a GPIO pin
+message ledTest{
+ required  bool ledState = 1;
+ optional uint32 gpioPort = 2;
+ optional 	uint32	gpioPin = 3; // LD2 default: PA5
+ optional 	uint32 	blinkingFrequency = 4;
+ optional	uint32	luminance = 5; // duty cycle
+}
+
+// Main message
+message Command{
+ required 	CommandTypeEnum commandType = 1;
+ optional 	i2cTest 	i2cTestType = 2;
+ optional	spiTest 	spiTestType = 3;
+ optional	gpioTest	gpioTestType = 5;
+ optional  timerTest  timerTestType = 6;
+ optional pwmTest 	pwmTestType = 7;
+ optional	ledTest 	ledTesType = 10;	
+}
+
+
