@@ -1,11 +1,7 @@
-/nanopb-0.3.9.3-linux-x86/
-/nanopb-0.3.9.4-windows-x86/
 /nanopb-0.3.9.3-windows-x86/
 /protobuf/
-/FuncPy/venv/
 /python/
 /pyQt/__pycache__/
-/FuncPy/.idea/
 .cproject
 language_settings.xml
 org.eclipse.cdt.core.prefs
