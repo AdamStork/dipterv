@@ -11,7 +11,6 @@
 #include "usart.h"
 #include "test.h"
 #include "link_layer.h"
-#include "functional_test.pb.h"
 
 
 bool frameReady = false;
@@ -31,11 +30,8 @@ link_layer_t linkLayer;
 bool encode_message(uint8_t* pBuffer,Command* message_out)
 {
 	bool status;
-//	size_t message_length;
-//	Command message_out_2 = Command_init_zero; // init_zero must be executed at declaration
 	pb_ostream_t stream_out = pb_ostream_from_buffer(pBuffer,sizeof(pBuffer));
 	status = pb_encode(&stream_out,Command_fields,message_out);
-//	message_length = stream_out.bytes_written;
 	return status;
 }
 
@@ -48,8 +44,6 @@ bool encode_message(uint8_t* pBuffer,Command* message_out)
 bool decode_message(uint8_t* pBuffer, Command* message_in)
 {
 	bool status;
-//	size_t message_length;
-//	Command message_in = Command_init_zero; // init_zero must be executed at declaration
 	pb_istream_t stream_in = pb_istream_from_buffer(pBuffer, sizeof(pBuffer));
 	status = pb_decode(&stream_in, Command_fields,message_in);
 	return status;
@@ -118,8 +112,6 @@ void enter_processing_state(void)
 				  encode_message(transmitBuffer,&message_out);
 				  link_set_phy_write_fn(&linkLayer,&buffer_send);
 				  link_write(&linkLayer,transmitBuffer,strlen((char*)transmitBuffer));
-				  // transmitByte --> protobuf --> framing --> protobuf
-	//				  HAL_UART_Transmit_DMA(&huart2,,1);
 				  break;
 			  case CommandTypeEnum_GPIO_test:
 				  break;
@@ -137,3 +129,6 @@ void enter_processing_state(void)
 	}
 
 }
+
+
+/** TODO: I2C test: perif init, test: write,  perif uninit **/
