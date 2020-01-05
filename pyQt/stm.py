@@ -30,8 +30,15 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return self        
 
     def fill_cmd_box(self):
-        self.cmd_box.addItem("LED_test",functional_test_pb2.CommandTypeEnum.LED_test)
+        self.cmd_box.addItem("STOP_CURRENT_TEST",functional_test_pb2.CommandTypeEnum.STOP_CURRENT_TEST)
+        self.cmd_box.addItem("ADC_test",functional_test_pb2.CommandTypeEnum.ADC_test)
         self.cmd_box.addItem("I2C_test",functional_test_pb2.CommandTypeEnum.I2C_test)
+        self.cmd_box.addItem("SPI_test",functional_test_pb2.CommandTypeEnum.SPI_test)
+        self.cmd_box.addItem("LED_test",functional_test_pb2.CommandTypeEnum.LED_test)
+        self.cmd_box.addItem("GPIO_test",functional_test_pb2.CommandTypeEnum.GPIO_test)
+        self.cmd_box.addItem("TIMER_SINGLE_SHOT",functional_test_pb2.CommandTypeEnum.TIMER_SINGLE_SHOT)
+        self.cmd_box.addItem("RTC_test",functional_test_pb2.CommandTypeEnum.RTC_test)
+        self.cmd_box.addItem("PWM_test",functional_test_pb2.CommandTypeEnum.PWM)
 
     def onChanged(self,text):
         # Ha I2C akkor jelenjenek meg ujabb input mezok stb --> show_data_depending_on_cmd_type
@@ -76,6 +83,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             ser.write(LL.tx_buffer)
             command_send_success = 'Command sent'
+            # Bajtszam beolvasas attol fugg --> read_data_depending_on_cmd_type - return: bajtszam
             response_data = ser.read(4)
             LL.link_unframe_data(response_data)
             response_list = []
