@@ -34,7 +34,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cmd_box.addItem("I2C_test",functional_test_pb2.CommandTypeEnum.I2C_test)
 
     def onChanged(self,text):
-        # Ha I2C akkor jelenjenek meg ujabb input mezok stb
+        # Ha I2C akkor jelenjenek meg ujabb input mezok stb --> show_data_depending_on_cmd_type
 #        self.qlabel.setText(text)
         print(self.cmd_box.currentData())
         self.show()
@@ -68,6 +68,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         cmd = functional_test_pb2.Command()
         cmd.commandType = self.cmd_box.currentData()
 #        print(cmd.commandType)
+# Ha cmd Type I2c, akkor adjuk hozza a regisztert, cimet is --> add_data_depending_on_cmd_type
         pb = cmd.SerializeToString()
         LL = link_layer()
         LL.link_frame_data(pb)   # frame data
