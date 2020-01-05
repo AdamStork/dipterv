@@ -1,5 +1,6 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtWidgets import QComboBox
 from decimal import Decimal
 
 import serial
@@ -22,9 +23,21 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.connect_button.clicked.connect(self.connect)
         self.command_button.clicked.connect(self.send_command)
         self.close_button.clicked.connect(self.close_port)
+        self.fill_cmd_box()
+        self.cmd_box.activated[str].connect(self.onChanged)
 
     def __call__(self):
         return self        
+
+    def fill_cmd_box(self):
+        self.cmd_box.addItem("LED_test",functional_test_pb2.CommandTypeEnum.LED_test)
+        self.cmd_box.addItem("I2C_test",functional_test_pb2.CommandTypeEnum.I2C_test)
+
+    def onChanged(self,text):
+        # Ha I2C akkor jelenjenek meg ujabb input mezok stb
+#        self.qlabel.setText(text)
+        print(self.cmd_box.currentData())
+        self.show()
 
     def connect(self):
         try:
@@ -53,7 +66,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def send_command(self):
         global ser
         cmd = functional_test_pb2.Command()
-        cmd.commandType = functional_test_pb2.CommandTypeEnum.LED_test
+        cmd.commandType = self.cmd_box.currentData()
+#        print(cmd.commandType)
         pb = cmd.SerializeToString()
         LL = link_layer()
         LL.link_frame_data(pb)   # frame data
