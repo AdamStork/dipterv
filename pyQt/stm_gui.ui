@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>341</width>
-    <height>330</height>
+    <width>364</width>
+    <height>434</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,17 +17,17 @@
    <widget class="QLabel" name="port_label">
     <property name="geometry">
      <rect>
-      <x>9</x>
-      <y>15</y>
+      <x>20</x>
+      <y>20</y>
       <width>35</width>
       <height>19</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
+      <pointsize>8</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
      </font>
     </property>
     <property name="text">
@@ -37,8 +37,8 @@
    <widget class="QLineEdit" name="port_box">
     <property name="geometry">
      <rect>
-      <x>73</x>
-      <y>15</y>
+      <x>83</x>
+      <y>45</y>
       <width>133</width>
       <height>20</height>
      </rect>
@@ -68,8 +68,8 @@
    <widget class="QPushButton" name="connect_button">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>10</y>
+      <x>240</x>
+      <y>40</y>
       <width>81</width>
       <height>23</height>
      </rect>
@@ -81,8 +81,8 @@
    <widget class="QLabel" name="connection_output">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>40</y>
+      <x>100</x>
+      <y>70</y>
       <width>111</width>
       <height>20</height>
      </rect>
@@ -97,8 +97,8 @@
    <widget class="QPushButton" name="command_button">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>140</y>
+      <x>170</x>
+      <y>250</y>
       <width>111</width>
       <height>41</height>
      </rect>
@@ -110,8 +110,8 @@
    <widget class="QLabel" name="command_output">
     <property name="geometry">
      <rect>
-      <x>110</x>
-      <y>180</y>
+      <x>160</x>
+      <y>280</y>
       <width>101</width>
       <height>21</height>
      </rect>
@@ -126,8 +126,8 @@
    <widget class="QPushButton" name="close_button">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>40</y>
+      <x>240</x>
+      <y>70</y>
       <width>81</width>
       <height>23</height>
      </rect>
@@ -139,32 +139,91 @@
    <widget class="QTextEdit" name="response_output">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>230</y>
-      <width>161</width>
+      <x>30</x>
+      <y>350</y>
+      <width>281</width>
       <height>41</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="response_label">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>230</y>
+      <x>20</x>
+      <y>300</y>
       <width>81</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Response (hex)</string>
     </property>
    </widget>
-   <widget class="QLabel" name="cmdSelectLabel">
+   <widget class="QLabel" name="cmd_label">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>90</y>
+      <x>20</x>
+      <y>120</y>
       <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Command</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="cmd_box">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>150</y>
+      <width>141</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="Line" name="cmd_line">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>130</y>
+      <width>301</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="Line" name="port_line">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>301</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="select_cmd_label">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>150</y>
+      <width>101</width>
       <height>16</height>
      </rect>
     </property>
@@ -172,14 +231,30 @@
      <string>Select command</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="cmd_box">
+   <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>90</y>
-      <width>141</width>
-      <height>22</height>
+      <x>30</x>
+      <y>190</y>
+      <width>47</width>
+      <height>13</height>
      </rect>
+    </property>
+    <property name="text">
+     <string>Options</string>
+    </property>
+   </widget>
+   <widget class="Line" name="response_line">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>320</y>
+      <width>301</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
     </property>
    </widget>
   </widget>
@@ -188,7 +263,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>341</width>
+     <width>364</width>
      <height>21</height>
     </rect>
    </property>

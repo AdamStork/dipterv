@@ -83,7 +83,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             ser.write(LL.tx_buffer)
             command_send_success = 'Command sent'
-            # Bajtszam beolvasas attol fugg --> read_data_depending_on_cmd_type - return: bajtszam
+            # Bajtszam beolvasas attol fugg --> read_data_depending_on_cmd_type - return: bajtszam,
+            # csak ha nagyobb mint 0
             response_data = ser.read(4)
             LL.link_unframe_data(response_data)
             response_list = []
