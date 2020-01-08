@@ -6,112 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>364</width>
-    <height>442</height>
+    <width>317</width>
+    <height>465</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>STM functional tester</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="port_label">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>20</y>
-      <width>35</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>8</pointsize>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Port</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="port_box">
-    <property name="geometry">
-     <rect>
-      <x>83</x>
-      <y>45</y>
-      <width>133</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::WheelFocus</enum>
-    </property>
-    <property name="toolTip">
-     <string/>
-    </property>
-    <property name="statusTip">
-     <string/>
-    </property>
-    <property name="whatsThis">
-     <string/>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-    <property name="placeholderText">
-     <string>COM9</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="connect_button">
-    <property name="geometry">
-     <rect>
-      <x>240</x>
-      <y>40</y>
-      <width>81</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Connect</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="connection_output">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>70</y>
-      <width>111</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="command_button">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>280</y>
-      <width>111</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Send command</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="command_output">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>290</y>
+      <x>520</x>
+      <y>280</y>
       <width>101</width>
       <height>21</height>
      </rect>
@@ -123,180 +30,249 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QPushButton" name="close_button">
+   <widget class="QGroupBox" name="port_GB">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>70</y>
-      <width>81</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Close port</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="response_output">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>360</y>
+      <x>10</x>
+      <y>9</y>
       <width>291</width>
-      <height>41</height>
+      <height>111</height>
      </rect>
     </property>
+    <property name="title">
+     <string>Port</string>
+    </property>
+    <widget class="QWidget" name="gridLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>241</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetNoConstraint</enum>
+      </property>
+      <property name="leftMargin">
+       <number>12</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <property name="horizontalSpacing">
+       <number>12</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>6</number>
+      </property>
+      <item row="1" column="0">
+       <widget class="QLabel" name="connection_output">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>11</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLineEdit" name="port_box">
+        <property name="focusPolicy">
+         <enum>Qt::WheelFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string/>
+        </property>
+        <property name="statusTip">
+         <string/>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="placeholderText">
+         <string>COM9</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="connect_button">
+        <property name="text">
+         <string>Connect</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="close_button">
+        <property name="text">
+         <string>Close port</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
-   <widget class="QLabel" name="response_label">
+   <widget class="QGroupBox" name="cmd_GB">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>320</y>
-      <width>81</width>
-      <height>31</height>
+      <x>10</x>
+      <y>150</y>
+      <width>291</width>
+      <height>191</height>
      </rect>
     </property>
-    <property name="font">
-     <font>
-      <pointsize>8</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Response (hex)</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="cmd_label">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>120</y>
-      <width>91</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>8</pointsize>
-     </font>
-    </property>
-    <property name="text">
+    <property name="title">
      <string>Command</string>
     </property>
+    <widget class="QWidget" name="gridLayoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>221</width>
+       <height>151</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cmd_box"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="select_cmd_label">
+        <property name="text">
+         <string>Select command</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="command_button">
+        <property name="text">
+         <string>Send command</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Options</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
-   <widget class="QComboBox" name="cmd_box">
+   <widget class="QGroupBox" name="response_GB">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>150</y>
-      <width>141</width>
-      <height>22</height>
+      <x>10</x>
+      <y>360</y>
+      <width>291</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Response (hex)</string>
+    </property>
+    <widget class="QWidget" name="verticalLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>271</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QTextEdit" name="response_output"/>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QMdiArea" name="mdiArea">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>2190</width>
+      <height>720</height>
      </rect>
     </property>
    </widget>
-   <widget class="Line" name="cmd_line">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>130</y>
-      <width>301</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="Line" name="port_line">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>30</y>
-      <width>301</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="QLabel" name="select_cmd_label">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>150</y>
-      <width>101</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Select command</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>190</y>
-      <width>47</width>
-      <height>13</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Options</string>
-    </property>
-   </widget>
-   <widget class="Line" name="response_line">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>340</y>
-      <width>301</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <zorder>label_3</zorder>
-   <zorder>port_label</zorder>
-   <zorder>port_box</zorder>
-   <zorder>connection_output</zorder>
-   <zorder>command_button</zorder>
+   <zorder>mdiArea</zorder>
    <zorder>command_output</zorder>
-   <zorder>close_button</zorder>
-   <zorder>response_output</zorder>
-   <zorder>response_label</zorder>
-   <zorder>cmd_label</zorder>
-   <zorder>cmd_box</zorder>
-   <zorder>cmd_line</zorder>
-   <zorder>port_line</zorder>
-   <zorder>select_cmd_label</zorder>
-   <zorder>response_line</zorder>
-   <zorder>connect_button</zorder>
-   <zorder>verticalSpacer</zorder>
+   <zorder>port_GB</zorder>
+   <zorder>cmd_GB</zorder>
+   <zorder>response_GB</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>364</width>
+     <width>317</width>
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSave_config"/>
+    <addaction name="actionLoad_config"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionContext_help"/>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
+  <action name="actionSave_config">
+   <property name="text">
+    <string>Save config</string>
    </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
+  </action>
+  <action name="actionLoad_config">
+   <property name="text">
+    <string>Load config</string>
+   </property>
+  </action>
+  <action name="actionContext_help">
+   <property name="text">
+    <string>Context help</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
