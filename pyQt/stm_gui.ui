@@ -14,22 +14,6 @@
    <string>STM functional tester</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="command_output">
-    <property name="geometry">
-     <rect>
-      <x>520</x>
-      <y>280</y>
-      <width>101</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
    <widget class="QGroupBox" name="port_GB">
     <property name="geometry">
      <rect>
@@ -180,6 +164,13 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="command_output">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </widget>
@@ -201,7 +192,7 @@
        <x>10</x>
        <y>20</y>
        <width>271</width>
-       <height>41</height>
+       <height>73</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -222,7 +213,6 @@
     </property>
    </widget>
    <zorder>mdiArea</zorder>
-   <zorder>command_output</zorder>
    <zorder>port_GB</zorder>
    <zorder>cmd_GB</zorder>
    <zorder>response_GB</zorder>
