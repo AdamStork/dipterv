@@ -52,6 +52,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.show_data_depending_on_cmd_type(self.cmd_box.currentData())
         self.show()
 
+    def on_changed_rw(self):
+        print("R/W selection:", self.i2c_rw_select.currentData())
+
     # Show data depending on the command type selected
     def show_data_depending_on_cmd_type(self,cmdType):
         if cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
@@ -69,12 +72,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_addr_label = QLabel("I2C address", self)
                 self.i2c_reg_label = QLabel("I2C register", self)
                 self.i2c_rw_label = QLabel("I2C R/W", self)
-                self.i2c_bus_select = QComboBox(self)                   ## TODO: melyik buszok elerhetok
+                self.i2c_bus_select = QComboBox(self)                   # TODO: melyik buszok elerhetok: addItem()
                 self.i2c_addr_select = QLineEdit(self)
                 self.i2c_reg_select = QLineEdit(self)
                 self.i2c_rw_select = QComboBox(self)
-                self.i2c_rw_select.addItem("Read",0)
-                self.i2c_rw_select.addItem("Write",0)
+                self.i2c_rw_select.addItem("Read",functional_test_pb2.i2cDirection.I2C_read)
+                self.i2c_rw_select.addItem("Write",functional_test_pb2.i2cDirection.I2C_write)
+                self.i2c_rw_select.activated[str].connect(self.on_changed_rw)
                 self.options_layout.addWidget(self.i2c_bus_label,0,0)
                 self.options_layout.addWidget(self.i2c_addr_label,1,0)
                 self.options_layout.addWidget(self.i2c_reg_label,2,0)
