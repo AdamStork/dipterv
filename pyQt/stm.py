@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtWidgets import *
 from decimal import Decimal
 
 import serial
@@ -14,21 +14,26 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(qtcreator_file)
 
 ser = serial.Serial()
 
-
 class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    # Initialization
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         self.connect_button.clicked.connect(self.connect)
-        self.command_button.clicked.connect(self.send_command)
+        self.cmd_button.clicked.connect(self.send_command)
         self.close_button.clicked.connect(self.close_port)
         self.fill_cmd_box()
-        self.cmd_box.activated[str].connect(self.onChanged)
+        self.cmd_box.activated[str].connect(self.on_changed)
+        # flags: avoid command reselection
+        self.I2C_active = False
+        self.LED_active = False
+        self.SPI_active = False
 
     def __call__(self):
-        return self        
+        return self
 
+    # Fill combobox with commands
     def fill_cmd_box(self):
         self.cmd_box.addItem("STOP_CURRENT_TEST",functional_test_pb2.CommandTypeEnum.STOP_CURRENT_TEST)
         self.cmd_box.addItem("ADC_test",functional_test_pb2.CommandTypeEnum.ADC_test)
@@ -40,12 +45,56 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cmd_box.addItem("RTC_test",functional_test_pb2.CommandTypeEnum.RTC_test)
         self.cmd_box.addItem("PWM_test",functional_test_pb2.CommandTypeEnum.PWM)
 
-    def onChanged(self,text):
-        # Ha I2C akkor jelenjenek meg ujabb input mezok stb --> show_data_depending_on_cmd_type
-#        self.qlabel.setText(text)
-        print(self.cmd_box.currentData())
+    # Called whenever a command is selected
+    def on_changed(self,text):
+        print("CmdType:",self.cmd_box.currentData())
+        self.delete_all_child_widget(self.options_layout)
+        self.show_data_depending_on_cmd_type(self.cmd_box.currentData())
         self.show()
 
+    # Show data depending on the command type selected
+    def show_data_depending_on_cmd_type(self,cmdType):
+        if cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
+            print("LED options")
+            if self.LED_active == False:
+                self.LED_active = True
+                self.led_label = QLabel("Label test", self)
+                self.options_layout.addWidget(self.led_label)
+
+        elif cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
+            print("I2C options")
+            if self.I2C_active == False:
+                self.I2C_active = True
+                self.i2c_bus_label = QLabel("I2C bus", self)
+                self.i2c_addr_label = QLabel("I2C address", self)
+                self.i2c_reg_label = QLabel("I2C register", self)
+                self.i2c_rw_label = QLabel("I2C R/W", self)
+                self.i2c_bus_select = QComboBox(self)                   ## TODO: melyik buszok elerhetok
+                self.i2c_addr_select = QLineEdit(self)
+                self.i2c_reg_select = QLineEdit(self)
+                self.i2c_rw_select = QComboBox(self)
+                self.i2c_rw_select.addItem("Read",0)
+                self.i2c_rw_select.addItem("Write",0)
+                self.options_layout.addWidget(self.i2c_bus_label,0,0)
+                self.options_layout.addWidget(self.i2c_addr_label,1,0)
+                self.options_layout.addWidget(self.i2c_reg_label,2,0)
+                self.options_layout.addWidget(self.i2c_rw_label,3,0)
+                self.options_layout.addWidget(self.i2c_bus_select,0,2)
+                self.options_layout.addWidget(self.i2c_addr_select,1,2)
+                self.options_layout.addWidget(self.i2c_reg_select,2,2)
+                self.options_layout.addWidget(self.i2c_rw_select,3,2)
+
+        elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
+            print("SPI options")
+
+    # Delete all child widget from a layout
+    def delete_all_child_widget(self, layout):
+        for i in reversed(range(layout.count())):
+            layout.itemAt(i).widget().setParent(None)
+        self.LED_active = False
+        self.I2C_active = False
+
+    # Connect to a serial port
     def connect(self):
         try:
             global ser
@@ -59,6 +108,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 is_port_open = 'Error opening port'
         self.connection_output.setText(is_port_open)
 
+    # Close serial port
     def close_port(self):
         if ser.is_open:
             try:
@@ -70,6 +120,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             is_port_open = 'Port is not open'
         self.connection_output.setText(is_port_open)
 
+    # Serialize command and options, then send out data via UART
     def send_command(self):
         global ser
         cmd = functional_test_pb2.Command()
@@ -79,7 +130,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pb = cmd.SerializeToString()
         LL = link_layer()
         LL.link_frame_data(pb)   # frame data
-        print(LL.tx_buffer)
+        print("TxBuffer: ",LL.tx_buffer)
         try:
             ser.write(LL.tx_buffer)
             command_send_success = 'Command sent'
@@ -99,7 +150,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 command_send_success = 'Error while sending command'
             else:
                 command_send_success = 'Port is not open'
-        self.command_output.setText(command_send_success)
+        self.cmd_output.setText(command_send_success)
 
 
 if __name__ == "__main__":
@@ -107,4 +158,3 @@ if __name__ == "__main__":
     window = MyWindow()
     window.show()
     sys.exit(app.exec_())
-    

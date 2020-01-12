@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>317</width>
+    <width>333</width>
     <height>481</height>
    </rect>
   </property>
@@ -35,7 +35,7 @@
        <height>61</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
+     <layout class="QGridLayout" name="port_layout">
       <property name="sizeConstraint">
        <enum>QLayout::SetNoConstraint</enum>
       </property>
@@ -122,9 +122,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>140</y>
+      <y>130</y>
       <width>291</width>
-      <height>191</height>
+      <height>221</height>
      </rect>
     </property>
     <property name="title">
@@ -135,11 +135,11 @@
       <rect>
        <x>20</x>
        <y>30</y>
-       <width>221</width>
-       <height>151</height>
+       <width>241</width>
+       <height>181</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4">
+     <layout class="QGridLayout" name="cmd_layout">
       <item row="0" column="1">
        <widget class="QComboBox" name="cmd_box"/>
       </item>
@@ -151,34 +151,50 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QPushButton" name="command_button">
+       <widget class="QPushButton" name="cmd_button">
         <property name="text">
          <string>Send command</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0" colspan="2">
-       <widget class="QGroupBox" name="groupBox">
+       <widget class="QGroupBox" name="options_GB">
         <property name="title">
          <string>Options</string>
         </property>
+        <widget class="QWidget" name="gridLayoutWidget_3">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>211</width>
+           <height>101</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="options_layout"/>
+        </widget>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLabel" name="command_output">
+       <widget class="QLabel" name="cmd_output">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
      </layout>
+     <zorder>cmd_box</zorder>
+     <zorder>select_cmd_label</zorder>
+     <zorder>cmd_button</zorder>
+     <zorder>cmd_output</zorder>
+     <zorder>options_GB</zorder>
     </widget>
    </widget>
    <widget class="QGroupBox" name="response_GB">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>350</y>
+      <y>360</y>
       <width>291</width>
       <height>81</height>
      </rect>
@@ -195,7 +211,7 @@
        <height>51</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="response_layout">
       <item>
        <widget class="QTextEdit" name="response_output"/>
       </item>
@@ -222,7 +238,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>317</width>
+     <width>333</width>
      <height>21</height>
     </rect>
    </property>
