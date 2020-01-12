@@ -14,11 +14,18 @@ enum CommandTypeEnum{
 }
 
 // I2C options - descriptionben megadni melyik i2c interfeszt konfigolja fel
+enum i2cDirection{
+	I2C_write = 0;
+	I2C_read = 1;
+}
+
 message i2cTest{
- required  bool direction = 1; 			// 1: read, 0: write
+ required  i2cDirection direction = 1; 			// 1: read, 0: write
  required  uint32 regAddr = 2;
  optional   uint32 regData = 3;
 }
+
+
 
 
 // SPI options
