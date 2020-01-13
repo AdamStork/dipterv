@@ -95,6 +95,19 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.LED_active = False
         self.I2C_active = False
 
+    # Add data depending on command type
+    def add_data_depending_on_cmd_type(self, cmdType):
+        print("Add data depending on cmd type")
+        if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
+            self.cmd.i2c = functional_test_pb2.i2cMessage()
+
+
+
+    # Read data depending on command type
+    def read_data_depending_on_cmd_type(self, cmdType):
+        print("Read data depending on cmd type")
+
+
     # Connect to a serial port
     def connect(self):
         try:
@@ -124,10 +137,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Serialize command and options, then send out data via UART
     def send_command(self):
         global ser
-        cmd = functional_test_pb2.Command()
-        cmd.commandType = self.cmd_box.currentData()
-#        print(cmd.commandType)
-# Ha cmd Type I2c, akkor adjuk hozza a regisztert, cimet is --> add_data_depending_on_cmd_type
+        # make command
+        self.cmd = functional_test_pb2.Command()
+        self.cmd.commandType = self.cmd_box.currentData()
+        self.add_data_depending_on_cmd_type(self.cmd.commandType)
+
         pb = cmd.SerializeToString()
         LL = link_layer()
         LL.link_frame_data(pb)   # frame data
@@ -153,10 +167,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 command_send_success = 'Port is not open'
         self.cmd_output.setText(command_send_success)
 
-    def add_data_depending_on_cmd_type(self):
-        print("Add data depending on cmd type")
-    def read_data_depending_on_cmd_type(self):
-        print("Read data depending on cmd type")
+
 
 
 if __name__ == "__main__":

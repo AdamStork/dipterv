@@ -1,5 +1,7 @@
 syntax = "proto2";
 
+// TODO: kitalalni, h a visszakuldott uzenet pl regiszer tartalom dekodolosa hogy legyen pl Command uzenetbe optionalkent
+
 // Command types
 enum CommandTypeEnum{
   STOP_CURRENT_TEST = 0;
@@ -19,17 +21,23 @@ enum i2cDirection{
 	I2C_read = 1;
 }
 
-message i2cTest{
- required  i2cDirection direction = 1; 			// 1: read, 0: write
- required  uint32 regAddr = 2;
- optional   uint32 regData = 3;
+enum i2cBus{
+	I2C1 = 1;
+	I2C2 = 2;
+	I2C3 = 3;
+}
+
+// Master only
+message i2cMessage{
+ required i2cBus bus = 1;
+ required uint32 address = 2;
+ required uint32 reg = 3;
+ required i2cDirection direction = 4; 	// 1: read, 0: write
 }
 
 
-
-
 // SPI options
-enum spiDirection{
+enum spiMode{
 	FULL_DUPLEX_MASTER = 0;
 	FULL_DUPLEX_SLAVE = 1;
 	HALF_DUPLEX_MASTER = 2;
@@ -40,10 +48,16 @@ enum spiDirection{
 	TRANSMIT_ONLY_SLAVE = 7;
 }
 
+enum spiBus{
+	SPI1 = 1;
+	SPI2 = 2;
+	SPI3 = 3;
+}
+
 message spiTest{
- required  spiDirection direction = 1; 			
- optional  uint32 regData = 2;
- optional	uint32 	spiMode = 3;  // 0..3 spimodes
+ required spiBus bus = 1;
+ required spiMode mode = 2; 			
+ required uint32 command = 3;
 }
 
 
@@ -141,13 +155,11 @@ message ledTest{
 
 // Main message
 message Command{
- required 	CommandTypeEnum commandType = 1;
- optional 	i2cTest 	i2cTestType = 2;
+ required CommandTypeEnum commandType = 1;
+ optional	i2cMessage	i2c = 2;
  optional	spiTest 	spiTestType = 3;
  optional	gpioTest	gpioTestType = 5;
  optional  timerTest  timerTestType = 6;
  optional pwmTest 	pwmTestType = 7;
  optional	ledTest 	ledTesType = 10;	
 }
-
-
