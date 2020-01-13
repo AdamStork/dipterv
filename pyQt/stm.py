@@ -1,6 +1,8 @@
 import time, os, sys, serial
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from decimal import Decimal
 
 import functional_test_pb2
@@ -69,13 +71,21 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_addr_label = QLabel("I2C address", self)
                 self.i2c_reg_label = QLabel("I2C register", self)
                 self.i2c_rw_label = QLabel("I2C R/W", self)
-                self.i2c_bus_select = QComboBox(self)                   # TODO: melyik buszok elerhetok: addItem()
+                self.i2c_bus_select = QComboBox(self)
                 self.i2c_addr_select = QLineEdit(self)
                 self.i2c_reg_select = QLineEdit(self)
                 self.i2c_rw_select = QComboBox(self)
+                self.i2c_bus_select.addItem("I2C1",functional_test_pb2.i2cBus.I2C1)  # TODO: melyik buszok elerhetok: addItem()
+                self.i2c_bus_select.addItem("I2C2",functional_test_pb2.i2cBus.I2C2)
+                self.i2c_bus_select.addItem("I2C3",functional_test_pb2.i2cBus.I2C3)
                 self.i2c_rw_select.addItem("Read",functional_test_pb2.i2cDirection.I2C_read)
                 self.i2c_rw_select.addItem("Write",functional_test_pb2.i2cDirection.I2C_write)
                 self.i2c_rw_select.activated[str].connect(self.on_changed_rw)
+                validator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]"))
+                self.i2c_addr_select.setValidator(validator)
+                self.i2c_reg_select.setValidator(validator)
+                self.i2c_addr_select.setPlaceholderText("0xFF")
+                self.i2c_reg_select.setPlaceholderText("0xFF")
                 self.options_layout.addWidget(self.i2c_bus_label,0,0)
                 self.options_layout.addWidget(self.i2c_addr_label,1,0)
                 self.options_layout.addWidget(self.i2c_reg_label,2,0)
@@ -99,9 +109,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def add_data_depending_on_cmd_type(self, cmdType):
         print("Add data depending on cmd type")
         if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
-            self.cmd.i2c = functional_test_pb2.i2cMessage()
-
-
+            self.cmd.i2c.bus = self.i2c_bus_select.currentData()
+            self.cmd.i2c.address = int(self.i2c_addr_select.text(),16)      # Convert to int
+            self.cmd.i2c.reg = int(self.i2c_reg_select.text(),16)           # Convert to int
+            self.cmd.i2c.direction = self.i2c_rw_select.currentData()
+#            print("addr:", self.cmd.i2c.address)
+#            print("reg:", self.cmd.i2c.reg)
 
     # Read data depending on command type
     def read_data_depending_on_cmd_type(self, cmdType):
@@ -142,7 +155,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cmd.commandType = self.cmd_box.currentData()
         self.add_data_depending_on_cmd_type(self.cmd.commandType)
 
-        pb = cmd.SerializeToString()
+        pb = self.cmd.SerializeToString()
         LL = link_layer()
         LL.link_frame_data(pb)   # frame data
         print("TxBuffer: ",LL.tx_buffer)
