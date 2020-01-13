@@ -1,16 +1,13 @@
-import sys
+import time, os, sys, serial
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtWidgets import *
 from decimal import Decimal
 
-import serial
 import functional_test_pb2
 from link_layer import link_layer
 
-import time
-
-qtcreator_file  = "D:/Work/dipterv/pyQt/stm_gui.ui" # Enter file here.
-Ui_MainWindow, QtBaseClass = uic.loadUiType(qtcreator_file)
+ui_path = os.path.dirname(os.path.abspath(__file__))
+Ui_MainWindow  = uic.loadUiType(os.path.join(ui_path, "stm_gui.ui"))[0]
 
 ser = serial.Serial()
 
@@ -155,6 +152,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 command_send_success = 'Port is not open'
         self.cmd_output.setText(command_send_success)
+
+    def add_data_depending_on_cmd_type(self):
+        print("Add data depending on cmd type")
+    def read_data_depending_on_cmd_type(self):
+        print("Read data depending on cmd type")
 
 
 if __name__ == "__main__":
