@@ -28,6 +28,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.I2C_active = False
         self.LED_active = False
         self.SPI_active = False
+        self.LL = link_layer()
 
     def __call__(self):
         return self
@@ -120,6 +121,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def read_data_depending_on_cmd_type(self, cmdType):
         print("Read data depending on cmd type")
 
+    # Create protocol buffer encoded command
+    def create_protobuf_command(self):
+        self.cmd = functional_test_pb2.Command()
+        self.cmd.commandType = self.cmd_box.currentData()
+        self.add_data_depending_on_cmd_type(self.cmd.commandType)
+        return self.cmd.SerializeToString()
+
 
     # Connect to a serial port
     def connect(self):
@@ -150,24 +158,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Serialize command and options, then send out data via UART
     def send_command(self):
         global ser
-        # make command
-        self.cmd = functional_test_pb2.Command()
-        self.cmd.commandType = self.cmd_box.currentData()
-        self.add_data_depending_on_cmd_type(self.cmd.commandType)
-
-        pb = self.cmd.SerializeToString()
-        LL = link_layer()
-        LL.link_frame_data(pb)   # frame data
-        print("TxBuffer: ",LL.tx_buffer)
+        pb = self.create_protobuf_command()    # make command
+        self.LL.link_frame_data(pb)            # frame data
+        print("TxBuffer: ",self.LL.tx_buffer)
         try:
-            ser.write(LL.tx_buffer)
+            ser.write(self.LL.tx_buffer)
             command_send_success = 'Command sent'
             # Bajtszam beolvasas attol fugg --> read_data_depending_on_cmd_type - return: bajtszam,
             # csak ha nagyobb mint 0
             response_data = ser.read(4)
-            LL.link_unframe_data(response_data)
+            self.LL.link_unframe_data(response_data)
             response_list = []
-            for i in LL.rx_buffer:
+            for i in self.LL.rx_buffer:
                 i = format(i,'02X')
                 response_list.append(i)
             str1 = ' '.join(str(e) for e in response_list)
