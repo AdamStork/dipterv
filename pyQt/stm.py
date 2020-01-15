@@ -112,8 +112,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print("Add data depending on cmd type")
         if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
             self.cmd.i2c.bus = self.i2c_bus_select.currentData()
-            self.cmd.i2c.address = int(self.i2c_addr_select.text(),16)      # Convert to int
-            self.cmd.i2c.reg = int(self.i2c_reg_select.text(),16)           # Convert to int
+            if is_empty(self.i2c_addr_select.text()):
+                self.cmd.i2c.address = 0
+            else:
+                self.cmd.i2c.address = int(self.i2c_addr_select.text(),16)      # Convert to int
+            if is_empty(self.i2c_reg_select.text()):
+                self.cmd.i2c.reg = 0
+            else:
+                self.cmd.i2c.reg = int(self.i2c_reg_select.text(),16)           # Convert to int
             self.cmd.i2c.direction = self.i2c_rw_select.currentData()
 #            print("addr:", self.cmd.i2c.address)
 #            print("reg:", self.cmd.i2c.reg)
@@ -134,11 +140,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Connect to a serial port
     def connect(self):
         try:
-            if self.serial_line_field.text() == "":
+#            if self.serial_line_field.text() == "":
+            if is_empty(self.serial_line_field.text()):
                 port_field = 'COM9'
             else:
                port_field = self.serial_line_field.text()
-            if self.speed_field.text() == "":
+            if is_empty(self.speed_field.text()):
                 speed = 115200
             else:
                 speed = self.speed_field.text()
@@ -194,8 +201,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 command_send_success = 'Port is not open'
         self.cmd_output.setText(command_send_success)
 
-
-
+def is_empty(field):
+    if field == "":
+        return True
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
