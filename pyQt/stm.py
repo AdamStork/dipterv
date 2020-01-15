@@ -123,13 +123,15 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cmd.i2c.direction = self.i2c_rw_select.currentData()
 #            print("addr:", self.cmd.i2c.address)
 #            print("reg:", self.cmd.i2c.reg)
-            # Lekezelni: Empty field
 
     # Get number of response bytes depending on command type
     def read_data_depending_on_cmd_type(self, cmdType):
         print("Read data depending on cmd type:",cmdType)
         if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
-            response_num = 5    # Frame:2, CmdType: 1+1, Result: 1
+            if self.i2c_rw_select == functional_test_pb2.i2cDirection.I2C_read:
+                response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (register value)
+            else:
+                respone_num = 5     # Frame:2, CmdType:1+1, Result: 1 (Write_successful)
         elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
             response_num = 4    # Frame:2, CmdType: 1+1
         else:
@@ -171,10 +173,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.connect_button.setEnabled(False)
             self.close_button.setEnabled(True)
         except serial.serialutil.SerialException:
-            if self.ser.is_open:
-                is_port_open = 'Port is already open'
-            else:
-                is_port_open = 'Error opening port'
+            is_port_open = 'Error opening port'
         self.connection_output.setText(is_port_open)
 
     # Close serial port
@@ -187,8 +186,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.close_button.setEnabled(False)
             except serial.serialutil.SerialException:
                 is_port_open = 'Error closing port'
-        else:
-            is_port_open = 'Port is not open'
         self.connection_output.setText(is_port_open)
 
     # Serialize command and options, then send out data via UART
@@ -200,19 +197,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.ser.write(self.LL.tx_buffer)
             command_send_success = 'Command sent'
             self.read_data_depending_on_cmd_type(self.cmd_box.currentData())
-#            response_num = self.get_number_of_response_bytes(self.cmd_box.currentData())
-#            response_num = 4
-#            print("response num:", response_num)
-#            if response_num > 0:
-#                response_data = self.ser.read(response_num)
-#                self.LL.link_unframe_data(response_data)
-#                response_list = []
-#                for i in self.LL.rx_buffer:
-#                    i = format(i,'02X')
-#                    response_list.append(i)
-#                str1 = ' '.join(str(e) for e in response_list)
-#                self.response_output.setText(str1)
-#ParseFromString()
         except serial.serialutil.SerialException:
             if self.ser.is_open:
                 command_send_success = 'Error while sending command'
