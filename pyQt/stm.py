@@ -11,7 +11,6 @@ from link_layer import link_layer
 ui_path = os.path.dirname(os.path.abspath(__file__))
 Ui_MainWindow  = uic.loadUiType(os.path.join(ui_path, "stm_gui.ui"))[0]
 
-ser = serial.Serial()
 
 class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Initialization
@@ -29,6 +28,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.LED_active = False
         self.SPI_active = False
         self.LL = link_layer()
+        self.ser = serial.Serial()
+        self.close_button.setEnabled(False)
 
     def __call__(self):
         return self
@@ -116,6 +117,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cmd.i2c.direction = self.i2c_rw_select.currentData()
 #            print("addr:", self.cmd.i2c.address)
 #            print("reg:", self.cmd.i2c.reg)
+            # Lekezelni: Empty field
 
     # Read data depending on command type
     def read_data_depending_on_cmd_type(self, cmdType):
@@ -132,12 +134,21 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Connect to a serial port
     def connect(self):
         try:
-            global ser
-            ser = serial.Serial(port='COM9', baudrate=115200, bytesize=8, parity='N', stopbits=1, timeout=1)
-            ser.setDTR(1)
+            if self.serial_line_field.text() == "":
+                port_field = 'COM9'
+            else:
+               port_field = self.serial_line_field.text()
+            if self.speed_field.text() == "":
+                speed = 115200
+            else:
+                speed = self.speed_field.text()
+            self.ser = serial.Serial(port=port_field, baudrate=speed, bytesize=8, parity='N', stopbits=1, timeout=0.2)
+            self.ser.setDTR(1)
             is_port_open = 'Port open'
+            self.connect_button.setEnabled(False)
+            self.close_button.setEnabled(True)
         except serial.serialutil.SerialException:
-            if ser.is_open:
+            if self.ser.is_open:
                 is_port_open = 'Port is already open'
             else:
                 is_port_open = 'Error opening port'
@@ -145,10 +156,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Close serial port
     def close_port(self):
-        if ser.is_open:
+        if self.ser.is_open:
             try:
-                ser.close()
+                self.ser.close()
                 is_port_open = 'Port closed'
+                self.connect_button.setEnabled(True)
+                self.close_button.setEnabled(False)
             except serial.serialutil.SerialException:
                 is_port_open = 'Error closing port'
         else:
@@ -157,16 +170,15 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Serialize command and options, then send out data via UART
     def send_command(self):
-        global ser
         pb = self.create_protobuf_command()    # make command
         self.LL.link_frame_data(pb)            # frame data
         print("TxBuffer: ",self.LL.tx_buffer)
         try:
-            ser.write(self.LL.tx_buffer)
+            self.ser.write(self.LL.tx_buffer)
             command_send_success = 'Command sent'
             # Bajtszam beolvasas attol fugg --> read_data_depending_on_cmd_type - return: bajtszam,
             # csak ha nagyobb mint 0
-            response_data = ser.read(4)
+            response_data = self.ser.read(4)
             self.LL.link_unframe_data(response_data)
             response_list = []
             for i in self.LL.rx_buffer:
@@ -176,7 +188,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.response_output.setText(str1)
 #ParseFromString()
         except serial.serialutil.SerialException:
-            if ser.is_open:
+            if self.ser.is_open:
                 command_send_success = 'Error while sending command'
             else:
                 command_send_success = 'Port is not open'
