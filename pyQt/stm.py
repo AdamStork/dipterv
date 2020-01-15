@@ -125,9 +125,25 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #            print("reg:", self.cmd.i2c.reg)
             # Lekezelni: Empty field
 
-    # Read data depending on command type
+    # Get number of response bytes depending on command type
     def read_data_depending_on_cmd_type(self, cmdType):
-        print("Read data depending on cmd type")
+        print("Read data depending on cmd type:",cmdType)
+        if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
+            response_num = 5    # Frame:2, CmdType: 1+1, Result: 1
+        elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
+            response_num = 4    # Frame:2, CmdType: 1+1
+        else:
+            response_num = 0
+        print("response_num:", response_num)
+        if response_num > 0:
+            response_data = self.ser.read(response_num)
+            self.LL.link_unframe_data(response_data)
+            response_list = []
+            for i in self.LL.rx_buffer:
+                i = format(i,'02X')
+                response_list.append(i)
+            str1 = ' '.join(str(e) for e in response_list)
+            self.response_output.setText(str1)
 
     # Create protocol buffer encoded command
     def create_protobuf_command(self):
@@ -183,16 +199,19 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             self.ser.write(self.LL.tx_buffer)
             command_send_success = 'Command sent'
-            # Bajtszam beolvasas attol fugg --> read_data_depending_on_cmd_type - return: bajtszam,
-            # csak ha nagyobb mint 0
-            response_data = self.ser.read(4)
-            self.LL.link_unframe_data(response_data)
-            response_list = []
-            for i in self.LL.rx_buffer:
-                i = format(i,'02X')
-                response_list.append(i)
-            str1 = ' '.join(str(e) for e in response_list)
-            self.response_output.setText(str1)
+            self.read_data_depending_on_cmd_type(self.cmd_box.currentData())
+#            response_num = self.get_number_of_response_bytes(self.cmd_box.currentData())
+#            response_num = 4
+#            print("response num:", response_num)
+#            if response_num > 0:
+#                response_data = self.ser.read(response_num)
+#                self.LL.link_unframe_data(response_data)
+#                response_list = []
+#                for i in self.LL.rx_buffer:
+#                    i = format(i,'02X')
+#                    response_list.append(i)
+#                str1 = ' '.join(str(e) for e in response_list)
+#                self.response_output.setText(str1)
 #ParseFromString()
         except serial.serialutil.SerialException:
             if self.ser.is_open:
