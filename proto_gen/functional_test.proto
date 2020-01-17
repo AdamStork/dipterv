@@ -31,8 +31,6 @@ message i2cMessage{
  required uint32 address = 2;
  required uint32 reg = 3;
  required i2cDirection direction = 4; 	// 1: read, 0: write
- optional uint32 responseRead = 5;
- optional bool responseWrite = 6;
 }
 
 
@@ -49,6 +47,11 @@ enum spiMode{
 	RECEIVE_ONLY_SLAVE = 5;
 	TRANSMIT_ONLY_MASTER = 6;
 	TRANSMIT_ONLY_SLAVE = 7;
+}
+
+enum spiDirection{
+ SPI_TRANSMIT = 0;
+ SPI_RECEIVE = 1;
 }
 
 enum clockMode{
@@ -75,9 +78,8 @@ message spiMessage{
  optional spiMode mode = 2;		// master only, full_duplex
  required clockMode clock = 3;	//ide esetleg hintet megjeleniteni
  required uint32 command = 4;
- optional uint32 dummyclocks = 5;
- optional uint32 responseRead = 6;
- optional bool responseWrite = 7;
+ required spiDirection direction = 5;
+ optional uint32 dummyclocks = 6;
 }
 
 
@@ -151,7 +153,6 @@ message digitalGPIO{
  required gpioPin pin = 1;
  required gpioDirection direction = 2; 	 // Input/output
  required gpioPinState pinState = 3;	// Low, high
- optional bool responseState = 4;		// PIN state high/low
 }
 
 

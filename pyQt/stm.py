@@ -27,6 +27,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.I2C_active = False
         self.LED_active = False
         self.SPI_active = False
+        self.GPIO_active = False
+        self.AnalogRead_active = False
+        self.AnalogWrite_active = False
         self.LL = link_layer()
         self.ser = serial.Serial()
         self.close_button.setEnabled(False)
@@ -36,15 +39,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Fill combobox with commands
     def fill_cmd_box(self):
-        self.cmd_box.addItem("STOP_CURRENT_TEST",functional_test_pb2.CommandTypeEnum.STOP_CURRENT_TEST)
-        self.cmd_box.addItem("ADC_test",functional_test_pb2.CommandTypeEnum.ADC_test)
-        self.cmd_box.addItem("I2C_test",functional_test_pb2.CommandTypeEnum.I2C_test)
-        self.cmd_box.addItem("SPI_test",functional_test_pb2.CommandTypeEnum.SPI_test)
-        self.cmd_box.addItem("LED_test",functional_test_pb2.CommandTypeEnum.LED_test)
-        self.cmd_box.addItem("GPIO_test",functional_test_pb2.CommandTypeEnum.GPIO_test)
-        self.cmd_box.addItem("TIMER_SINGLE_SHOT",functional_test_pb2.CommandTypeEnum.TIMER_SINGLE_SHOT)
-        self.cmd_box.addItem("RTC_test",functional_test_pb2.CommandTypeEnum.RTC_test)
-        self.cmd_box.addItem("PWM_test",functional_test_pb2.CommandTypeEnum.PWM)
+        self.cmd_box.addItem("LED test",functional_test_pb2.CommandTypeEnum.LED_test)
+        self.cmd_box.addItem("I2C test",functional_test_pb2.CommandTypeEnum.I2C_test)
+        self.cmd_box.addItem("SPI test",functional_test_pb2.CommandTypeEnum.SPI_test)
+        self.cmd_box.addItem("GPIO digital",functional_test_pb2.CommandTypeEnum.GPIO_digital)
+        self.cmd_box.addItem("Analog read",functional_test_pb2.CommandTypeEnum.Analog_read)
+        self.cmd_box.addItem("PWM",functional_test_pb2.CommandTypeEnum.Analog_write)
 
     # Called whenever a command is selected
     def on_changed(self,text):
@@ -99,6 +99,29 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             print("SPI options")
+            if self.SPI_active == False:
+                self.SPI_active = True
+                #spiBus
+                #clockMode
+                #command
+                #direcion
+                #dummyclocks
+
+        elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
+            print("GPIO digital optons")
+            if self.GPIO_active == False:
+                self.GPIO_active = True
+
+        elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
+            print("AnalogRead optons")
+            if self.AnalogRead_active == False:
+                self.AnalogRead_active = True
+
+        elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
+            print("AnalogWrite_active optons")
+            if self.AnalogWrite_active == False:
+                self.AnalogWrite_active = True
+
 
     # Delete all child widget from a layout
     def delete_all_child_widget(self, layout):
@@ -106,6 +129,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             layout.itemAt(i).widget().setParent(None)
         self.LED_active = False
         self.I2C_active = False
+        self.SPI_active = False
+        self.GPIO_active = False
+        self.AnalogRead_active = False
+        self.AnalogWrite_active = False
 
     # Add data depending on command type
     def add_data_depending_on_cmd_type(self, cmdType):
