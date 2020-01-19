@@ -33,6 +33,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.LL = link_layer()
         self.ser = serial.Serial()
         self.close_button.setEnabled(False)
+        self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]")) # Byte validator for input fields (0xhh format)
+        self.decValidator = QRegExpValidator(QRegExp("[0-9][0-9]")) # 2-digit decimal validator for input fields (0xhh format)
+
 
     def __call__(self):
         return self
@@ -53,8 +56,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.show_data_depending_on_cmd_type(self.cmd_box.currentData())
         self.show()
 
-    def on_changed_rw(self):
-        print("R/W selection:", self.i2c_rw_select.currentData())
+#    def on_changed_rw(self):
+#        print("R/W selection:", self.i2c_rw_select.currentData())
 
     # Show data depending on the command type selected
     def show_data_depending_on_cmd_type(self,cmdType):
@@ -77,17 +80,20 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_addr_select = QLineEdit(self)
                 self.i2c_reg_select = QLineEdit(self)
                 self.i2c_rw_select = QComboBox(self)
+
                 self.i2c_bus_select.addItem("I2C1",functional_test_pb2.i2cBus.I2C1)  # TODO: melyik buszok elerhetok: addItem()
                 self.i2c_bus_select.addItem("I2C2",functional_test_pb2.i2cBus.I2C2)
                 self.i2c_bus_select.addItem("I2C3",functional_test_pb2.i2cBus.I2C3)
+
                 self.i2c_rw_select.addItem("Read",functional_test_pb2.i2cDirection.I2C_read)
-                self.i2c_rw_select.addItem("Write",functional_test_pb2.i2cDirection.I2C_write)
-                self.i2c_rw_select.activated[str].connect(self.on_changed_rw)
-                validator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]"))
-                self.i2c_addr_select.setValidator(validator)
-                self.i2c_reg_select.setValidator(validator)
+                self.i2c_rw_select.addItem("Write",functional_test_pb2.i2cDirection.I2C_write)          
+#                self.i2c_rw_select.activated[str].connect(self.on_changed_rw)
+
+                self.i2c_addr_select.setValidator(self.byteValidator)
                 self.i2c_addr_select.setPlaceholderText("0xFF")
+                self.i2c_reg_select.setValidator(self.byteValidator)
                 self.i2c_reg_select.setPlaceholderText("0xFF")
+
                 self.options_layout.addWidget(self.i2c_bus_label,0,0)
                 self.options_layout.addWidget(self.i2c_addr_label,1,0)
                 self.options_layout.addWidget(self.i2c_reg_label,2,0)
@@ -101,11 +107,46 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("SPI options")
             if self.SPI_active == False:
                 self.SPI_active = True
-                #spiBus
-                #clockMode
-                #command
-                #direcion
-                #dummyclocks
+                self.spi_bus_label = QLabel("SPI bus", self)
+                self.spi_clockmode_label = QLabel("SPI mode", self)
+                self.spi_command_label = QLabel("SPI command", self)
+                self.spi_dummyclocks_label = QLabel("SPI dummy clocks", self)
+                self.spi_direcion_label = QLabel("SPI direction", self)     # Needed for response (register value or write success)
+
+                self.spi_bus_select = QComboBox(self)
+                self.spi_clockmode_select = QComboBox(self)
+                self.spi_command_select = QLineEdit(self)
+                self.spi_dummyclocks_select = QLineEdit(self)
+                self.spi_direcion_select = QComboBox(self)
+
+                self.spi_bus_select.addItem("SPI1",functional_test_pb2.spiBus.SPI1)  # TODO: melyik buszok elerhetok: addItem()
+                self.spi_bus_select.addItem("SPI2",functional_test_pb2.spiBus.SPI2)
+                self.spi_bus_select.addItem("SPI3",functional_test_pb2.spiBus.SPI3)
+
+                self.spi_clockmode_select.addItem("Mode 0",functional_test_pb2.clockMode.MODE_0)
+                self.spi_clockmode_select.addItem("Mode 1",functional_test_pb2.clockMode.MODE_1)
+                self.spi_clockmode_select.addItem("Mode 2",functional_test_pb2.clockMode.MODE_2)
+                self.spi_clockmode_select.addItem("Mode 3",functional_test_pb2.clockMode.MODE_3)
+
+                self.spi_command_select.setValidator(self.byteValidator)
+                self.spi_command_select.setPlaceholderText("0xFF")
+                self.spi_dummyclocks_select.setValidator(self.decValidator)
+                self.spi_dummyclocks_select.setPlaceholderText("0-99")
+
+                self.spi_direcion_select.addItem("Transmit",functional_test_pb2.spiDirection.SPI_TRANSMIT)
+                self.spi_direcion_select.addItem("Receive",functional_test_pb2.spiDirection.SPI_RECEIVE)
+
+                self.options_layout.addWidget(self.spi_bus_label,0,0)
+                self.options_layout.addWidget(self.spi_clockmode_label,1,0)
+                self.options_layout.addWidget(self.spi_command_label,2,0)
+                self.options_layout.addWidget(self.spi_dummyclocks_label,3,0)
+                self.options_layout.addWidget(self.spi_direcion_label,4,0)
+                self.options_layout.addWidget(self.spi_bus_select,0,2)
+                self.options_layout.addWidget(self.spi_clockmode_select,1,2)
+                self.options_layout.addWidget(self.spi_command_select,2,2)
+                self.options_layout.addWidget(self.spi_dummyclocks_select,3,2)
+                self.options_layout.addWidget(self.spi_direcion_select,4,2)
+                self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
             print("GPIO digital optons")
@@ -151,6 +192,24 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #            print("addr:", self.cmd.i2c.address)
 #            print("reg:", self.cmd.i2c.reg)
 
+        if cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
+            self.cmd.spi.bus = self.spi_bus_select.currentData()
+            self.cmd.spi.clock = self.spi_clockmode_select.currentData()
+            if is_empty(self.spi_command_select.text()):
+                self.cmd.spi.command = 0
+            else:
+                self.cmd.spi.command = int(self.spi_command_select.text(),16)
+            if is_empty(self.spi_dummyclocks_select.text()):
+                self.cmd.spi.dummyclocks = 0
+            else:
+                self.cmd.spi.dummyclocks = int(self.spi_dummyclocks_select.text(),16)
+            self.cmd.spi.direction = self.spi_direcion_select.currentData()
+            print("Bus:", self.cmd.spi.bus)
+            print("Clock:",self.cmd.spi.clock)
+            print("Cmd:",self.cmd.spi.command)
+            print("Dummy:",self.cmd.spi.dummyclocks)
+            print("Dir:",self.cmd.spi.direction)
+
     # Get number of response bytes depending on command type
     def read_data_depending_on_cmd_type(self, cmdType):
         print("Read data depending on cmd type:",cmdType)
@@ -158,11 +217,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.i2c_rw_select == functional_test_pb2.i2cDirection.I2C_read:
                 response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (register value)
             else:
-                respone_num = 5     # Frame:2, CmdType:1+1, Result: 1 (Write_successful)
+                respone_num = 5     # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
         elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
-            response_num = 4    # Frame:2, CmdType: 1+1
+            response_num = 4        # Frame:2, CmdType: 1+1
+        elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
+            if self.spi_direcion_select ==functional_test_pb2.spiDirection.SPI_RECEIVE:
+                response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (register value)
+            else:
+                response_num = 5    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
         else:
             response_num = 0
+
+
         print("response_num:", response_num)
         if response_num > 0:
             response_data = self.ser.read(response_num)
