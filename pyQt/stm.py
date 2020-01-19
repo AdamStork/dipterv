@@ -35,6 +35,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.close_button.setEnabled(False)
         self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]")) # Byte validator for input fields (0xhh format)
         self.decValidator = QRegExpValidator(QRegExp("[0-9][0-9]")) # 2-digit decimal validator for input fields (0xhh format)
+        self.gpioValidator = QRegExpValidator(QRegExp("[0-1][0-5]")) # 2-digit decimal validator for input fields (0xhh format)
 
 
     def __call__(self):
@@ -56,16 +57,15 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.show_data_depending_on_cmd_type(self.cmd_box.currentData())
         self.show()
 
-#    def on_changed_rw(self):
-#        print("R/W selection:", self.i2c_rw_select.currentData())
-
     # Show data depending on the command type selected
     def show_data_depending_on_cmd_type(self,cmdType):
+        self.spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding) # Row Spacer if needed
+
         if cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
             print("LED options")
             if self.LED_active == False:
                 self.LED_active = True
-                self.led_label = QLabel("Label test", self)
+                self.led_label = QLabel("Let there be (LED) light!", self)
                 self.options_layout.addWidget(self.led_label)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
@@ -87,7 +87,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 self.i2c_rw_select.addItem("Read",functional_test_pb2.i2cDirection.I2C_read)
                 self.i2c_rw_select.addItem("Write",functional_test_pb2.i2cDirection.I2C_write)          
-#                self.i2c_rw_select.activated[str].connect(self.on_changed_rw)
 
                 self.i2c_addr_select.setValidator(self.byteValidator)
                 self.i2c_addr_select.setPlaceholderText("0xFF")
@@ -102,6 +101,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.i2c_addr_select,1,2)
                 self.options_layout.addWidget(self.i2c_reg_select,2,2)
                 self.options_layout.addWidget(self.i2c_rw_select,3,2)
+
+                self.options_layout.addItem(self.spacerItem,4,0)
+                self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             print("SPI options")
@@ -119,7 +121,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spi_dummyclocks_select = QLineEdit(self)
                 self.spi_direcion_select = QComboBox(self)
 
-                self.spi_bus_select.addItem("SPI1",functional_test_pb2.spiBus.SPI1)  # TODO: melyik buszok elerhetok: addItem()
+                self.spi_bus_select.addItem("SPI1",functional_test_pb2.spiBus.SPI1)
                 self.spi_bus_select.addItem("SPI2",functional_test_pb2.spiBus.SPI2)
                 self.spi_bus_select.addItem("SPI3",functional_test_pb2.spiBus.SPI3)
 
@@ -131,7 +133,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spi_command_select.setValidator(self.byteValidator)
                 self.spi_command_select.setPlaceholderText("0xFF")
                 self.spi_dummyclocks_select.setValidator(self.decValidator)
-                self.spi_dummyclocks_select.setPlaceholderText("0-99")
+                self.spi_dummyclocks_select.setPlaceholderText("0..99")
 
                 self.spi_direcion_select.addItem("Transmit",functional_test_pb2.spiDirection.SPI_TRANSMIT)
                 self.spi_direcion_select.addItem("Receive",functional_test_pb2.spiDirection.SPI_RECEIVE)
@@ -152,6 +154,42 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("GPIO digital optons")
             if self.GPIO_active == False:
                 self.GPIO_active = True
+                self.gpio_port_label = QLabel("GPIO port", self)
+                self.gpio_pin_label = QLabel("GPIO pin", self)
+                self.gpio_direction_label = QLabel("GPIO direction", self)
+                self.gpio_state_label = QLabel("GPIO state", self)
+
+                self.gpio_port_select = QComboBox(self)
+                self.gpio_pin_select = QLineEdit(self)
+                self.gpio_direction_select = QComboBox(self)
+                self.gpio_state_select = QComboBox(self)
+
+                self.gpio_pin_select.setValidator(self.gpioValidator)
+                self.gpio_pin_select.setPlaceholderText("0..15")
+
+                self.gpio_port_select.addItem("Port A",functional_test_pb2.gpioPort.GPIO_PORT_A)
+                self.gpio_port_select.addItem("Port B",functional_test_pb2.gpioPort.GPIO_PORT_B)
+                self.gpio_port_select.addItem("Port C",functional_test_pb2.gpioPort.GPIO_PORT_C)
+
+                self.gpio_direction_select.addItem("Input",functional_test_pb2.gpioDirection.GPIO_INPUT)
+                self.gpio_direction_select.addItem("Output",functional_test_pb2.gpioDirection.GPIO_OUTPUT)
+
+                self.gpio_state_select.addItem("Low",functional_test_pb2.gpioPinState.GPIO_LOW)
+                self.gpio_state_select.addItem("High",functional_test_pb2.gpioPinState.GPIO_HIGH)
+
+
+#self.gridLayout.addItem(spacerItem, 1, 1, 1, 1)
+                self.options_layout.addWidget(self.gpio_port_label,0,0)
+                self.options_layout.addWidget(self.gpio_pin_label,1,0)
+                self.options_layout.addWidget(self.gpio_direction_label,2,0)
+                self.options_layout.addWidget(self.gpio_state_label,3,0)
+                self.options_layout.addWidget(self.gpio_port_select,0,2)
+                self.options_layout.addWidget(self.gpio_pin_select,1,2)
+                self.options_layout.addWidget(self.gpio_direction_select,2,2)
+                self.options_layout.addWidget(self.gpio_state_select,3,2)
+
+                self.options_layout.addItem(self.spacerItem,4,0)
+                self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
             print("AnalogRead optons")
@@ -166,8 +204,17 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Delete all child widget from a layout
     def delete_all_child_widget(self, layout):
-        for i in reversed(range(layout.count())):
-            layout.itemAt(i).widget().setParent(None)
+#        for i in reversed(range(layout.count())):
+#            layout.itemAt(i).widget().setParent(None)
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+#                else:
+#                    self.clearLayout(item.layout())
+
         self.LED_active = False
         self.I2C_active = False
         self.SPI_active = False
@@ -192,7 +239,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #            print("addr:", self.cmd.i2c.address)
 #            print("reg:", self.cmd.i2c.reg)
 
-        if cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
+        elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             self.cmd.spi.bus = self.spi_bus_select.currentData()
             self.cmd.spi.clock = self.spi_clockmode_select.currentData()
             if is_empty(self.spi_command_select.text()):
@@ -210,6 +257,20 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("Dummy:",self.cmd.spi.dummyclocks)
             print("Dir:",self.cmd.spi.direction)
 
+        elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
+            self.cmd.gpio.port = self.gpio_port_select.currentData()
+            if is_empty(self.gpio_pin_select.text()):
+                self.cmd.gpio.pin = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
+            else:
+                self.cmd.gpio.pin = int(self.gpio_pin_select.text())
+            self.cmd.gpio.direction = self.gpio_direction_select.currentData()
+            self.cmd.gpio.pinState = self.gpio_state_select.currentData()
+            print("GPIO port:", self.cmd.gpio.port)
+            print("GPIO pin:", self.cmd.gpio.pin)
+            print("GPIO dir:",self.cmd.gpio.direction)
+            print("GPIO state:",self.cmd.gpio.pinState)
+
+
     # Get number of response bytes depending on command type
     def read_data_depending_on_cmd_type(self, cmdType):
         print("Read data depending on cmd type:",cmdType)
@@ -218,13 +279,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (register value)
             else:
                 respone_num = 5     # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
-        elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
-            response_num = 4        # Frame:2, CmdType: 1+1
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             if self.spi_direcion_select ==functional_test_pb2.spiDirection.SPI_RECEIVE:
                 response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (register value)
             else:
                 response_num = 5    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
+        elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
+            response_num = 4        # Frame:2, CmdType: 1+1
+        elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
+            if self.gpio_direction_select ==functional_test_pb2.gpioDirection.GPIO_INPUT:
+                response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (pin state) ---- ide is inkabb pin config set kene
+            else:
+                response_num = 5    # Frame:2, CmdType:1+1, Result: 1 (pin set/reset)
         else:
             response_num = 0
 
@@ -300,6 +366,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 def is_empty(field):
     if field == "":
         return True
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
