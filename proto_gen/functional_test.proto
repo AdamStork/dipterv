@@ -99,7 +99,7 @@ enum gpioPort{
 	GPIO_PORT_A = 0;
 	GPIO_PORT_B = 1;
 	GPIO_PORT_C = 2;
-	GPIO_TEMP_SENSOR = 3,
+	GPIO_TEMP_SENSOR = 3;
 	GPIO_VREFINT = 4;
 	GPIO_VBAT = 5;
 }
@@ -118,7 +118,7 @@ enum ADC_RESOLUTION{
 	ADC_12_BITS = 0;
 	ADC_10_BITS = 1;
 	ADC_8_BITS = 2;
-	ADC_6_BITS = 3,
+	ADC_6_BITS = 3;
 }
 
 

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\x15\x66unctional_test.proto\"b\n\ni2cMessage\x12\x14\n\x03\x62us\x18\x01 \x02(\x0e\x32\x07.i2cBus\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x02(\r\x12\x0b\n\x03reg\x18\x03 \x02(\r\x12 \n\tdirection\x18\x04 \x02(\x0e\x32\r.i2cDirection\"\x9d\x01\n\nspiMessage\x12\x14\n\x03\x62us\x18\x01 \x02(\x0e\x32\x07.spiBus\x12\x16\n\x04mode\x18\x02 \x01(\x0e\x32\x08.spiMode\x12\x19\n\x05\x63lock\x18\x03 \x02(\x0e\x32\n.clockMode\x12\x0f\n\x07\x63ommand\x18\x04 \x02(\r\x12 \n\tdirection\x18\x05 \x02(\x0e\x32\r.spiDirection\x12\x13\n\x0b\x64ummyclocks\x18\x06 \x01(\r\"w\n\x0b\x64igitalGPIO\x12\x17\n\x04port\x18\x01 \x02(\x0e\x32\t.gpioPort\x12\x0b\n\x03pin\x18\x02 \x02(\r\x12!\n\tdirection\x18\x03 \x02(\x0e\x32\x0e.gpioDirection\x12\x1f\n\x08pinState\x18\x04 \x02(\x0e\x32\r.gpioPinState\"v\n\x08\x61nalogIN\x12\x1a\n\x02\x66s\x18\x01 \x02(\x0e\x32\x0e.ADC_FULLSCALE\x12\x15\n\x03mpx\x18\x02 \x02(\x0e\x32\x08.ADC_MPX\x12\x17\n\x04port\x18\x03 \x02(\x0e\x32\t.gpioPort\x12\x0b\n\x03pin\x18\x04 \x02(\r\x12\x11\n\tdutyCycle\x18\x05 \x01(\r\"W\n\tanalogOUT\x12\x17\n\x04port\x18\x01 \x02(\x0e\x32\t.gpioPort\x12\x0b\n\x03pin\x18\x02 \x02(\r\x12\x11\n\tfrequency\x18\x03 \x02(\r\x12\x11\n\tdutyCycle\x18\x04 \x02(\r\"\xfd\x01\n\x07\x43ommand\x12%\n\x0b\x63ommandType\x18\x01 \x02(\x0e\x32\x10.CommandTypeEnum\x12\x18\n\x03i2c\x18\x02 \x01(\x0b\x32\x0b.i2cMessage\x12\x18\n\x03spi\x18\x03 \x01(\x0b\x32\x0b.spiMessage\x12\x1a\n\x04gpio\x18\x04 \x01(\x0b\x32\x0c.digitalGPIO\x12\x1c\n\tanalog_in\x18\x06 \x01(\x0b\x32\t.analogIN\x12\x1e\n\nanalog_out\x18\x07 \x01(\x0b\x32\n.analogOUT\x12\x14\n\x0cresponseRead\x18\n \x01(\r\x12\'\n\rresponseWrite\x18\x0b \x01(\x0e\x32\x10.successfulWrite*p\n\x0f\x43ommandTypeEnum\x12\x0c\n\x08LED_test\x10\x00\x12\x0c\n\x08I2C_test\x10\x01\x12\x0c\n\x08SPI_test\x10\x02\x12\x10\n\x0cGPIO_digital\x10\x03\x12\x0f\n\x0b\x41nalog_read\x10\x04\x12\x10\n\x0c\x41nalog_write\x10\x05*+\n\x0ci2cDirection\x12\r\n\tI2C_write\x10\x00\x12\x0c\n\x08I2C_read\x10\x01*&\n\x06i2cBus\x12\x08\n\x04I2C1\x10\x01\x12\x08\n\x04I2C2\x10\x02\x12\x08\n\x04I2C3\x10\x03*\xcb\x01\n\x07spiMode\x12\x16\n\x12\x46ULL_DUPLEX_MASTER\x10\x00\x12\x15\n\x11\x46ULL_DUPLEX_SLAVE\x10\x01\x12\x16\n\x12HALF_DUPLEX_MASTER\x10\x02\x12\x15\n\x11HALF_DUPLEX_SLAVE\x10\x03\x12\x17\n\x13RECEIVE_ONLY_MASTER\x10\x04\x12\x16\n\x12RECEIVE_ONLY_SLAVE\x10\x05\x12\x18\n\x14TRANSMIT_ONLY_MASTER\x10\x06\x12\x17\n\x13TRANSMIT_ONLY_SLAVE\x10\x07*1\n\x0cspiDirection\x12\x10\n\x0cSPI_TRANSMIT\x10\x00\x12\x0f\n\x0bSPI_RECEIVE\x10\x01*;\n\tclockMode\x12\n\n\x06MODE_0\x10\x00\x12\n\n\x06MODE_1\x10\x01\x12\n\n\x06MODE_2\x10\x02\x12\n\n\x06MODE_3\x10\x03*9\n\x0bhardwareNSS\x12\x0b\n\x07\x44ISABLE\x10\x00\x12\r\n\tNSS_INPUT\x10\x01\x12\x0e\n\nNSS_OUTPUT\x10\x02*&\n\x06spiBus\x12\x08\n\x04SPI1\x10\x01\x12\x08\n\x04SPI2\x10\x02\x12\x08\n\x04SPI3\x10\x03*0\n\rgpioDirection\x12\x0e\n\nGPIO_INPUT\x10\x00\x12\x0f\n\x0bGPIO_OUTPUT\x10\x01*+\n\x0cgpioPinState\x12\x0c\n\x08GPIO_LOW\x10\x00\x12\r\n\tGPIO_HIGH\x10\x01*=\n\x08gpioPort\x12\x0f\n\x0bGPIO_PORT_A\x10\x00\x12\x0f\n\x0bGPIO_PORT_B\x10\x01\x12\x0f\n\x0bGPIO_PORT_C\x10\x02*\x1d\n\rADC_FULLSCALE\x12\x0c\n\x08\x46S_4P096\x10\x00*\x18\n\x07\x41\x44\x43_MPX\x12\r\n\tMPX_P0_NG\x10\x00*\xa4\x01\n\x0fsuccessfulWrite\x12\x0b\n\x07LED_SET\x10\x00\x12\x10\n\x0cI2C_WRITE_OK\x10\x01\x12\x12\n\x0eI2C_WRITE_FAIL\x10\x02\x12\x10\n\x0cSPI_WRITE_OK\x10\x03\x12\x12\n\x0eSPI_WRITE_FAIL\x10\x04\x12\x0c\n\x08GPIO_SET\x10\x05\x12\x0e\n\nGPIO_RESET\x10\x06\x12\x0b\n\x07PWM_SET\x10\x07\x12\r\n\tPWM_RESET\x10\x08')
+  serialized_pb=_b('\n\x15\x66unctional_test.proto\"b\n\ni2cMessage\x12\x14\n\x03\x62us\x18\x01 \x02(\x0e\x32\x07.i2cBus\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x02(\r\x12\x0b\n\x03reg\x18\x03 \x02(\r\x12 \n\tdirection\x18\x04 \x02(\x0e\x32\r.i2cDirection\"\x9d\x01\n\nspiMessage\x12\x14\n\x03\x62us\x18\x01 \x02(\x0e\x32\x07.spiBus\x12\x16\n\x04mode\x18\x02 \x01(\x0e\x32\x08.spiMode\x12\x19\n\x05\x63lock\x18\x03 \x02(\x0e\x32\n.clockMode\x12\x0f\n\x07\x63ommand\x18\x04 \x02(\r\x12 \n\tdirection\x18\x05 \x02(\x0e\x32\r.spiDirection\x12\x13\n\x0b\x64ummyclocks\x18\x06 \x01(\r\"w\n\x0b\x64igitalGPIO\x12\x17\n\x04port\x18\x01 \x02(\x0e\x32\t.gpioPort\x12\x0b\n\x03pin\x18\x02 \x02(\r\x12!\n\tdirection\x18\x03 \x02(\x0e\x32\x0e.gpioDirection\x12\x1f\n\x08pinState\x18\x04 \x02(\x0e\x32\r.gpioPinState\"U\n\x08\x61nalogIN\x12\x17\n\x04port\x18\x01 \x02(\x0e\x32\t.gpioPort\x12\x0b\n\x03pin\x18\x02 \x02(\r\x12#\n\nresolution\x18\x03 \x02(\x0e\x32\x0f.ADC_RESOLUTION\"W\n\tanalogOUT\x12\x17\n\x04port\x18\x01 \x02(\x0e\x32\t.gpioPort\x12\x0b\n\x03pin\x18\x02 \x02(\r\x12\x11\n\tfrequency\x18\x03 \x02(\r\x12\x11\n\tdutyCycle\x18\x04 \x02(\r\"\xfd\x01\n\x07\x43ommand\x12%\n\x0b\x63ommandType\x18\x01 \x02(\x0e\x32\x10.CommandTypeEnum\x12\x18\n\x03i2c\x18\x02 \x01(\x0b\x32\x0b.i2cMessage\x12\x18\n\x03spi\x18\x03 \x01(\x0b\x32\x0b.spiMessage\x12\x1a\n\x04gpio\x18\x04 \x01(\x0b\x32\x0c.digitalGPIO\x12\x1c\n\tanalog_in\x18\x06 \x01(\x0b\x32\t.analogIN\x12\x1e\n\nanalog_out\x18\x07 \x01(\x0b\x32\n.analogOUT\x12\x14\n\x0cresponseRead\x18\n \x01(\r\x12\'\n\rresponseWrite\x18\x0b \x01(\x0e\x32\x10.successfulWrite*p\n\x0f\x43ommandTypeEnum\x12\x0c\n\x08LED_test\x10\x00\x12\x0c\n\x08I2C_test\x10\x01\x12\x0c\n\x08SPI_test\x10\x02\x12\x10\n\x0cGPIO_digital\x10\x03\x12\x0f\n\x0b\x41nalog_read\x10\x04\x12\x10\n\x0c\x41nalog_write\x10\x05*+\n\x0ci2cDirection\x12\r\n\tI2C_write\x10\x00\x12\x0c\n\x08I2C_read\x10\x01*&\n\x06i2cBus\x12\x08\n\x04I2C1\x10\x01\x12\x08\n\x04I2C2\x10\x02\x12\x08\n\x04I2C3\x10\x03*\xcb\x01\n\x07spiMode\x12\x16\n\x12\x46ULL_DUPLEX_MASTER\x10\x00\x12\x15\n\x11\x46ULL_DUPLEX_SLAVE\x10\x01\x12\x16\n\x12HALF_DUPLEX_MASTER\x10\x02\x12\x15\n\x11HALF_DUPLEX_SLAVE\x10\x03\x12\x17\n\x13RECEIVE_ONLY_MASTER\x10\x04\x12\x16\n\x12RECEIVE_ONLY_SLAVE\x10\x05\x12\x18\n\x14TRANSMIT_ONLY_MASTER\x10\x06\x12\x17\n\x13TRANSMIT_ONLY_SLAVE\x10\x07*1\n\x0cspiDirection\x12\x10\n\x0cSPI_TRANSMIT\x10\x00\x12\x0f\n\x0bSPI_RECEIVE\x10\x01*;\n\tclockMode\x12\n\n\x06MODE_0\x10\x00\x12\n\n\x06MODE_1\x10\x01\x12\n\n\x06MODE_2\x10\x02\x12\n\n\x06MODE_3\x10\x03*9\n\x0bhardwareNSS\x12\x0b\n\x07\x44ISABLE\x10\x00\x12\r\n\tNSS_INPUT\x10\x01\x12\x0e\n\nNSS_OUTPUT\x10\x02*&\n\x06spiBus\x12\x08\n\x04SPI1\x10\x01\x12\x08\n\x04SPI2\x10\x02\x12\x08\n\x04SPI3\x10\x03*0\n\rgpioDirection\x12\x0e\n\nGPIO_INPUT\x10\x00\x12\x0f\n\x0bGPIO_OUTPUT\x10\x01*+\n\x0cgpioPinState\x12\x0c\n\x08GPIO_LOW\x10\x00\x12\r\n\tGPIO_HIGH\x10\x01*t\n\x08gpioPort\x12\x0f\n\x0bGPIO_PORT_A\x10\x00\x12\x0f\n\x0bGPIO_PORT_B\x10\x01\x12\x0f\n\x0bGPIO_PORT_C\x10\x02\x12\x14\n\x10GPIO_TEMP_SENSOR\x10\x03\x12\x10\n\x0cGPIO_VREFINT\x10\x04\x12\r\n\tGPIO_VBAT\x10\x05*R\n\x0e\x41\x44\x43_RESOLUTION\x12\x0f\n\x0b\x41\x44\x43_12_BITS\x10\x00\x12\x0f\n\x0b\x41\x44\x43_10_BITS\x10\x01\x12\x0e\n\nADC_8_BITS\x10\x02\x12\x0e\n\nADC_6_BITS\x10\x03*\xcd\x01\n\x0fsuccessfulWrite\x12\x0b\n\x07LED_SET\x10\x00\x12\x10\n\x0cI2C_WRITE_OK\x10\x01\x12\x12\n\x0eI2C_WRITE_FAIL\x10\x02\x12\x10\n\x0cSPI_WRITE_OK\x10\x03\x12\x12\n\x0eSPI_WRITE_FAIL\x10\x04\x12\x0c\n\x08GPIO_SET\x10\x05\x12\x0e\n\nGPIO_RESET\x10\x06\x12\x13\n\x0fGPIO_WRITE_FAIL\x10\x07\x12\x0b\n\x07PWM_SET\x10\x08\x12\r\n\tPWM_RESET\x10\t\x12\x12\n\x0ePWM_WRITE_FAIL\x10\n')
 )
 
 _COMMANDTYPEENUM = _descriptor.EnumDescriptor(
@@ -56,8 +56,8 @@ _COMMANDTYPEENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=871,
-  serialized_end=983,
+  serialized_start=838,
+  serialized_end=950,
 )
 _sym_db.RegisterEnumDescriptor(_COMMANDTYPEENUM)
 
@@ -79,8 +79,8 @@ _I2CDIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=985,
-  serialized_end=1028,
+  serialized_start=952,
+  serialized_end=995,
 )
 _sym_db.RegisterEnumDescriptor(_I2CDIRECTION)
 
@@ -106,8 +106,8 @@ _I2CBUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1030,
-  serialized_end=1068,
+  serialized_start=997,
+  serialized_end=1035,
 )
 _sym_db.RegisterEnumDescriptor(_I2CBUS)
 
@@ -153,8 +153,8 @@ _SPIMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1071,
-  serialized_end=1274,
+  serialized_start=1038,
+  serialized_end=1241,
 )
 _sym_db.RegisterEnumDescriptor(_SPIMODE)
 
@@ -176,8 +176,8 @@ _SPIDIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1276,
-  serialized_end=1325,
+  serialized_start=1243,
+  serialized_end=1292,
 )
 _sym_db.RegisterEnumDescriptor(_SPIDIRECTION)
 
@@ -207,8 +207,8 @@ _CLOCKMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1327,
-  serialized_end=1386,
+  serialized_start=1294,
+  serialized_end=1353,
 )
 _sym_db.RegisterEnumDescriptor(_CLOCKMODE)
 
@@ -234,8 +234,8 @@ _HARDWARENSS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1388,
-  serialized_end=1445,
+  serialized_start=1355,
+  serialized_end=1412,
 )
 _sym_db.RegisterEnumDescriptor(_HARDWARENSS)
 
@@ -261,8 +261,8 @@ _SPIBUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1447,
-  serialized_end=1485,
+  serialized_start=1414,
+  serialized_end=1452,
 )
 _sym_db.RegisterEnumDescriptor(_SPIBUS)
 
@@ -284,8 +284,8 @@ _GPIODIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1487,
-  serialized_end=1535,
+  serialized_start=1454,
+  serialized_end=1502,
 )
 _sym_db.RegisterEnumDescriptor(_GPIODIRECTION)
 
@@ -307,8 +307,8 @@ _GPIOPINSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1537,
-  serialized_end=1580,
+  serialized_start=1504,
+  serialized_end=1547,
 )
 _sym_db.RegisterEnumDescriptor(_GPIOPINSTATE)
 
@@ -331,53 +331,58 @@ _GPIOPORT = _descriptor.EnumDescriptor(
       name='GPIO_PORT_C', index=2, number=2,
       serialized_options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GPIO_TEMP_SENSOR', index=3, number=3,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GPIO_VREFINT', index=4, number=4,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GPIO_VBAT', index=5, number=5,
+      serialized_options=None,
+      type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1582,
-  serialized_end=1643,
+  serialized_start=1549,
+  serialized_end=1665,
 )
 _sym_db.RegisterEnumDescriptor(_GPIOPORT)
 
 gpioPort = enum_type_wrapper.EnumTypeWrapper(_GPIOPORT)
-_ADC_FULLSCALE = _descriptor.EnumDescriptor(
-  name='ADC_FULLSCALE',
-  full_name='ADC_FULLSCALE',
+_ADC_RESOLUTION = _descriptor.EnumDescriptor(
+  name='ADC_RESOLUTION',
+  full_name='ADC_RESOLUTION',
   filename=None,
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='FS_4P096', index=0, number=0,
+      name='ADC_12_BITS', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ADC_10_BITS', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ADC_8_BITS', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ADC_6_BITS', index=3, number=3,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1645,
-  serialized_end=1674,
+  serialized_start=1667,
+  serialized_end=1749,
 )
-_sym_db.RegisterEnumDescriptor(_ADC_FULLSCALE)
+_sym_db.RegisterEnumDescriptor(_ADC_RESOLUTION)
 
-ADC_FULLSCALE = enum_type_wrapper.EnumTypeWrapper(_ADC_FULLSCALE)
-_ADC_MPX = _descriptor.EnumDescriptor(
-  name='ADC_MPX',
-  full_name='ADC_MPX',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='MPX_P0_NG', index=0, number=0,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1676,
-  serialized_end=1700,
-)
-_sym_db.RegisterEnumDescriptor(_ADC_MPX)
-
-ADC_MPX = enum_type_wrapper.EnumTypeWrapper(_ADC_MPX)
+ADC_RESOLUTION = enum_type_wrapper.EnumTypeWrapper(_ADC_RESOLUTION)
 _SUCCESSFULWRITE = _descriptor.EnumDescriptor(
   name='successfulWrite',
   full_name='successfulWrite',
@@ -413,18 +418,26 @@ _SUCCESSFULWRITE = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='PWM_SET', index=7, number=7,
+      name='GPIO_WRITE_FAIL', index=7, number=7,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='PWM_RESET', index=8, number=8,
+      name='PWM_SET', index=8, number=8,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PWM_RESET', index=9, number=9,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PWM_WRITE_FAIL', index=10, number=10,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1703,
-  serialized_end=1867,
+  serialized_start=1752,
+  serialized_end=1957,
 )
 _sym_db.RegisterEnumDescriptor(_SUCCESSFULWRITE)
 
@@ -467,8 +480,13 @@ GPIO_HIGH = 1
 GPIO_PORT_A = 0
 GPIO_PORT_B = 1
 GPIO_PORT_C = 2
-FS_4P096 = 0
-MPX_P0_NG = 0
+GPIO_TEMP_SENSOR = 3
+GPIO_VREFINT = 4
+GPIO_VBAT = 5
+ADC_12_BITS = 0
+ADC_10_BITS = 1
+ADC_8_BITS = 2
+ADC_6_BITS = 3
 LED_SET = 0
 I2C_WRITE_OK = 1
 I2C_WRITE_FAIL = 2
@@ -476,8 +494,10 @@ SPI_WRITE_OK = 3
 SPI_WRITE_FAIL = 4
 GPIO_SET = 5
 GPIO_RESET = 6
-PWM_SET = 7
-PWM_RESET = 8
+GPIO_WRITE_FAIL = 7
+PWM_SET = 8
+PWM_RESET = 9
+PWM_WRITE_FAIL = 10
 
 
 
@@ -659,36 +679,22 @@ _ANALOGIN = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='fs', full_name='analogIN.fs', index=0,
+      name='port', full_name='analogIN.port', index=0,
       number=1, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='mpx', full_name='analogIN.mpx', index=1,
-      number=2, type=14, cpp_type=8, label=2,
+      name='pin', full_name='analogIN.pin', index=1,
+      number=2, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='port', full_name='analogIN.port', index=2,
+      name='resolution', full_name='analogIN.resolution', index=2,
       number=3, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='pin', full_name='analogIN.pin', index=3,
-      number=4, type=13, cpp_type=3, label=2,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='dutyCycle', full_name='analogIN.dutyCycle', index=4,
-      number=5, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -706,7 +712,7 @@ _ANALOGIN = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=406,
-  serialized_end=524,
+  serialized_end=491,
 )
 
 
@@ -757,8 +763,8 @@ _ANALOGOUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=526,
-  serialized_end=613,
+  serialized_start=493,
+  serialized_end=580,
 )
 
 
@@ -837,8 +843,8 @@ _COMMAND = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=616,
-  serialized_end=869,
+  serialized_start=583,
+  serialized_end=836,
 )
 
 _I2CMESSAGE.fields_by_name['bus'].enum_type = _I2CBUS
@@ -850,9 +856,8 @@ _SPIMESSAGE.fields_by_name['direction'].enum_type = _SPIDIRECTION
 _DIGITALGPIO.fields_by_name['port'].enum_type = _GPIOPORT
 _DIGITALGPIO.fields_by_name['direction'].enum_type = _GPIODIRECTION
 _DIGITALGPIO.fields_by_name['pinState'].enum_type = _GPIOPINSTATE
-_ANALOGIN.fields_by_name['fs'].enum_type = _ADC_FULLSCALE
-_ANALOGIN.fields_by_name['mpx'].enum_type = _ADC_MPX
 _ANALOGIN.fields_by_name['port'].enum_type = _GPIOPORT
+_ANALOGIN.fields_by_name['resolution'].enum_type = _ADC_RESOLUTION
 _ANALOGOUT.fields_by_name['port'].enum_type = _GPIOPORT
 _COMMAND.fields_by_name['commandType'].enum_type = _COMMANDTYPEENUM
 _COMMAND.fields_by_name['i2c'].message_type = _I2CMESSAGE
@@ -878,8 +883,7 @@ DESCRIPTOR.enum_types_by_name['spiBus'] = _SPIBUS
 DESCRIPTOR.enum_types_by_name['gpioDirection'] = _GPIODIRECTION
 DESCRIPTOR.enum_types_by_name['gpioPinState'] = _GPIOPINSTATE
 DESCRIPTOR.enum_types_by_name['gpioPort'] = _GPIOPORT
-DESCRIPTOR.enum_types_by_name['ADC_FULLSCALE'] = _ADC_FULLSCALE
-DESCRIPTOR.enum_types_by_name['ADC_MPX'] = _ADC_MPX
+DESCRIPTOR.enum_types_by_name['ADC_RESOLUTION'] = _ADC_RESOLUTION
 DESCRIPTOR.enum_types_by_name['successfulWrite'] = _SUCCESSFULWRITE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
