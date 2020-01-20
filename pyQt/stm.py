@@ -43,12 +43,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Fill combobox with commands
     def fill_cmd_box(self):
-        self.cmd_box.addItem("LED test",functional_test_pb2.CommandTypeEnum.LED_test)
+        self.cmd_box.addItem("Click to select...",functional_test_pb2.CommandTypeEnum.LED_test)
         self.cmd_box.addItem("I2C test",functional_test_pb2.CommandTypeEnum.I2C_test)
         self.cmd_box.addItem("SPI test",functional_test_pb2.CommandTypeEnum.SPI_test)
         self.cmd_box.addItem("GPIO digital",functional_test_pb2.CommandTypeEnum.GPIO_digital)
         self.cmd_box.addItem("Analog read",functional_test_pb2.CommandTypeEnum.Analog_read)
         self.cmd_box.addItem("PWM",functional_test_pb2.CommandTypeEnum.Analog_write)
+
+    def on_changed_gpio_dir(self):
+        if self.gpio_direction_select.currentData() == functional_test_pb2.gpioDirection.GPIO_INPUT:
+            self.gpio_state_select.setEnabled(False)
+        else:
+            self.gpio_state_select.setEnabled(True)
 
     # Called whenever a command is selected
     def on_changed(self,text):
@@ -177,6 +183,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_state_select.addItem("Low",functional_test_pb2.gpioPinState.GPIO_LOW)
                 self.gpio_state_select.addItem("High",functional_test_pb2.gpioPinState.GPIO_HIGH)
 
+                self.gpio_state_select.setEnabled(False)
+                self.gpio_direction_select.activated[str].connect(self.on_changed_gpio_dir)
 
 #self.gridLayout.addItem(spacerItem, 1, 1, 1, 1)
                 self.options_layout.addWidget(self.gpio_port_label,0,0)
@@ -270,6 +278,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("GPIO dir:",self.cmd.gpio.direction)
             print("GPIO state:",self.cmd.gpio.pinState)
 
+        elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
+            print("LED test")
+#            self.cmd.commandType = 6
+
 
     # Get number of response bytes depending on command type
     def read_data_depending_on_cmd_type(self, cmdType):
@@ -311,6 +323,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cmd = functional_test_pb2.Command()
         self.cmd.commandType = self.cmd_box.currentData()
         self.add_data_depending_on_cmd_type(self.cmd.commandType)
+        print (self.cmd.SerializeToString())
         return self.cmd.SerializeToString()
 
 

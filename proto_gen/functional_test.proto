@@ -99,6 +99,9 @@ enum gpioPort{
 	GPIO_PORT_A = 0;
 	GPIO_PORT_B = 1;
 	GPIO_PORT_C = 2;
+	GPIO_TEMP_SENSOR = 3,
+	GPIO_VREFINT = 4;
+	GPIO_VBAT = 5;
 }
 
 message digitalGPIO{
@@ -111,20 +114,18 @@ message digitalGPIO{
 
 
 // Analog IN message
-enum ADC_FULLSCALE{		
-	FS_4P096 = 0;
+enum ADC_RESOLUTION{		
+	ADC_12_BITS = 0;
+	ADC_10_BITS = 1;
+	ADC_8_BITS = 2;
+	ADC_6_BITS = 3,
 }
 
-enum ADC_MPX{		
-	MPX_P0_NG = 0;
-}
 
 message analogIN{		
- required ADC_FULLSCALE fs = 1;	// Full scale
- required ADC_MPX mpx = 2;			// Channel selection
- required gpioPort port = 3;
- required uint32 pin = 4;
- optional uint32 dutyCycle = 5;
+ required gpioPort port= 1;
+ required uint32 pin = 2;
+ required ADC_RESOLUTION resolution = 3;
 }
 
 
@@ -147,8 +148,10 @@ enum successfulWrite{
  SPI_WRITE_FAIL = 4;
  GPIO_SET = 5;
  GPIO_RESET = 6;
- PWM_SET = 7;
- PWM_RESET = 8;
+ GPIO_WRITE_FAIL = 7;
+ PWM_SET = 8;
+ PWM_RESET = 9;
+ PWM_WRITE_FAIL = 10;
 }
 
 

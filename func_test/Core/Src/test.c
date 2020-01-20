@@ -88,10 +88,6 @@ void enter_processing_state(void)
 		  messageDecodeSuccessful = decode_message(receiveBuffer, &message_in);
 		  if(messageDecodeSuccessful){
 			  switch(message_in.commandType){
-			  case CommandTypeEnum_STOP_CURRENT_TEST:
-				  break;
-			  case CommandTypeEnum_ADC_test:
-				  break;
 			  case CommandTypeEnum_I2C_test:
 				  // perif_init()
 				  // perif_test()
@@ -106,21 +102,14 @@ void enter_processing_state(void)
 					  testToggle = false;
 				  }
 				  else{
-					  message_out.commandType = CommandTypeEnum_GPIO_test;
+					  message_out.commandType = CommandTypeEnum_GPIO_digital;
 					  testToggle = true;
 				  }
 				  encode_message(transmitBuffer,&message_out);
 				  link_set_phy_write_fn(&linkLayer,&buffer_send);
 				  link_write(&linkLayer,transmitBuffer,strlen((char*)transmitBuffer));
 				  break;
-			  case CommandTypeEnum_GPIO_test:
-				  break;
-			  case CommandTypeEnum_TIMER_SINGLE_SHOT:
-				  break;
-			  case CommandTypeEnum_RTC_test:
-				  break;
-			  case CommandTypeEnum_PWM:
-				  break;
+
 			  default:
 				  break;
 			  }
