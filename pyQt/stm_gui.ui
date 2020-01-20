@@ -204,7 +204,26 @@
      </property>
      <layout class="QGridLayout" name="cmd_layout">
       <item row="0" column="1">
-       <widget class="QComboBox" name="cmd_box"/>
+       <widget class="QComboBox" name="cmd_box">
+        <property name="toolTip">
+         <string/>
+        </property>
+        <property name="statusTip">
+         <string/>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
+        <property name="accessibleName">
+         <string/>
+        </property>
+        <property name="accessibleDescription">
+         <string/>
+        </property>
+        <property name="currentText">
+         <string/>
+        </property>
+       </widget>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="select_cmd_label">
@@ -271,7 +290,7 @@
        <x>10</x>
        <y>20</y>
        <width>271</width>
-       <height>61</height>
+       <height>73</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="response_layout">
