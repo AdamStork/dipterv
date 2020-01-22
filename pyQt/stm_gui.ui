@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>500</height>
+    <width>700</width>
+    <height>510</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>320</width>
-    <height>500</height>
+    <width>700</width>
+    <height>510</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>320</width>
-    <height>500</height>
+    <width>700</width>
+    <height>510</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -185,9 +185,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>120</y>
+      <y>210</y>
       <width>291</width>
-      <height>251</height>
+      <height>271</height>
      </rect>
     </property>
     <property name="title">
@@ -197,12 +197,33 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>30</y>
+       <y>20</y>
        <width>241</width>
-       <height>211</height>
+       <height>241</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="cmd_layout">
+      <item row="3" column="0">
+       <widget class="QPushButton" name="sequency_add_button">
+        <property name="text">
+         <string>Add to sequence</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="select_cmd_label">
+        <property name="text">
+         <string>Select command</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="cmd_button">
+        <property name="text">
+         <string>Send command</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <widget class="QComboBox" name="cmd_box">
         <property name="toolTip">
@@ -222,20 +243,6 @@
         </property>
         <property name="currentText">
          <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="select_cmd_label">
-        <property name="text">
-         <string>Select command</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QPushButton" name="cmd_button">
-        <property name="text">
-         <string>Send command</string>
         </property>
        </widget>
       </item>
@@ -265,19 +272,14 @@
        </widget>
       </item>
      </layout>
-     <zorder>cmd_box</zorder>
-     <zorder>select_cmd_label</zorder>
-     <zorder>cmd_button</zorder>
-     <zorder>cmd_output</zorder>
-     <zorder>options_GB</zorder>
     </widget>
    </widget>
    <widget class="QGroupBox" name="response_GB">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>380</y>
-      <width>291</width>
+      <x>320</x>
+      <y>390</y>
+      <width>361</width>
       <height>91</height>
      </rect>
     </property>
@@ -289,8 +291,8 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>271</width>
-       <height>73</height>
+       <width>341</width>
+       <height>61</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="response_layout">
@@ -300,13 +302,167 @@
      </layout>
     </widget>
    </widget>
+   <widget class="QGroupBox" name="config_GB">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>291</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>CubeMX config</string>
+    </property>
+    <widget class="QWidget" name="gridLayoutWidget_4">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>241</width>
+       <height>54</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="cfg_layout">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="cfg_checkbox">
+        <property name="text">
+         <string>Use CubeMX config file</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="cfg_browse_button">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="cfg_load_button">
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLineEdit" name="cfg_file_path">
+        <property name="placeholderText">
+         <string>File path</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="sequence_GB">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>10</y>
+      <width>361</width>
+      <height>361</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Sequence builder</string>
+    </property>
+    <widget class="QWidget" name="verticalLayoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>30</y>
+       <width>90</width>
+       <height>171</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="seq_buttons_layout">
+      <item>
+       <widget class="QPushButton" name="delete_row_button">
+        <property name="text">
+         <string>Delete row</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="move_up_button">
+        <property name="text">
+         <string>Move up</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="move_down_button">
+        <property name="text">
+         <string>Move down</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="save_seq_button">
+        <property name="text">
+         <string>Save sequence</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="load_seq_button">
+        <property name="text">
+         <string>Load sequence</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="delete_seq_button">
+        <property name="text">
+         <string>Delete sequence</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="verticalLayoutWidget_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>241</width>
+       <height>321</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="sequence_list_layout">
+      <item>
+       <widget class="QListView" name="seq_list"/>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="verticalLayoutWidget_4">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>320</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="send_seq_layout">
+      <item>
+       <widget class="QPushButton" name="send_seq_button">
+        <property name="text">
+         <string>Send sequence</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
    <widget class="QMdiArea" name="mdiArea">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>-10</x>
       <y>0</y>
-      <width>2190</width>
-      <height>720</height>
+      <width>721</width>
+      <height>531</height>
      </rect>
     </property>
    </widget>
@@ -314,13 +470,15 @@
    <zorder>port_GB</zorder>
    <zorder>cmd_GB</zorder>
    <zorder>response_GB</zorder>
+   <zorder>config_GB</zorder>
+   <zorder>sequence_GB</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>320</width>
+     <width>700</width>
      <height>21</height>
     </rect>
    </property>
