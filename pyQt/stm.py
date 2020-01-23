@@ -34,10 +34,32 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ser = serial.Serial()
         self.close_button.setEnabled(False)
         self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]")) # Byte validator for input fields (0xhh format)
-        self.decValidator = QRegExpValidator(QRegExp("[0-9][0-9]")) # 2-digit decimal validator for input fields
+        self.decValidator  = QRegExpValidator(QRegExp("[0-9][0-9]")) # 2-digit decimal validator for input fields
         self.gpioValidator = QRegExpValidator(QRegExp("[0-7][0-7]")) # 2-digit decimal validator for GPIO fields
         self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]")) # Max. 3 digit validator for duty cycle [0-100], limits checked
         self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]")) # Max. 4 digit validator for freqency [0-1000], limits checked
+
+
+
+        # QListWidget feltoltese
+        for word in ['cat', 'dog', 'bird']:
+            list_item = QListWidgetItem(word, self.sequence_list)  # Ide a sequence[index].display-t kell hozzaadni
+        self.sequence_list.currentItemChanged.connect(self.print_info)
+
+    #akt indexet kiirja
+    def print_info(self):
+        print(self.sequence_list.currentRow())
+
+#        self.sequence_list.insertItem(0,"python") # Insert: (len(sequence)-1). helyre
+#        self.sequence_list.insertItem(0,"python")
+#        self.sequence_list.insertItem(0,"python")
+#        self.sequence_list.insertItem(0,"python")
+#        self.sequence_list.insertItem(0,"python")
+#        self.sequence_list.insertItem(0,"python")
+#        self.sequence_list.insertItem(0,"python")
+#        self.sequence_list.insertItem(0,"python")
+#        self.sequence_list.insertItem(0,"python") # GOMBOK bekotese: itemClicked: akt index lekerese
+
 
     def __call__(self):
         return self
@@ -466,6 +488,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.close_button.setEnabled(True)
         except serial.serialutil.SerialException:
             is_port_open = 'Error opening port'
+#            self.connection_output.setStyleSheet('color: red')
         self.connection_output.setText(is_port_open)
 
     # Close serial port

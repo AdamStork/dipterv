@@ -292,7 +292,7 @@
        <x>10</x>
        <y>20</y>
        <width>341</width>
-       <height>61</height>
+       <height>73</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="response_layout">
@@ -312,7 +312,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>CubeMX config</string>
+     <string>Auto-detect</string>
     </property>
     <widget class="QWidget" name="gridLayoutWidget_4">
      <property name="geometry">
@@ -427,12 +427,12 @@
        <x>10</x>
        <y>30</y>
        <width>241</width>
-       <height>321</height>
+       <height>190</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="sequence_list_layout">
       <item>
-       <widget class="QListView" name="seq_list"/>
+       <widget class="QListWidget" name="sequence_list"/>
       </item>
      </layout>
     </widget>
