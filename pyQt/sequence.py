@@ -71,7 +71,7 @@ def delete_test_from_sequence(sequence, index):
 
 # Move up test in sequence (move to front / decrease index)
 def move_up_test_in_sequence(sequence, index):
-    if index > 0:
+    if index > 0:       # Watch out for upper limit
         sequence[index], sequence[index-1] = sequence[index-1], sequence[index]
     else:
         print('Error! Index out of range!')
@@ -79,7 +79,7 @@ def move_up_test_in_sequence(sequence, index):
 # Move down test in sequence (move to back / increase index)
 def move_down_test_in_sequence(sequence,index):
     lastIndex = len(sequence) - 1
-    if index < lastIndex:
+    if index < lastIndex:   # Watch out for lower limit
       sequence[index], sequence[index+1] = sequence[index+1], sequence[index]
     else:
         print('Error! Index out of range!')

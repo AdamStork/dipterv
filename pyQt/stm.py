@@ -18,11 +18,17 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
+        # Signals connected to slots
         self.connect_button.clicked.connect(self.connect)
         self.cmd_button.clicked.connect(self.send_command)
         self.close_button.clicked.connect(self.close_port)
-        self.fill_cmd_box()
         self.cmd_box.activated[str].connect(self.on_changed)
+        self.move_up_button.clicked.connect(self.move_up)
+        self.move_down_button.clicked.connect(self.move_down)
+        self.delete_row_button.clicked.connect(self.delete_row)
+        self.sequence_add_button.clicked.connect(self.add_row)
+        self.delete_seq_button.clicked.connect(self.delete_seq)
+        self.fill_cmd_box()
         # flags: avoid command reselection
         self.I2C_active = False
         self.LED_active = False
@@ -44,12 +50,35 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # QListWidget feltoltese
         for word in ['cat', 'dog', 'bird']:
             list_item = QListWidgetItem(word, self.sequence_list)  # Ide a sequence[index].display-t kell hozzaadni
-        self.sequence_list.currentItemChanged.connect(self.print_info)
 
-    #akt indexet kiirja
-    def print_info(self):
-        print(self.sequence_list.currentRow())
+    # Move up QListWidgetItem
+    def move_up(self):
+        currentRow = self.sequence_list.currentRow()
+        if currentRow > 0:
+            currentItem = self.sequence_list.takeItem(currentRow)
+            self.sequence_list.insertItem(currentRow - 1, currentItem)
 
+    # Move down QListWidgetItem
+    def move_down(self):
+        currentRow = self.sequence_list.currentRow()
+        if currentRow < (self.sequence_list.count()-1):
+            currentItem = self.sequence_list.takeItem(currentRow)
+            self.sequence_list.insertItem(currentRow + 1, currentItem)
+
+    # Delete QListWidgetItem
+    def delete_row(self):
+        currentRow = self.sequence_list.currentRow()
+        self.sequence_list.takeItem(currentRow)
+
+    # Add command to sequence (Add QListWidgetItem)
+    def add_row(self):
+        command_to_add = "KutyaCica"
+        self.sequence_list.insertItem(self.sequence_list.count(),command_to_add)
+
+    def delete_seq(self):
+        self.sequence_list.clear()
+
+#        currentItem.deleteLater()
 #        self.sequence_list.insertItem(0,"python") # Insert: (len(sequence)-1). helyre
 #        self.sequence_list.insertItem(0,"python")
 #        self.sequence_list.insertItem(0,"python")
