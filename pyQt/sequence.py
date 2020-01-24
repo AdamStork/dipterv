@@ -1,4 +1,4 @@
-#    Python file for sequence builder
+#    Python file for sequence builder - list handling
 #    Author: Adam Golya
 #   #######################################
 
@@ -84,13 +84,13 @@ def move_down_test_in_sequence(sequence,index):
     else:
         print('Error! Index out of range!')
 
-def split_and_save_sequence:
+def make_listitem_from_object:
     print('TODO')
-#        save_sequence: QFileDialog, elmentes .txt, pl /t-vel elvalasztva
+#
 
 
-def load_and_print_sequence:
-    print('TODO')
+#def load_and_print_sequence:
+#    print('TODO')
 
 #        load_sequence: QFileDialog, betoltes .txt, pl /t-vel splitelve es listat csinalva belole
 #   https://www.tutorialspoint.com/pyqt/pyqt_qfiledialog_widget.htm

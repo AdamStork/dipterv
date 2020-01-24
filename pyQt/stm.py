@@ -26,8 +26,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.move_up_button.clicked.connect(self.move_up)
         self.move_down_button.clicked.connect(self.move_down)
         self.delete_row_button.clicked.connect(self.delete_row)
-        self.sequence_add_button.clicked.connect(self.add_row)
+        self.sequence_add_button.clicked.connect(self.add_seq)
         self.delete_seq_button.clicked.connect(self.delete_seq)
+        self.save_seq_button.clicked.connect(self.save_seq)
+        self.load_seq_button.clicked.connect(self.load_seq)
         self.fill_cmd_box()
         # flags: avoid command reselection
         self.I2C_active = False
@@ -44,50 +46,86 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.gpioValidator = QRegExpValidator(QRegExp("[0-7][0-7]")) # 2-digit decimal validator for GPIO fields
         self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]")) # Max. 3 digit validator for duty cycle [0-100], limits checked
         self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]")) # Max. 4 digit validator for freqency [0-1000], limits checked
-
-
+        self.test_list = []     # List filled with test objects
 
         # QListWidget feltoltese
         for word in ['cat', 'dog', 'bird']:
             list_item = QListWidgetItem(word, self.sequence_list)  # Ide a sequence[index].display-t kell hozzaadni
 
-    # Move up QListWidgetItem
+    # Move up row (Move up QListWidgetItem)
     def move_up(self):
         currentRow = self.sequence_list.currentRow()
         if currentRow > 0:
             currentItem = self.sequence_list.takeItem(currentRow)
             self.sequence_list.insertItem(currentRow - 1, currentItem)
+            self.sequence_list.setCurrentRow(currentRow - 1)
 
-    # Move down QListWidgetItem
+
+    # Move down row (Move down QListWidgetItem)
     def move_down(self):
         currentRow = self.sequence_list.currentRow()
         if currentRow < (self.sequence_list.count()-1):
             currentItem = self.sequence_list.takeItem(currentRow)
             self.sequence_list.insertItem(currentRow + 1, currentItem)
+            self.sequence_list.setCurrentRow(currentRow + 1)
 
-    # Delete QListWidgetItem
+    # Delete row (Delete QListWidgetItem)
     def delete_row(self):
         currentRow = self.sequence_list.currentRow()
         self.sequence_list.takeItem(currentRow)
 
     # Add command to sequence (Add QListWidgetItem)
-    def add_row(self):
-        command_to_add = "KutyaCica"
+    def add_seq(self, rowObject):
+        if rowObject == False:
+        # Lementi objektbe pl i2c_test az akt beallitasokat
+            command_to_add = "KutyaCica\tLoKopp" # sequence.py Add fv: egy sztringet osszerak es visszaadja
+        else: # Empty
+            command_to_add = rowObject # sequence.py Add fv: egy sztringet osszerak es visszaadja
+        # Objektbol listItemet csinal, es ezt szurja be a sequence listaba
         self.sequence_list.insertItem(self.sequence_list.count(),command_to_add)
+        # Hozzaadas a test_list-hez is, ami az objektekbol all
+#        self.test_list = add_test_to_sequence(object)
 
+   # Delete the whole sequence (Delete QListWidget content)
     def delete_seq(self):
         self.sequence_list.clear()
 
-#        currentItem.deleteLater()
-#        self.sequence_list.insertItem(0,"python") # Insert: (len(sequence)-1). helyre
-#        self.sequence_list.insertItem(0,"python")
-#        self.sequence_list.insertItem(0,"python")
-#        self.sequence_list.insertItem(0,"python")
-#        self.sequence_list.insertItem(0,"python")
-#        self.sequence_list.insertItem(0,"python")
-#        self.sequence_list.insertItem(0,"python")
-#        self.sequence_list.insertItem(0,"python")
-#        self.sequence_list.insertItem(0,"python") # GOMBOK bekotese: itemClicked: akt index lekerese
+    # Save sequence: Make a data_line list (string list from the lines) from sequence_list, and save it to a .txt file
+    def save_seq(self):
+        data_line = []
+        for i in range (self.sequence_list.count()):
+          self.sequence_list.setCurrentRow(i)
+          line = self.sequence_list.currentItem().text()
+          data_line.append(line)
+
+        dialog = QFileDialog.getSaveFileName(self, "Save config to file", ".", "Text file (*.txt)")
+        if not dialog[0]: return    # If no file name was given, then return
+        file = open(dialog[0], 'w')
+        for i in range(len(data_line)):
+           file.write(data_line[i])
+           file.write("\n")
+        file.close()
+
+    # Load sequence: open text file, and read line-by-line
+    def load_seq(self):
+        dialog = QFileDialog(self)
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        dialog.setNameFilters(["Text files (*.txt)"])
+        filenames = []
+        if dialog.exec_():
+            filenames = dialog.selectedFiles()
+            file = open(filenames[0], 'r')
+            with file:
+                data_line = file.readlines()
+                self.response_output.setText(data_line[0])
+                file.close()
+
+        # Fv sequence.py: lista atad, letrehoz soronkent egy tesztet es appendolja, vissza egy tesztekbol allo listat
+#        self.test_list =  make_listitem_from_object(data_line)
+#       for i in self.test_list:
+#            add_row(self.test_list[i])
+
+
 
 
     def __call__(self):
