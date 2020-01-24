@@ -6,6 +6,7 @@ from PyQt5.QtGui import *
 from decimal import Decimal
 
 import functional_test_pb2
+import sequence
 from link_layer import link_layer
 
 ui_path = os.path.dirname(os.path.abspath(__file__))
@@ -48,6 +49,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]")) # Max. 4 digit validator for freqency [0-1000], limits checked
         self.test_list = []     # List filled with test objects
 
+
         # QListWidget feltoltese
         for word in ['cat', 'dog', 'bird']:
             list_item = QListWidgetItem(word, self.sequence_list)  # Ide a sequence[index].display-t kell hozzaadni
@@ -76,11 +78,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Add command to sequence (Add QListWidgetItem)
     def add_seq(self, rowObject):
-        if rowObject == False:
-        # Lementi objektbe pl i2c_test az akt beallitasokat
-            command_to_add = "KutyaCica\tLoKopp" # sequence.py Add fv: egy sztringet osszerak es visszaadja
-        else: # Empty
-            command_to_add = rowObject # sequence.py Add fv: egy sztringet osszerak es visszaadja
+        if self.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.LED_test:
+            return
+        sequence.add_test_to_sequence(self, self.test_list)
+        print('sequence added')
+        command_to_add = sequence.make_string_from_test_object(self.test_list[len(self.test_list)-1])
+        print('string made')
         # Objektbol listItemet csinal, es ezt szurja be a sequence listaba
         self.sequence_list.insertItem(self.sequence_list.count(),command_to_add)
         # Hozzaadas a test_list-hez is, ami az objektekbol all
@@ -117,14 +120,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             file = open(filenames[0], 'r')
             with file:
                 data_line = file.readlines()
-                self.response_output.setText(data_line[0])
+                for i in range(len(data_line)):
+                    self.response_output.setText(data_line[i]) # Add text to sequence_list layout
                 file.close()
 
         # Fv sequence.py: lista atad, letrehoz soronkent egy tesztet es appendolja, vissza egy tesztekbol allo listat
-#        self.test_list =  make_listitem_from_object(data_line)
+#        self.test_list =  make_listitem_from_object(data_line) -- ehhez kell dictionary
 #       for i in self.test_list:
 #            add_row(self.test_list[i])
-
 
 
 
@@ -221,13 +224,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spi_clockmode_label = QLabel("SPI mode", self)
                 self.spi_command_label = QLabel("SPI command", self)
                 self.spi_dummyclocks_label = QLabel("SPI dummy clocks", self)
-                self.spi_direcion_label = QLabel("SPI direction", self)     # Needed for response (register value or write success)
+                self.spi_direction_label = QLabel("SPI direction", self)     # Needed for response (register value or write success)
 
                 self.spi_bus_select = QComboBox(self)
                 self.spi_clockmode_select = QComboBox(self)
                 self.spi_command_select = QLineEdit(self)
                 self.spi_dummyclocks_select = QLineEdit(self)
-                self.spi_direcion_select = QComboBox(self)
+                self.spi_direction_select = QComboBox(self)
 
                 self.spi_bus_select.addItem("SPI1",functional_test_pb2.spiBus.SPI1)
                 self.spi_bus_select.addItem("SPI2",functional_test_pb2.spiBus.SPI2)
@@ -243,19 +246,19 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spi_dummyclocks_select.setValidator(self.decValidator)
                 self.spi_dummyclocks_select.setPlaceholderText("0..99")
 
-                self.spi_direcion_select.addItem("Transmit",functional_test_pb2.spiDirection.SPI_TRANSMIT)
-                self.spi_direcion_select.addItem("Receive",functional_test_pb2.spiDirection.SPI_RECEIVE)
+                self.spi_direction_select.addItem("Transmit",functional_test_pb2.spiDirection.SPI_TRANSMIT)
+                self.spi_direction_select.addItem("Receive",functional_test_pb2.spiDirection.SPI_RECEIVE)
 
                 self.options_layout.addWidget(self.spi_bus_label,0,0)
                 self.options_layout.addWidget(self.spi_clockmode_label,1,0)
                 self.options_layout.addWidget(self.spi_command_label,2,0)
                 self.options_layout.addWidget(self.spi_dummyclocks_label,3,0)
-                self.options_layout.addWidget(self.spi_direcion_label,4,0)
+                self.options_layout.addWidget(self.spi_direction_label,4,0)
                 self.options_layout.addWidget(self.spi_bus_select,0,2)
                 self.options_layout.addWidget(self.spi_clockmode_select,1,2)
                 self.options_layout.addWidget(self.spi_command_select,2,2)
                 self.options_layout.addWidget(self.spi_dummyclocks_select,3,2)
-                self.options_layout.addWidget(self.spi_direcion_select,4,2)
+                self.options_layout.addWidget(self.spi_direction_select,4,2)
                 self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
@@ -406,11 +409,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print("Add data depending on cmd type")
         if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
             self.cmd.i2c.bus = self.i2c_bus_select.currentData()
-            if is_empty(self.i2c_addr_select.text()):
+            if sequence.is_empty(self.i2c_addr_select.text()):
                 self.cmd.i2c.address = 0
             else:
                 self.cmd.i2c.address = int(self.i2c_addr_select.text(),16)      # Convert to int
-            if is_empty(self.i2c_reg_select.text()):
+            if sequence.is_empty(self.i2c_reg_select.text()):
                 self.cmd.i2c.reg = 0
             else:
                 self.cmd.i2c.reg = int(self.i2c_reg_select.text(),16)           # Convert to int
@@ -423,15 +426,15 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             self.cmd.spi.bus = self.spi_bus_select.currentData()
             self.cmd.spi.clock = self.spi_clockmode_select.currentData()
-            if is_empty(self.spi_command_select.text()):
+            if sequence.is_empty(self.spi_command_select.text()):
                 self.cmd.spi.command = 0
             else:
                 self.cmd.spi.command = int(self.spi_command_select.text(),16)
-            if is_empty(self.spi_dummyclocks_select.text()):
+            if sequence.is_empty(self.spi_dummyclocks_select.text()):
                 self.cmd.spi.dummyclocks = 0
             else:
                 self.cmd.spi.dummyclocks = int(self.spi_dummyclocks_select.text(),16)
-            self.cmd.spi.direction = self.spi_direcion_select.currentData()
+            self.cmd.spi.direction = self.spi_direction_select.currentData()
             print("SPI Bus:", self.cmd.spi.bus)
             print("SPI Clock:",self.cmd.spi.clock)
             print("SPI Cmd:",self.cmd.spi.command)
@@ -440,7 +443,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
             self.cmd.gpio.port = self.gpio_port_select.currentData()
-            if is_empty(self.gpio_pin_select.text()):
+            if sequence.is_empty(self.gpio_pin_select.text()):
                 self.cmd.gpio.pin = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
             else:
                 self.cmd.gpio.pin = int(self.gpio_pin_select.text())
@@ -454,7 +457,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
             self.cmd.analog_in.port = self.gpio_port_select.currentData()
             if self.gpio_pin_select.isEnabled():
-                if is_empty(self.gpio_pin_select.text()):
+                if sequence.is_empty(self.gpio_pin_select.text()):
                     self.cmd.analog_in.pin = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
                 else:
                     self.cmd.analog_in.pin = int(self.gpio_pin_select.text())
@@ -467,15 +470,15 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
             self.cmd.analog_out.port = self.gpio_port_select.currentData()
-            if is_empty(self.gpio_pin_select.text()):
+            if sequence.is_empty(self.gpio_pin_select.text()):
                 self.cmd.analog_out.pin = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
             else:
                 self.cmd.analog_out.pin = int(self.gpio_pin_select.text())
-            if is_empty(self.pwm_freq_select.text()):
+            if sequence.is_empty(self.pwm_freq_select.text()):
                 self.cmd.analog_out.frequency = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
             else:
                 self.cmd.analog_out.frequency= int(self.pwm_freq_select.text())
-            if is_empty(self.pwm_duty_select.text()):
+            if sequence.is_empty(self.pwm_duty_select.text()):
                 self.cmd.analog_out.dutyCycle = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
             else:
                 self.cmd.analog_out.dutyCycle = int(self.pwm_duty_select.text())
@@ -498,7 +501,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 respone_num = 5     # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
-            if self.spi_direcion_select ==functional_test_pb2.spiDirection.SPI_RECEIVE:
+            if self.spi_direction_select ==functional_test_pb2.spiDirection.SPI_RECEIVE:
                 response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (register value)
             else:
                 response_num = 5    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
@@ -540,11 +543,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def connect(self):
         try:
 #            if self.serial_line_field.text() == "":
-            if is_empty(self.serial_line_field.text()):
+            if sequence.is_empty(self.serial_line_field.text()):
                 port_field = 'COM9'
             else:
                port_field = self.serial_line_field.text()
-            if is_empty(self.speed_field.text()):
+            if sequence.is_empty(self.speed_field.text()):
                 speed = 115200
             else:
                 speed = self.speed_field.text()
@@ -586,9 +589,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 command_send_success = 'Port is not open'
         self.cmd_output.setText(command_send_success)
 
-def is_empty(field):
-    if field == "":
-        return True
+
 
 
 if __name__ == "__main__":
