@@ -53,40 +53,53 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def move_up(self):
         currentRow = self.sequence_list.currentRow()
         if currentRow > 0:
+            # Move test object forward in test list
+            sequence.move_up_test_in_sequence(self.test_list, currentRow)
+            # Move up item in list
             currentItem = self.sequence_list.takeItem(currentRow)
             self.sequence_list.insertItem(currentRow - 1, currentItem)
             self.sequence_list.setCurrentRow(currentRow - 1)
-
+#            print(self.test_list[0].cmdType)
 
     # Move down row (Move down QListWidgetItem)
     def move_down(self):
         currentRow = self.sequence_list.currentRow()
         if currentRow < (self.sequence_list.count()-1):
+            # Move test object backward in test list
+            sequence.move_down_test_in_sequence(self.test_list, currentRow)
+            # Move down item in list
             currentItem = self.sequence_list.takeItem(currentRow)
             self.sequence_list.insertItem(currentRow + 1, currentItem)
             self.sequence_list.setCurrentRow(currentRow + 1)
+#            print(self.test_list[0].cmdType)
 
-    # Delete row (Delete QListWidgetItem)
+
+    # Delete row
     def delete_row(self):
-        currentRow = self.sequence_list.currentRow()
-        self.sequence_list.takeItem(currentRow)
+        currentRow = self.sequence_list.currentRow()        # Get index of current row
+        self.sequence_list.takeItem(currentRow)             # Delete current row (listWidgetitem)
+        sequence.delete_test_from_sequence(self.test_list, currentRow)    # Delete test from test list
+#        print("len seq:", len(self.sequence_list))
+#        print("len test:", len(self.test_list))
+#        print("")
 
-    # Add command to sequence (Add QListWidgetItem)
+    # Add command to test list and sequence list
     def add_seq(self, rowObject):
         if self.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.LED_test:
             return
-        sequence.add_test_to_sequence(self, self.test_list)
-        print('sequence added')
-        command_to_add = sequence.make_string_from_test_object(self.test_list[len(self.test_list)-1])
-        print('string made')
-        # Objektbol listItemet csinal, es ezt szurja be a sequence listaba
-        self.sequence_list.insertItem(self.sequence_list.count(),command_to_add)
-        # Hozzaadas a test_list-hez is, ami az objektekbol all
-#        self.test_list = add_test_to_sequence(object)
+        test_object = sequence.make_test_object_from_options(self)                                      # Make test object from selected options
+        sequence.add_test_object_to_test_list(test_object, self.test_list)                              # Add test object to test list
+        command_to_add = sequence.make_string_from_test_object(self.test_list[len(self.test_list)-1])   # Make string from test object
+        self.sequence_list.insertItem(self.sequence_list.count(),command_to_add)                        # Add string to sequence list
+#        print("len seq:", len(self.sequence_list))
+#        print("len test:", len(self.test_list))
 
-   # Delete the whole sequence (Delete QListWidget content)
+   # Delete the whole sequence
     def delete_seq(self):
-        self.sequence_list.clear()
+        self.sequence_list.clear()                  # Delete sequence list
+        sequence.delete_test_list(self.test_list)        # Delete test list
+#        print("len seq:", len(self.sequence_list))
+#        print("len test:", len(self.test_list))
 
     # Save sequence: Make a data_line list (string list from the lines) from sequence_list, and save it to a .txt file
     def save_seq(self):
@@ -116,8 +129,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             with file:
                 data_line = file.readlines()
                 for i in range(len(data_line)):
-                    self.response_output.setText(data_line[i]) # Add text to sequence_list layout
+                    data_line[i] = data_line[i].rstrip()
+                    print(data_line[i])
+                    self.sequence_list.insertItem(self.sequence_list.count(),data_line[i])      # Add string line to sequence
+                    test_object = sequence.make_test_object_from_string(data_line[i])           # Make object from string line
+                    sequence.add_test_object_to_test_list(test_object, self.test_list)                   # Add object to test list
                 file.close()
+
 
         # Fv sequence.py: lista atad, letrehoz soronkent egy tesztet es appendolja, vissza egy tesztekbol allo listat
 #        self.test_list =  make_listitem_from_object(data_line) -- ehhez kell dictionary
@@ -338,7 +356,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
-            print("AnalogWrite_active optons")
+            print("AnalogWrite optons")
             if self.AnalogWrite_active == False:
                 self.AnalogWrite_active = True
                 self.gpio_port_label = QLabel("GPIO port", self)

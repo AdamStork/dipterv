@@ -53,21 +53,10 @@ class analog_write:
         self.dutyCycle = dutyCycle
 
 
-#def add_test_using_cmd_options(UI, test_list):
-#    cmdType = UI.cmd_box.currentData()
-#    if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
-#        test_list.append( )
 
 
-#    elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
-#    elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
-#    elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
-#    elif cmdType == functional_test_pb2.CommandTypeEnum.analog_write:
-
-
-
-# Add test to sequence list depending on the selected command and options.
-def add_test_to_sequence(UI, sequence):
+# Make test objects from the selected options and add it to test_list.
+def make_test_object_from_options(UI):
     cmdType = UI.cmd_box.currentData()
 
     if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
@@ -83,7 +72,9 @@ def add_test_to_sequence(UI, sequence):
         else:
             selectedCommand.register = int(UI.i2c_reg_select.text(),16)           # Convert to int
         selectedCommand.rw = UI.i2c_rw_select.currentData()
-        sequence.append(selectedCommand)
+        return selectedCommand
+#        sequence.append(selectedCommand)
+#        add_test_object_to_test_list(selectedCommand, test_list)
 
     elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
         selectedCommand = spi_test()
@@ -99,7 +90,9 @@ def add_test_to_sequence(UI, sequence):
         else:
             selectedCommand.dummyclocks = int(UI.spi_dummyclocks_select.text())
         selectedCommand.direction = UI.spi_direction_select.currentData()
-        sequence.append(selectedCommand)
+        return selectedCommand
+#        sequence.append(selectedCommand)
+#        add_test_object_to_test_list(selectedCommand, test_list)
 
     elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         selectedCommand = gpio_digital()
@@ -111,7 +104,9 @@ def add_test_to_sequence(UI, sequence):
             selectedCommand.pin = int(UI.gpio_pin_select.text())
         selectedCommand.direction = UI.gpio_direction_select.currentData()
         selectedCommand.state = UI.gpio_state_select.currentData()
-        sequence.append(selectedCommand)
+        return selectedCommand
+#        sequence.append(selectedCommand)
+#        add_test_object_to_test_list(selectedCommand, test_list)
 
     elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
         selectedCommand = analog_read()
@@ -122,7 +117,9 @@ def add_test_to_sequence(UI, sequence):
         else:
             selectedCommand.pin = int(UI.gpio_pin_select.text())
         selectedCommand.resolution = UI.adc_resolution_select.currentData()
-        sequence.append(selectedCommand)
+        return selectedCommand
+#        sequence.append(selectedCommand)
+#        add_test_object_to_test_list(selectedCommand, test_list)
 
     elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
         selectedCommand = analog_write()
@@ -140,12 +137,15 @@ def add_test_to_sequence(UI, sequence):
             selectedCommand.dutyCycle = 0                               # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
         else:
             selectedCommand.dutyCycle = int(UI.pwm_duty_select.text())
-        sequence.append(selectedCommand)
-        print(selectedCommand.dutyCycle)
+        return selectedCommand
+#        sequence.append(selectedCommand)
+#        add_test_object_to_test_list(selectedCommand, test_list)
+
 
 # Delete test from sequence
 def delete_test_from_sequence(sequence, index):
     del sequence[index]
+
 
 # Move up test in sequence (move to front / decrease index)
 def move_up_test_in_sequence(sequence, index):
@@ -153,6 +153,7 @@ def move_up_test_in_sequence(sequence, index):
         sequence[index], sequence[index-1] = sequence[index-1], sequence[index]
     else:
         print('Error! Index out of range!')
+
 
 # Move down test in sequence (move to back / increase index)
 def move_down_test_in_sequence(sequence,index):
@@ -162,18 +163,20 @@ def move_down_test_in_sequence(sequence,index):
     else:
         print('Error! Index out of range!')
 
+
+# Make string from test object
 def make_string_from_test_object(test_object):
     string = ""
     if test_object.cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
         string += "I2C"
-        string += "  BUS" + str(test_object.bus)
+        string += "  Bus: " + list_i2c_bus[test_object.bus]
         string += "  Addr: " + "0x{:02X}".format(test_object.address)
         string += "  Reg: " + "0x{:02X}".format(test_object.register)
         string += "  R/W: " + list_i2c_rw[test_object.rw]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
         string += "SPI"
-        string += "  BUS" + str(test_object.bus)
+        string += "  Bus: " + list_spi_bus[test_object.bus]
         string += "  Mode: " + str(test_object.mode)
         string += "  Cmd: " + "0x{:02X}".format(test_object.command)
         string += "  Dummy: " + str(test_object.dummyclocks)
@@ -202,40 +205,107 @@ def make_string_from_test_object(test_object):
     return string
 
 
-#def load_and_print_sequence:
-#    print('TODO')
+# Make test object from string line: split words using a double space separator. Attach only the relevant string parts to object parameters.
+# Lists are used to find the indexes (enum values in .proto) of strings.
+def make_test_object_from_string(string):
+    words = string.split("  ")
+    if words[0] == list_cmd_types[0]:
+        test_object = i2c_test()
+        test_object.cmdType = functional_test_pb2.CommandTypeEnum.I2C_test
+        test_object.bus = list_i2c_bus.index( words[1][5:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
+        test_object.address = int(words[2][6:],16)
+        test_object.register = int(words[3][5:],16)
+        test_object.rw = list_i2c_rw.index(words[4][5:])
+        return test_object
+#        print("Test object:")
+#        print("cmd:",test_object.cmdType)
+#        print("bus:",test_object.bus)
+#        print("address:",test_object.address)
+#        print("register:",test_object.register)
+#        print("rw:",test_object.rw)
+    elif words[0] == list_cmd_types[1]:
+        test_object = spi_test()
+        test_object.cmdType = functional_test_pb2.CommandTypeEnum.SPI_test
+        test_object.bus = list_spi_bus.index( words[1][5:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
+        test_object.mode = list_spi_mode.index(words[2][6:])
+        test_object.command = int(words[3][7:],16)
+        test_object.dummyclocks = int(words[4][7:])
+        test_object.direction = list_spi_rw.index(words[5][5:])
+#        print("Test object: ")
+#        print("cmd:",test_object.cmdType)
+#        print("bus:",test_object.bus)
+#        print("mode:",test_object.mode)
+#        print("cmd:",test_object.command)
+#        print("dum:", test_object.dummyclocks)
+#        print("rw:",test_object.direction)
+    elif words[0] == list_cmd_types[2]:
+        test_object = gpio_digital()
+        test_object.cmdType = functional_test_pb2.CommandTypeEnum.GPIO_digital
+        test_object.port = list_gpio_port.index( words[1][6:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
+        test_object.pin = int(words[2][5:])
+        test_object.direction = list_gpio_rw.index(words[3][5:])
+        test_object.state = list_gpio_state.index(words[4][7:])
+#        print("Test object: ")
+#        print("cmd:",test_object.cmdType)
+#        print("port:",test_object.port)
+#        print("pin:",test_object.pin)
+#        print("rw:",test_object.direction)
+#        print("state:", test_object.state)
+    elif words[0] == list_cmd_types[3]:
+        test_object = analog_read()
+        test_object.cmdType = functional_test_pb2.CommandTypeEnum.Analog_read
+        test_object.port = list_gpio_port.index( words[1][6:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
+        test_object.pin = int(words[2][5:])
+        test_object.resolution = list_adc_res.index(words[3][5:])
+#        print("Test object:")
+#        print("cmd:",test_object.cmdType)
+#        print("port:",test_object.port)
+#        print("pin:",test_object.pin)
+#        print("Res:",test_object.resolution)
+    elif words[0] == list_cmd_types[3]:
+        test_object = analog_read()
+        test_object.cmdType = functional_test_pb2.CommandTypeEnum.Analog_write
+        test_object.port = list_gpio_port.index( words[1][6:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
+        test_object.pin = int(words[2][5:])
+        test_object.frequency = int(words[3][6:])
+        test_object.dutyCycle = int(words[4][6:])
+        print("Test object:")
+        print("cmd:",test_object.cmdType)
+        print("port:",test_object.port)
+        print("pin:",test_object.pin)
+        print("Res:",test_object.frequency)
+        print("Freq:",test_object.dutyCycle)
 
-#        load_sequence: QFileDialog, betoltes .txt, pl /t-vel splitelve es listat csinalva belole
-#   https://www.tutorialspoint.com/pyqt/pyqt_qfiledialog_widget.htm
-#   setText(): beállítás
+
+
+# Add test object to test list
+def add_test_object_to_test_list(test_object, test_list):
+    test_list.append(test_object)
+
 
 #  Delete sequence: clear list
-def delete_sequence(sequence):
-    sequence.clear()
+def delete_test_list(test_list):
+    test_list.clear()
 
-#def display_sequence_item:
-#    print('TODO')
-
-
-#        send_sequence: create_command_from_sequence_row:
-#            for ciklus a listan
-#            osszes ID-n vegigmegy
-#                uj Command
-#                cmdType-ot hozzadja
-#                tobbi adatot ettol fuggoen adja hozza
-#                send_command
 
 def is_empty(field):
     if field == "":
         return True
 
+
+list_cmd_types = ["I2C","SPI","GPIO","Analog_read","PWM"]
 list_i2c_rw = ["Write","Read"]
+list_i2c_bus = ["Invalid","I2C1","I2C2", "I2C3"]
+
+list_spi_bus = ["Invalid","SPI1","SPI2", "SPI3"]
+list_spi_mode = ["0", "1", "2", "3"]
 list_spi_rw = ["Transmit","Receive"]
+
+list_gpio_port = ["0","1","2"]
 list_gpio_rw = ["Input","Output"]
 list_gpio_state = ["Low", "High"]
+
 list_adc_res = ["12 bits", "10 bits", "8 bits", "6 bits"]
-
-
 
 
 
