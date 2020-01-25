@@ -49,11 +49,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]")) # Max. 4 digit validator for freqency [0-1000], limits checked
         self.test_list = []     # List filled with test objects
 
-
-        # QListWidget feltoltese
-        for word in ['cat', 'dog', 'bird']:
-            list_item = QListWidgetItem(word, self.sequence_list)  # Ide a sequence[index].display-t kell hozzaadni
-
     # Move up row (Move up QListWidgetItem)
     def move_up(self):
         currentRow = self.sequence_list.currentRow()
@@ -130,9 +125,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #            add_row(self.test_list[i])
 
 
-
-    def __call__(self):
-        return self
 
     # Fill combobox with commands
     def fill_cmd_box(self):

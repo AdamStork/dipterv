@@ -5,6 +5,8 @@
 import functional_test_pb2
 import commands
 
+
+#gTabSize = 0
 # TODO: Ha a port/pint kijavitjuk stm.py-ban meg .protoban, akkor majd itt is !!!!!
 
 class i2c_test:
@@ -96,7 +98,7 @@ def add_test_to_sequence(UI, sequence):
         if is_empty(UI.spi_dummyclocks_select.text()):
             selectedCommand.dummyclocks = 0
         else:
-            selectedCommand.dummyclocks = int(UI.spi_dummyclocks_select.text(),16)
+            selectedCommand.dummyclocks = int(UI.spi_dummyclocks_select.text())
         selectedCommand.direction = UI.spi_direction_select.currentData()
         sequence.append(selectedCommand)
 
@@ -165,37 +167,38 @@ def make_string_from_test_object(test_object):
     string = ""
     if test_object.cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
         string += "I2C"
-        string += " BUS" + str(test_object.bus)
-        string += " Addr:" + str(test_object.address)
-        string += " Reg:" + str(test_object.register)
-        string += " R/W" + str(test_object.rw)
+        string += "  BUS" + str(test_object.bus)
+        string += "  Addr: " + "0x{:02X}".format(test_object.address)
+        string += "  Reg: " + "0x{:02X}".format(test_object.register)
+        string += "  R/W: " + rw_i2c_string_from_value(test_object.rw)
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
         string += "SPI"
-        string += " BUS" + str(test_object.mode)
-        string += " Cmd:" + str(test_object.command)
-        string += " Dummy:" + str(test_object.dummyclocks)
-        string += " Dir" + str(test_object.direction)
+        string += "  BUS" + str(test_object.bus)
+        string += "  Mode: " + str(test_object.mode)
+        string += "  Cmd: " + "0x{:02X}".format(test_object.command)
+        string += "  Dummy: " + str(test_object.dummyclocks)
+        string += "  R/W: " + rw_spi_string_from_value(test_object.direction)
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         string += "GPIO"
-        string += " Port" + str(test_object.port)
-        string += " Pin:" + str(test_object.pin)
-        string += " Dir:" + str(test_object.direction)
-        string += " State" + str(test_object.state)
+        string += "  Port: " + str(test_object.port)
+        string += "  Pin: " + str(test_object.pin)
+        string += "  R/W: " + rw_gpio_string_from_value(test_object.direction)
+        string += "  State: " + state_gpio_string_from_value(test_object.state)
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
         string += "Analog_read"
-        string += " Port" + str(test_object.port)
-        string += " Pin:" + str(test_object.pin)
-        string += " Res:" + str(test_object.resolution)
+        string += "  Port: " + str(test_object.port)
+        string += "  Pin: " + str(test_object.pin)
+        string += "  Res: " + res_adc_string_from_value(test_object.resolution)
 
-    elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
+    elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
         string += "PWM"
-        string += " Port" + str(test_object.port)
-        string += " Pin:" + str(test_object.pin)
-        string += " Freq:" + str(test_object.frequency)
-        string += " Duty" + str(test_object.dutyCycle)
+        string += "  Port: " + str(test_object.port)
+        string += "  Pin: " + str(test_object.pin)
+        string += "  Freq: " + str(test_object.frequency)
+        string += "  Duty: " + str(test_object.dutyCycle)
 
     return string
 
@@ -226,3 +229,60 @@ def delete_sequence(sequence):
 def is_empty(field):
     if field == "":
         return True
+
+
+def rw_i2c_string_from_value(value):
+    str = ""
+    if value == 0:
+        str = "Write"
+    elif value == 1:
+        str = "Read"
+    else:
+        str = "Error"
+    return str
+
+
+def rw_spi_string_from_value(value):
+    str = ""
+    if value == 0:
+        str = "Transmit"
+    elif value == 1:
+        str = "Receive"
+    else:
+        str = "Error"
+    return str
+
+def rw_gpio_string_from_value(value):
+    str = ""
+    if value == 0:
+        str = "Input"
+    elif value == 1:
+        str = "Output"
+    else:
+        str = "Error"
+    return str
+
+def state_gpio_string_from_value(value):
+    str = ""
+    if value == 0:
+        str = "Low"
+    elif value == 1:
+        str = "High"
+    else:
+        str = "Error"
+    return str
+
+
+def res_adc_string_from_value(value):
+    str = ""
+    if value == 0:
+        str = "12 bits"
+    elif value == 1:
+        str = "10 bits"
+    elif value == 2:
+        str = "8 bits"
+    elif value == 3:
+        str = "6 bits"
+    else:
+        str = "Error"
+    return str
