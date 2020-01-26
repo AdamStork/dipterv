@@ -31,6 +31,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.delete_seq_button.clicked.connect(self.delete_seq)
         self.save_seq_button.clicked.connect(self.save_seq)
         self.load_seq_button.clicked.connect(self.load_seq)
+        self.send_seq_button.clicked.connect(self.send_seq)
         self.fill_cmd_box()
         # flags: avoid command reselection
         self.I2C_active = False
@@ -49,6 +50,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]")) # Max. 4 digit validator for freqency [0-1000], limits checked
         self.test_list = []     # List filled with test objects
 
+
     # Move up row (Move up QListWidgetItem)
     def move_up(self):
         currentRow = self.sequence_list.currentRow()
@@ -60,6 +62,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.sequence_list.insertItem(currentRow - 1, currentItem)
             self.sequence_list.setCurrentRow(currentRow - 1)
 #            print(self.test_list[0].cmdType)
+
 
     # Move down row (Move down QListWidgetItem)
     def move_down(self):
@@ -83,6 +86,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #        print("len test:", len(self.test_list))
 #        print("")
 
+
     # Add command to test list and sequence list
     def add_seq(self, rowObject):
         if self.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.LED_test:
@@ -94,12 +98,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #        print("len seq:", len(self.sequence_list))
 #        print("len test:", len(self.test_list))
 
+
    # Delete the whole sequence
     def delete_seq(self):
         self.sequence_list.clear()                  # Delete sequence list
         sequence.delete_test_list(self.test_list)        # Delete test list
 #        print("len seq:", len(self.sequence_list))
 #        print("len test:", len(self.test_list))
+
 
     # Save sequence: Make a data_line list (string list from the lines) from sequence_list, and save it to a .txt file
     def save_seq(self):
@@ -130,19 +136,15 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 data_line = file.readlines()
                 for i in range(len(data_line)):
                     data_line[i] = data_line[i].rstrip()
-                    print(data_line[i])
+#                    print(data_line[i])
                     self.sequence_list.insertItem(self.sequence_list.count(),data_line[i])      # Add string line to sequence
                     test_object = sequence.make_test_object_from_string(data_line[i])           # Make object from string line
-                    sequence.add_test_object_to_test_list(test_object, self.test_list)                   # Add object to test list
+                    sequence.add_test_object_to_test_list(test_object, self.test_list)          # Add object to test list
                 file.close()
 
-
-        # Fv sequence.py: lista atad, letrehoz soronkent egy tesztet es appendolja, vissza egy tesztekbol allo listat
-#        self.test_list =  make_listitem_from_object(data_line) -- ehhez kell dictionary
-#       for i in self.test_list:
-#            add_row(self.test_list[i])
-
-
+    def send_seq(self):
+        for i in range(len(self.test_list)):
+            print(self.test_list[i])
 
     # Fill combobox with commands
     def fill_cmd_box(self):

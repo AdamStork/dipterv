@@ -231,6 +231,7 @@ def make_test_object_from_string(string):
         test_object.command = int(words[3][7:],16)
         test_object.dummyclocks = int(words[4][7:])
         test_object.direction = list_spi_rw.index(words[5][5:])
+        return test_object
 #        print("Test object: ")
 #        print("cmd:",test_object.cmdType)
 #        print("bus:",test_object.bus)
@@ -245,6 +246,7 @@ def make_test_object_from_string(string):
         test_object.pin = int(words[2][5:])
         test_object.direction = list_gpio_rw.index(words[3][5:])
         test_object.state = list_gpio_state.index(words[4][7:])
+        return test_object
 #        print("Test object: ")
 #        print("cmd:",test_object.cmdType)
 #        print("port:",test_object.port)
@@ -257,24 +259,26 @@ def make_test_object_from_string(string):
         test_object.port = list_gpio_port.index( words[1][6:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
         test_object.pin = int(words[2][5:])
         test_object.resolution = list_adc_res.index(words[3][5:])
+        return test_object
 #        print("Test object:")
 #        print("cmd:",test_object.cmdType)
 #        print("port:",test_object.port)
 #        print("pin:",test_object.pin)
 #        print("Res:",test_object.resolution)
-    elif words[0] == list_cmd_types[3]:
-        test_object = analog_read()
+    elif words[0] == list_cmd_types[4]:
+        test_object = analog_write()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.Analog_write
         test_object.port = list_gpio_port.index( words[1][6:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
         test_object.pin = int(words[2][5:])
         test_object.frequency = int(words[3][6:])
         test_object.dutyCycle = int(words[4][6:])
-        print("Test object:")
-        print("cmd:",test_object.cmdType)
-        print("port:",test_object.port)
-        print("pin:",test_object.pin)
-        print("Res:",test_object.frequency)
-        print("Freq:",test_object.dutyCycle)
+        return test_object
+#        print("Test object:")
+#        print("cmd:",test_object.cmdType)
+#        print("port:",test_object.port)
+#        print("pin:",test_object.pin)
+#        print("Res:",test_object.frequency)
+#        print("Freq:",test_object.dutyCycle)
 
 
 
