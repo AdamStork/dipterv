@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from decimal import Decimal
+from functools import partial
 
 import functional_test_pb2
 import sequence
@@ -146,7 +147,30 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def send_seq(self):
         for i in range(len(self.test_list)):
-            print(self.test_list[i])
+#            pb = make_protobuf_command_from_test_object(test_list[i])    # Make protobuf command
+
+#            self.LL.link_frame_data(pb)            # Frame protobuf data
+#            print("TxBuffer: ",self.LL.tx_buffer)
+#            try:
+#                self.ser.write(self.LL.tx_buffer)
+#                command_send_success = 'Command sent'
+#                self.read_data_depending_on_cmd_type(self.cmd_box.currentData())
+#            except serial.serialutil.SerialException:
+#                if self.ser.is_open:
+#                    command_send_success = 'Error while sending command'
+#                else:
+#                    command_send_success = 'Port is not open'
+#            self.cmd_output.setText(command_send_success)
+
+            str1 = str(self.test_list[i])          # Print test list objects to scrollArea
+            label = QLabel(str1)
+            self.scroll_layout.addWidget(label)
+            self.show()
+
+
+            last_widget = self.scroll_layout.itemAt(self.scroll_layout.count()-1).widget()
+            print(last_widget)
+            QtCore.QTimer.singleShot(0, partial(self.scrollArea.ensureWidgetVisible, last_widget))
 
     # Fill combobox with commands
     def fill_cmd_box(self):
@@ -545,6 +569,20 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             str1 = ' '.join(str(e) for e in response_list)
             label = QLabel(str1)
             self.scroll_layout.addWidget(label)
+
+#            last_widget = scroll_layout.itemAt(scroll_layout.count()-1).widget()
+#            print(last_widget)
+#            QtCore.QTimer.singleShot(0, partial(scroll.ensureWidgetVisible, last_widget))
+#            self.show()
+#            vbar = self.scrollArea.verticalScrollBar()
+#            vbar.setValue(vbar.maximum())
+#            self.show()
+#            self.scrollArea.ensureWidgetVisible(label)
+#            vbar = self.scrollArea.verticalScrollBar()
+#            vbar.setValue(vbar.maximum())
+
+
+
 
 
     # Create protocol buffer encoded command

@@ -313,5 +313,5 @@ list_adc_res = ["12 bits", "10 bits", "8 bits", "6 bits"]
 
 
 
-
-# KELL: fv ami betolteskor, sztringbol objektumot csinal. Es ezt belepakolja a test_listbe
+def make_protobuf_command_from_test_object(test_object):
+    print("TA-DA")
