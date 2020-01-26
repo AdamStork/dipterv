@@ -49,7 +49,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]")) # Max. 3 digit validator for duty cycle [0-100], limits checked
         self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]")) # Max. 4 digit validator for freqency [0-1000], limits checked
         self.test_list = []     # List filled with test objects
-
+        self.helpLabel_list = []
+        self.scroll_layout.addStretch()                            # Add stretch for scroll area
+        self.container_widget.setLayout(self.scroll_layout)        # Set layout for scrollArea container widget
 
     # Move up row (Move up QListWidgetItem)
     def move_up(self):
@@ -541,7 +543,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 i = format(i,'02X')
                 response_list.append(i)
             str1 = ' '.join(str(e) for e in response_list)
-            self.response_output.setText(str1)
+            label = QLabel(str1)
+            self.scroll_layout.addWidget(label)
+
 
     # Create protocol buffer encoded command
     def create_protobuf_command(self):

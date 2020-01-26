@@ -278,28 +278,54 @@
     <property name="geometry">
      <rect>
       <x>320</x>
-      <y>390</y>
+      <y>350</y>
       <width>361</width>
-      <height>91</height>
+      <height>131</height>
      </rect>
     </property>
     <property name="title">
      <string>Response (hex)</string>
     </property>
-    <widget class="QWidget" name="verticalLayoutWidget">
+    <widget class="QScrollArea" name="scrollArea">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>341</width>
-       <height>73</height>
+       <x>19</x>
+       <y>30</y>
+       <width>321</width>
+       <height>91</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="response_layout">
-      <item>
-       <widget class="QTextEdit" name="response_output"/>
-      </item>
-     </layout>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="container_widget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>302</width>
+        <height>89</height>
+       </rect>
+      </property>
+      <widget class="QWidget" name="verticalLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>9</y>
+         <width>281</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="scroll_layout">
+        <property name="leftMargin">
+         <number>6</number>
+        </property>
+       </layout>
+      </widget>
+     </widget>
     </widget>
    </widget>
    <widget class="QGroupBox" name="config_GB">
@@ -361,7 +387,7 @@
       <x>320</x>
       <y>10</y>
       <width>361</width>
-      <height>361</height>
+      <height>321</height>
      </rect>
     </property>
     <property name="title">
@@ -440,7 +466,7 @@
      <property name="geometry">
       <rect>
        <x>260</x>
-       <y>320</y>
+       <y>280</y>
        <width>91</width>
        <height>31</height>
       </rect>
