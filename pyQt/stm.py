@@ -147,30 +147,40 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def send_seq(self):
         for i in range(len(self.test_list)):
-#            pb = make_protobuf_command_from_test_object(test_list[i])    # Make protobuf command
+            pb = sequence.make_protobuf_command_from_test_object(self.test_list[i])    # Make protobuf command
+            self.LL.link_frame_data(pb)            # Frame protobuf data
+            print("TxBuffer: ",self.LL.tx_buffer)
+            try:
+                self.ser.write(self.LL.tx_buffer)
+                command_send_success = 'Command sent'
+                self.read_data_depending_on_cmd_type(self.test_list[i].cmdType)
+            except serial.serialutil.SerialException:
+                if self.ser.is_open:
+                    command_send_success = 'Error while sending command'
+                else:
+                    command_send_success = 'Port is not open'
+                # If serial write is unsuccessful, then display it on scrollArea and return immediately.
+                successLabel = QLabel(command_send_success)
+                self.scroll_layout.addWidget(successLabel)
+                return
 
-#            self.LL.link_frame_data(pb)            # Frame protobuf data
-#            print("TxBuffer: ",self.LL.tx_buffer)
-#            try:
-#                self.ser.write(self.LL.tx_buffer)
-#                command_send_success = 'Command sent'
-#                self.read_data_depending_on_cmd_type(self.cmd_box.currentData())
-#            except serial.serialutil.SerialException:
-#                if self.ser.is_open:
-#                    command_send_success = 'Error while sending command'
-#                else:
-#                    command_send_success = 'Port is not open'
-#            self.cmd_output.setText(command_send_success)
-
-            str1 = str(self.test_list[i])          # Print test list objects to scrollArea
-            label = QLabel(str1)
-            self.scroll_layout.addWidget(label)
-            self.show()
+            # Print current command
+            self.sequence_list.setCurrentRow(i)
+            currentCommand = "Cmd: " + self.sequence_list.currentItem().text()
+            currentCommandLabel = QLabel(currentCommand)
 
 
+
+            # Print serial read response
+            response = "Response:"
+            responseLabel = QLabel(response)
+
+            # Add widgets (labels) to scrollArea
+            self.scroll_layout.addWidget(currentCommandLabel)
+            self.scroll_layout.addWidget(responseLabel)
             last_widget = self.scroll_layout.itemAt(self.scroll_layout.count()-1).widget()
-            print(last_widget)
             QtCore.QTimer.singleShot(0, partial(self.scrollArea.ensureWidgetVisible, last_widget))
+
 
     # Fill combobox with commands
     def fill_cmd_box(self):
@@ -534,22 +544,16 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def read_data_depending_on_cmd_type(self, cmdType):
         print("Read data depending on cmd type:",cmdType)
         if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
-            if self.i2c_rw_select == functional_test_pb2.i2cDirection.I2C_read:
-                response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (register value)
-            else:
-                respone_num = 5     # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
+            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
+                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
-            if self.spi_direction_select ==functional_test_pb2.spiDirection.SPI_RECEIVE:
-                response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (register value)
-            else:
-                response_num = 5    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
+            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
+                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
         elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
             response_num = 4        # Frame:2, CmdType: 1+1
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
-            if self.gpio_direction_select ==functional_test_pb2.gpioDirection.GPIO_INPUT:
-                response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (pin state) ---- ide is inkabb pin config set kene
-            else:
-                response_num = 5    # Frame:2, CmdType:1+1, Result: 1 (pin set/reset)
+            response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (pin state) ---- ide is inkabb pin config set kene
+                                # Frame:2, CmdType:1+1, Result: 1 (pin set/reset)
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
             response_num = 6    # Frame:2, CmdType: 1+1, Result: 2 (16bit value)
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
@@ -566,9 +570,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for i in self.LL.rx_buffer:
                 i = format(i,'02X')
                 response_list.append(i)
-            str1 = ' '.join(str(e) for e in response_list)
-            label = QLabel(str1)
-            self.scroll_layout.addWidget(label)
+            response = ' '.join(str(e) for e in response_list)
+            return response
+
 
 #            last_widget = scroll_layout.itemAt(scroll_layout.count()-1).widget()
 #            print(last_widget)
@@ -580,8 +584,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #            self.scrollArea.ensureWidgetVisible(label)
 #            vbar = self.scrollArea.verticalScrollBar()
 #            vbar.setValue(vbar.maximum())
-
-
 
 
 
@@ -635,7 +637,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             self.ser.write(self.LL.tx_buffer)
             command_send_success = 'Command sent'
-            self.read_data_depending_on_cmd_type(self.cmd_box.currentData())
+            response = "Response: " + self.read_data_depending_on_cmd_type(self.cmd_box.currentData())
+            responseLabel = QLabel(response)
+            self.scroll_layout.addWidget(responseLabel)
         except serial.serialutil.SerialException:
             if self.ser.is_open:
                 command_send_success = 'Error while sending command'

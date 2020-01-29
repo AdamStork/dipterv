@@ -15,10 +15,6 @@ class i2c_test:
         self.address = address
         self.register = register
         self.rw = rw
-#    def diplay(self):
-## Dictionary alapjan adni egy str objektumot
-#        return print_object = "asd"
-
 
 class spi_test:
     def __init__(self, cmdType = None, bus = None, mode = None, command = None, dummyclocks = None, direction = None):
@@ -164,7 +160,9 @@ def move_down_test_in_sequence(sequence,index):
         print('Error! Index out of range!')
 
 
-# Make string from test object
+# @brief        Make string from test object
+# @param[in]    test_object
+# @return       string
 def make_string_from_test_object(test_object):
     string = ""
     if test_object.cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
@@ -312,6 +310,40 @@ list_gpio_state = ["Low", "High"]
 list_adc_res = ["12 bits", "10 bits", "8 bits", "6 bits"]
 
 
-
+# @brief    Make protobuf command from test object
+# @return   Encoded message
 def make_protobuf_command_from_test_object(test_object):
-    print("TA-DA")
+    cmd = functional_test_pb2.Command()
+    cmd.commandType = test_object.cmdType
+
+    if test_object.cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
+        cmd.i2c.bus = test_object.bus
+        cmd.i2c.address = test_object.address
+        cmd.i2c.reg = test_object.register
+        cmd.i2c.direction = test_object.rw
+
+    elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
+        cmd.spi.bus = test_object.bus
+        cmd.spi.clock = test_object.mode
+        cmd.spi.command = test_object.command
+        cmd.spi.dummyclocks = test_object.dummyclocks
+        cmd.spi.direction = test_object.direction
+
+    elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
+        cmd.gpio.port = test_object.port
+        cmd.gpio.pin = test_object.pin
+        cmd.gpio.direction = test_object.direction
+        cmd.gpio.pinState = test_object.state
+
+    elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
+        cmd.analog_in.port = test_object.port
+        cmd.analog_in.pin  = test_object.pin
+        cmd.analog_in.resolution = test_object.resolution
+
+    elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
+        cmd.analog_out.port = test_object.port
+        cmd.analog_out.pin = test_object.pin
+        cmd.analog_out.frequency = test_object.frequency
+        cmd.analog_out.dutyCycle = test_object.dutyCycle
+
+    return cmd.SerializeToString()

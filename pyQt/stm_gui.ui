@@ -278,9 +278,9 @@
     <property name="geometry">
      <rect>
       <x>320</x>
-      <y>350</y>
+      <y>310</y>
       <width>361</width>
-      <height>131</height>
+      <height>171</height>
      </rect>
     </property>
     <property name="title">
@@ -291,8 +291,8 @@
       <rect>
        <x>19</x>
        <y>30</y>
-       <width>321</width>
-       <height>91</height>
+       <width>331</width>
+       <height>131</height>
       </rect>
      </property>
      <property name="verticalScrollBarPolicy">
@@ -309,8 +309,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>302</width>
-        <height>89</height>
+        <width>312</width>
+        <height>129</height>
        </rect>
       </property>
       <widget class="QWidget" name="verticalLayoutWidget">
@@ -318,8 +318,8 @@
         <rect>
          <x>10</x>
          <y>9</y>
-         <width>281</width>
-         <height>71</height>
+         <width>291</width>
+         <height>111</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="scroll_layout">
@@ -390,7 +390,7 @@
       <x>320</x>
       <y>10</y>
       <width>361</width>
-      <height>321</height>
+      <height>291</height>
      </rect>
     </property>
     <property name="title">
@@ -456,7 +456,7 @@
        <x>10</x>
        <y>30</y>
        <width>241</width>
-       <height>190</height>
+       <height>251</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="sequence_list_layout">
@@ -469,7 +469,7 @@
      <property name="geometry">
       <rect>
        <x>260</x>
-       <y>280</y>
+       <y>250</y>
        <width>91</width>
        <height>31</height>
       </rect>
