@@ -84,7 +84,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def delete_row(self):
         currentRow = self.sequence_list.currentRow()        # Get index of current row
         self.sequence_list.takeItem(currentRow)             # Delete current row (listWidgetitem)
-        sequence.delete_test_from_sequence(self.test_list, currentRow)    # Delete test from test list
+        sequence.delete_test_object_from_test_list(self.test_list, currentRow)    # Delete test from test list
 #        print("len seq:", len(self.sequence_list))
 #        print("len test:", len(self.test_list))
 #        print("")

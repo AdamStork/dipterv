@@ -1,4 +1,4 @@
-#    Python file for sequence builder - list handling
+#    Python file for sequence builder - test object and list handling
 #    Author: Adam Golya
 #   #######################################
 
@@ -8,6 +8,38 @@ import commands
 # @Note: For value <-> string conversion lists are used.
 # TODO: Ha a port/pint kijavitjuk stm.py-ban meg .protoban, akkor majd itt is !!!!!
 
+#Function list:
+#    make_test_object_from_options(UI)
+#    delete_test_from_sequence(sequence, index)
+#    move_up_test_in_sequence(sequence, index)
+#    move_down_test_in_sequence(sequence,index)
+#    make_string_from_test_object(test_object)
+#    make_test_object_from_string(string)
+#    add_test_object_to_test_list(test_object, test_list)
+#    delete_test_list(test_list)
+#    is_empty(field)
+#    make_protobuf_command_from_test_object(test_object)
+
+
+
+
+# @brief    List of strings for value <-> string conversion
+list_cmd_types = ["I2C","SPI","GPIO","Analog_read","PWM"]
+list_i2c_rw = ["Write","Read"]
+list_i2c_bus = ["Invalid","I2C1","I2C2", "I2C3"]
+
+list_spi_bus = ["Invalid","SPI1","SPI2", "SPI3"]
+list_spi_mode = ["0", "1", "2", "3"]
+list_spi_rw = ["Transmit","Receive"]
+
+list_gpio_port = ["0","1","2"]
+list_gpio_rw = ["Input","Output"]
+list_gpio_state = ["Low", "High"]
+
+list_adc_res = ["12 bits", "10 bits", "8 bits", "6 bits"]
+
+
+# @rief     Classes that represent the tests
 class i2c_test:
     def __init__(self, cmdType = None, bus = None, address = None, register = None, rw = None):
         self.cmdType = cmdType
@@ -50,8 +82,9 @@ class analog_write:
 
 
 
-
-# Make test objects from the selected options and add it to test_list.
+# @brief        Make test objects from the selected options and add it to test_list.
+# @param[in]    UI: user interface (e.g. MyWindow class)
+# @return       test_object: created from the selected command options
 def make_test_object_from_options(UI):
     cmdType = UI.cmd_box.currentData()
 
@@ -138,24 +171,30 @@ def make_test_object_from_options(UI):
 #        add_test_object_to_test_list(selectedCommand, test_list)
 
 
-# Delete test from sequence
-def delete_test_from_sequence(sequence, index):
-    del sequence[index]
+# @brief            Delete test object from test_list on given index
+# @param[in,out]    test_list
+# @param[in]        index
+def delete_test_object_from_test_list(test_list, index):
+    del test_list[index]
 
 
-# Move up test in sequence (move to front / decrease index)
-def move_up_test_in_sequence(sequence, index):
+# @brief            Move up test object in test_list (move to front / decrease index)
+# @param[in,out]    test_list
+# @param[in]        index
+def move_up_test_in_sequence(test_list, index):
     if index > 0:       # Watch out for upper limit
-        sequence[index], sequence[index-1] = sequence[index-1], sequence[index]
+        test_list[index], test_list[index-1] = test_list[index-1], test_list[index]
     else:
         print('Error! Index out of range!')
 
 
-# Move down test in sequence (move to back / increase index)
-def move_down_test_in_sequence(sequence,index):
-    lastIndex = len(sequence) - 1
+# @brief            Move down test object in test_list (move to back / increase index)
+# @param[in,out]    test_list
+# @param[in]        index
+def move_down_test_in_sequence(test_list,index):
+    lastIndex = len(test_list) - 1
     if index < lastIndex:   # Watch out for lower limit
-      sequence[index], sequence[index+1] = sequence[index+1], sequence[index]
+      test_list[index], test_list[index+1] = test_list[index+1], test_list[index]
     else:
         print('Error! Index out of range!')
 
@@ -203,8 +242,10 @@ def make_string_from_test_object(test_object):
     return string
 
 
-# Make test object from string line: split words using a double space separator. Attach only the relevant string parts to object parameters.
-# Lists are used to find the indexes (enum values in .proto) of strings.
+# @brief        Make test object from string line: split words using a double space separator. Attach only the relevant string parts to object parameters.
+# @details      Lists are used to find the indexes (enum values in .proto) of strings.
+# @param[in]    string
+# @return       test_object
 def make_test_object_from_string(string):
     words = string.split("  ")
     if words[0] == list_cmd_types[0]:
@@ -279,39 +320,9 @@ def make_test_object_from_string(string):
 #        print("Freq:",test_object.dutyCycle)
 
 
-
-# Add test object to test list
-def add_test_object_to_test_list(test_object, test_list):
-    test_list.append(test_object)
-
-
-#  Delete sequence: clear list
-def delete_test_list(test_list):
-    test_list.clear()
-
-
-def is_empty(field):
-    if field == "":
-        return True
-
-
-list_cmd_types = ["I2C","SPI","GPIO","Analog_read","PWM"]
-list_i2c_rw = ["Write","Read"]
-list_i2c_bus = ["Invalid","I2C1","I2C2", "I2C3"]
-
-list_spi_bus = ["Invalid","SPI1","SPI2", "SPI3"]
-list_spi_mode = ["0", "1", "2", "3"]
-list_spi_rw = ["Transmit","Receive"]
-
-list_gpio_port = ["0","1","2"]
-list_gpio_rw = ["Input","Output"]
-list_gpio_state = ["Low", "High"]
-
-list_adc_res = ["12 bits", "10 bits", "8 bits", "6 bits"]
-
-
-# @brief    Make protobuf command from test object
-# @return   Encoded message
+# @brief        Make protobuf command from test object
+# @param[in]    test_object
+# @return       Encoded message
 def make_protobuf_command_from_test_object(test_object):
     cmd = functional_test_pb2.Command()
     cmd.commandType = test_object.cmdType
@@ -347,3 +358,29 @@ def make_protobuf_command_from_test_object(test_object):
         cmd.analog_out.dutyCycle = test_object.dutyCycle
 
     return cmd.SerializeToString()
+
+
+# @brief            Add test object to test list
+# @param[in]        test_object
+# @param[in,out]    test_list
+def add_test_object_to_test_list(test_object, test_list):
+    test_list.append(test_object)
+
+
+# @brief            Delete sequence: clear list
+# @param[in,out]    test_list
+def delete_test_list(test_list):
+    test_list.clear()
+
+
+# @brief        Check whether input field is empty
+# @param[in]    field: input field
+# @return       True: if field is empty
+def is_empty(field):
+    if field == "":
+        return True
+
+
+
+
+
