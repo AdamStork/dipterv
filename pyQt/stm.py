@@ -168,8 +168,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             currentCommand = "Cmd: " + self.sequence_list.currentItem().text()
             currentCommandLabel = QLabel(currentCommand)
 
-
-
             # Print serial read response
             response = "Response:"
             responseLabel = QLabel(response)
@@ -555,8 +553,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.close_button.setEnabled(True)
         except serial.serialutil.SerialException:
             is_port_open = 'Error opening port'
-#            self.connection_output.setStyleSheet('color: red')
-        self.connection_output.setText(is_port_open)
+        openPortLabel = QLabel(is_port_open)
+        self.scroll_layout.addWidget(openPortLabel)
 
     # Close serial port
     def close_port(self):
@@ -568,7 +566,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.close_button.setEnabled(False)
             except serial.serialutil.SerialException:
                 is_port_open = 'Error closing port'
-        self.connection_output.setText(is_port_open)
+        closePortLabel = QLabel(is_port_open)
+        self.scroll_layout.addWidget(closePortLabel)
 
     # Serialize command and options, then send out data via UART
     def send_command(self):
@@ -586,7 +585,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 command_send_success = 'Error while sending command'
             else:
                 command_send_success = 'Port is not open'
-        self.cmd_output.setText(command_send_success)
+        commandSendingLabel = QLabel(command_send_success)
+        self.scroll_layout.addWidget(commandSendingLabel)
 
 
 
