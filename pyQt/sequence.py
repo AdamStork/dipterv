@@ -6,7 +6,6 @@ import functional_test_pb2
 import commands
 
 # @Note: For value <-> string conversion lists are used.
-# TODO: Ha a port/pint kijavitjuk stm.py-ban meg .protoban, akkor majd itt is !!!!!
 
 #Function list:
 #    make_test_object_from_options(UI)
@@ -32,9 +31,9 @@ list_spi_bus = ["Invalid","SPI1","SPI2", "SPI3"]
 list_spi_mode = ["0", "1", "2", "3"]
 list_spi_rw = ["Transmit","Receive"]
 
-list_gpio_port = ["0","1","2"]
-list_gpio_rw = ["Input","Output"]
+list_gpio_rw = ["Output","Input"]
 list_gpio_state = ["Low", "High"]
+list_gpio_pins = ["PA0","PA1","PA4","PA5", "PA6", "PA7","PB0","PB1", "PC0", "PC1","PC2","PC3", "PC4", "PC5","Temp","Vrefint", "Vbat"]
 
 list_adc_res = ["12 bits", "10 bits", "8 bits", "6 bits"]
 
@@ -58,24 +57,21 @@ class spi_test:
         self.direction = direction
 
 class gpio_digital:
-    def __init__(self, cmdType = None, port = None, pin = None, direction = None, state = None):
+    def __init__(self, cmdType = None, pin = None, direction = None, state = None):
         self.cmdType = cmdType
-        self.port = port
         self.pin = pin
         self.direction = direction
         self.state = state
 
 class analog_read:
-    def __init__(self, cmdType = None,  port = None, pin = None, resolution = None):
+    def __init__(self, cmdType = None, pin = None, resolution = None):
         self.cmdType = cmdType
-        self.port = port
         self.pin = pin
         self.resolution = resolution
 
 class analog_write:
-    def __init__(self, cmdType = None,  port = None, pin = None, frequency = None, dutyCycle = None):
+    def __init__(self, cmdType = None, pin = None, frequency = None, dutyCycle = None):
         self.cmdType = cmdType
-        self.port = port
         self.pin = pin
         self.frequency = frequency
         self.dutyCycle = dutyCycle
@@ -126,11 +122,7 @@ def make_test_object_from_options(UI):
     elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         selectedCommand = gpio_digital()
         selectedCommand.cmdType = cmdType
-        selectedCommand.port = UI.gpio_port_select.currentData()
-        if is_empty(UI.gpio_pin_select.text()):
-            selectedCommand.pin = 0                               # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
-        else:
-            selectedCommand.pin = int(UI.gpio_pin_select.text())
+        selectedCommand.pin = UI.gpio_pin_select.currentData()
         selectedCommand.direction = UI.gpio_direction_select.currentData()
         selectedCommand.state = UI.gpio_state_select.currentData()
         return selectedCommand
@@ -140,11 +132,7 @@ def make_test_object_from_options(UI):
     elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
         selectedCommand = analog_read()
         selectedCommand.cmdType = cmdType
-        selectedCommand.port = UI.gpio_port_select.currentData()
-        if is_empty(UI.gpio_pin_select.text()):
-            selectedCommand.pin = 0                               # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
-        else:
-            selectedCommand.pin = int(UI.gpio_pin_select.text())
+        selectedCommand.pin = UI.gpio_pin_select.currentData()
         selectedCommand.resolution = UI.adc_resolution_select.currentData()
         return selectedCommand
 #        sequence.append(selectedCommand)
@@ -153,11 +141,7 @@ def make_test_object_from_options(UI):
     elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
         selectedCommand = analog_write()
         selectedCommand.cmdType = cmdType
-        selectedCommand.port = UI.gpio_port_select.currentData()
-        if is_empty(UI.gpio_pin_select.text()):
-            selectedCommand.pin = 0                               # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
-        else:
-            selectedCommand.pin = int(UI.gpio_pin_select.text())
+        selectedCommand.pin = UI.gpio_pin_select.currentData()
         if is_empty(UI.pwm_freq_select.text()):
             selectedCommand.frequency = 0                               # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
         else:
@@ -221,21 +205,18 @@ def make_string_from_test_object(test_object):
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         string += "GPIO"
-        string += "  Port: " + str(test_object.port)
-        string += "  Pin: " + str(test_object.pin)
+        string += "  Pin: " + list_gpio_pins[test_object.pin]
         string += "  R/W: " + list_gpio_rw[test_object.direction]
         string += "  State: " + list_gpio_state[test_object.state]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
         string += "Analog_read"
-        string += "  Port: " + str(test_object.port)
-        string += "  Pin: " + str(test_object.pin)
+        string += "  Pin: " + list_gpio_pins[test_object.pin]
         string += "  Res: " + list_adc_res[test_object.resolution]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
         string += "PWM"
-        string += "  Port: " + str(test_object.port)
-        string += "  Pin: " + str(test_object.pin)
+        string += "  Pin: " + list_gpio_pins[test_object.pin]
         string += "  Freq: " + str(test_object.frequency)
         string += "  Duty: " + str(test_object.dutyCycle)
 
@@ -281,40 +262,34 @@ def make_test_object_from_string(string):
     elif words[0] == list_cmd_types[2]:
         test_object = gpio_digital()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.GPIO_digital
-        test_object.port = list_gpio_port.index( words[1][6:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
-        test_object.pin = int(words[2][5:])
+        test_object.pin = list_gpio_pins.index(words[2][5:])
         test_object.direction = list_gpio_rw.index(words[3][5:])
         test_object.state = list_gpio_state.index(words[4][7:])
         return test_object
 #        print("Test object: ")
 #        print("cmd:",test_object.cmdType)
-#        print("port:",test_object.port)
 #        print("pin:",test_object.pin)
 #        print("rw:",test_object.direction)
 #        print("state:", test_object.state)
     elif words[0] == list_cmd_types[3]:
         test_object = analog_read()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.Analog_read
-        test_object.port = list_gpio_port.index( words[1][6:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
-        test_object.pin = int(words[2][5:])
+        test_object.pin = list_gpio_pins.index(words[2][5:])
         test_object.resolution = list_adc_res.index(words[3][5:])
         return test_object
 #        print("Test object:")
 #        print("cmd:",test_object.cmdType)
-#        print("port:",test_object.port)
 #        print("pin:",test_object.pin)
 #        print("Res:",test_object.resolution)
     elif words[0] == list_cmd_types[4]:
         test_object = analog_write()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.Analog_write
-        test_object.port = list_gpio_port.index( words[1][6:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
-        test_object.pin = int(words[2][5:])
+        test_object.pin = list_gpio_pins.index(words[2][5:])
         test_object.frequency = int(words[3][6:])
         test_object.dutyCycle = int(words[4][6:])
         return test_object
 #        print("Test object:")
 #        print("cmd:",test_object.cmdType)
-#        print("port:",test_object.port)
 #        print("pin:",test_object.pin)
 #        print("Res:",test_object.frequency)
 #        print("Freq:",test_object.dutyCycle)
@@ -341,18 +316,15 @@ def make_protobuf_command_from_test_object(test_object):
         cmd.spi.direction = test_object.direction
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
-        cmd.gpio.port = test_object.port
         cmd.gpio.pin = test_object.pin
         cmd.gpio.direction = test_object.direction
         cmd.gpio.pinState = test_object.state
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
-        cmd.analog_in.port = test_object.port
         cmd.analog_in.pin  = test_object.pin
         cmd.analog_in.resolution = test_object.resolution
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
-        cmd.analog_out.port = test_object.port
         cmd.analog_out.pin = test_object.pin
         cmd.analog_out.frequency = test_object.frequency
         cmd.analog_out.dutyCycle = test_object.dutyCycle
@@ -379,8 +351,4 @@ def delete_test_list(test_list):
 def is_empty(field):
     if field == "":
         return True
-
-
-
-
 

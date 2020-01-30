@@ -46,7 +46,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.close_button.setEnabled(False)
         self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]")) # Byte validator for input fields (0xhh format)
         self.decValidator  = QRegExpValidator(QRegExp("[0-9][0-9]")) # 2-digit decimal validator for input fields
-        self.gpioValidator = QRegExpValidator(QRegExp("[0-7][0-7]")) # 2-digit decimal validator for GPIO fields
         self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]")) # Max. 3 digit validator for duty cycle [0-100], limits checked
         self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]")) # Max. 4 digit validator for freqency [0-1000], limits checked
         self.test_list = []     # List filled with test objects
@@ -198,17 +197,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.gpio_state_select.setEnabled(True)
 
-    # Called whenever GPIO port selection is changed in Analog read command
-    def on_changed_gpio_port(self):
-        if self.gpio_port_select.currentData() == functional_test_pb2.gpioPort.GPIO_TEMP_SENSOR:
-            self.gpio_pin_select.setEnabled(False)
-        elif self.gpio_port_select.currentData() == functional_test_pb2.gpioPort.GPIO_VREFINT:
-            self.gpio_pin_select.setEnabled(False)
-        elif self.gpio_port_select.currentData() == functional_test_pb2.gpioPort.GPIO_VBAT:
-            self.gpio_pin_select.setEnabled(False)
-        else:
-            self.gpio_pin_select.setEnabled(True)
-
     # Called whenever a command is selected
     def on_changed(self,text):
         print("CmdType:",self.cmd_box.currentData())
@@ -313,22 +301,17 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("GPIO digital optons")
             if self.GPIO_active == False:
                 self.GPIO_active = True
-                self.gpio_port_label = QLabel("GPIO port", self)
                 self.gpio_pin_label = QLabel("GPIO pin", self)
                 self.gpio_direction_label = QLabel("GPIO direction", self)
                 self.gpio_state_label = QLabel("GPIO state", self)
 
-                self.gpio_port_select = QComboBox(self)
-                self.gpio_pin_select = QLineEdit(self)
+                self.gpio_pin_select = QComboBox(self)
                 self.gpio_direction_select = QComboBox(self)
                 self.gpio_state_select = QComboBox(self)
 
-                self.gpio_pin_select.setValidator(self.gpioValidator)
-                self.gpio_pin_select.setPlaceholderText("0..15")
-
-                self.gpio_port_select.addItem("Port A",functional_test_pb2.gpioPort.GPIO_PORT_A)
-                self.gpio_port_select.addItem("Port B",functional_test_pb2.gpioPort.GPIO_PORT_B)
-                self.gpio_port_select.addItem("Port C",functional_test_pb2.gpioPort.GPIO_PORT_C)
+                length = len(sequence.list_gpio_pins) - 3       # End of list contains special, analog input pins (temp, vrefint, vbat)
+                for i in range(length):
+                    self.gpio_pin_select.addItem(sequence.list_gpio_pins[i],i)
 
                 self.gpio_direction_select.addItem("Input",functional_test_pb2.gpioDirection.GPIO_INPUT)
                 self.gpio_direction_select.addItem("Output",functional_test_pb2.gpioDirection.GPIO_OUTPUT)
@@ -339,14 +322,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_state_select.setEnabled(False)
                 self.gpio_direction_select.activated[str].connect(self.on_changed_gpio_dir)
 
-                self.options_layout.addWidget(self.gpio_port_label,0,0)
-                self.options_layout.addWidget(self.gpio_pin_label,1,0)
-                self.options_layout.addWidget(self.gpio_direction_label,2,0)
-                self.options_layout.addWidget(self.gpio_state_label,3,0)
-                self.options_layout.addWidget(self.gpio_port_select,0,2)
-                self.options_layout.addWidget(self.gpio_pin_select,1,2)
-                self.options_layout.addWidget(self.gpio_direction_select,2,2)
-                self.options_layout.addWidget(self.gpio_state_select,3,2)
+                self.options_layout.addWidget(self.gpio_pin_label,0,0)
+                self.options_layout.addWidget(self.gpio_direction_label,1,0)
+                self.options_layout.addWidget(self.gpio_state_label,2,0)
+                self.options_layout.addWidget(self.gpio_pin_select,0,2)
+                self.options_layout.addWidget(self.gpio_direction_select,1,2)
+                self.options_layout.addWidget(self.gpio_state_select,2,2)
 
                 self.options_layout.addItem(self.spacerItem,4,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
@@ -355,40 +336,25 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("AnalogRead optons")
             if self.AnalogRead_active == False:
                 self.AnalogRead_active = True
-                self.gpio_port_label = QLabel("GPIO port", self)
                 self.gpio_pin_label = QLabel("GPIO pin", self)
                 self.adc_resolution_label = QLabel("ADC resolution", self)
-                self.available_pins_label = QLabel("Available GPIOs:", self)
-                self.available_pins_label_2 = QLabel("PA0..PA7, \nPB0..PB1,\nPC0..PC5\n", self)
 
-                self.gpio_port_select = QComboBox(self)
-                self.gpio_pin_select = QLineEdit(self)
+                self.gpio_pin_select = QComboBox(self)
                 self.adc_resolution_select = QComboBox(self)
 
-                self.gpio_port_select.addItem("Port A",functional_test_pb2.gpioPort.GPIO_PORT_A)
-                self.gpio_port_select.addItem("Port B",functional_test_pb2.gpioPort.GPIO_PORT_B)
-                self.gpio_port_select.addItem("Port C",functional_test_pb2.gpioPort.GPIO_PORT_C)
-                self.gpio_port_select.addItem("Temp sensor",functional_test_pb2.gpioPort.GPIO_TEMP_SENSOR)
-                self.gpio_port_select.addItem("Vrefint",functional_test_pb2.gpioPort.GPIO_VREFINT)
-                self.gpio_port_select.addItem("Vbat",functional_test_pb2.gpioPort.GPIO_VBAT)
-                self.gpio_port_select.activated[str].connect(self.on_changed_gpio_port)
+                length = len(sequence.list_gpio_pins)
+                for i in range(length):
+                    self.gpio_pin_select.addItem(sequence.list_gpio_pins[i],i)
 
-                self.gpio_pin_select.setValidator(self.gpioValidator)
-                self.gpio_pin_select.setPlaceholderText("0..15")
+                self.adc_resolution_select.addItem("12 bits",functional_test_pb2.adcResolution.ADC_12_BITS)
+                self.adc_resolution_select.addItem("10 bits",functional_test_pb2.adcResolution.ADC_10_BITS)
+                self.adc_resolution_select.addItem("8 bits",functional_test_pb2.adcResolution.ADC_8_BITS)
+                self.adc_resolution_select.addItem("6 bits",functional_test_pb2.adcResolution.ADC_6_BITS)
 
-                self.adc_resolution_select.addItem("12 bits",functional_test_pb2.ADC_RESOLUTION.ADC_12_BITS)
-                self.adc_resolution_select.addItem("10 bits",functional_test_pb2.ADC_RESOLUTION.ADC_10_BITS)
-                self.adc_resolution_select.addItem("8 bits",functional_test_pb2.ADC_RESOLUTION.ADC_8_BITS)
-                self.adc_resolution_select.addItem("6 bits",functional_test_pb2.ADC_RESOLUTION.ADC_6_BITS)
-
-                self.options_layout.addWidget(self.gpio_port_label,0,0)
-                self.options_layout.addWidget(self.gpio_pin_label,1,0)
-                self.options_layout.addWidget(self.adc_resolution_label,2,0)
-                self.options_layout.addWidget(self.available_pins_label,3,0)
-                self.options_layout.addWidget(self.gpio_port_select,0,2)
-                self.options_layout.addWidget(self.gpio_pin_select,1,2)
-                self.options_layout.addWidget(self.adc_resolution_select,2,2)
-                self.options_layout.addWidget(self.available_pins_label_2,3,2)
+                self.options_layout.addWidget(self.gpio_pin_label,0,0)
+                self.options_layout.addWidget(self.adc_resolution_label,1,0)
+                self.options_layout.addWidget(self.gpio_pin_select,0,2)
+                self.options_layout.addWidget(self.adc_resolution_select,1,2)
 
                 self.options_layout.addItem(self.spacerItem,4,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
@@ -397,22 +363,17 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("AnalogWrite optons")
             if self.AnalogWrite_active == False:
                 self.AnalogWrite_active = True
-                self.gpio_port_label = QLabel("GPIO port", self)
                 self.gpio_pin_label = QLabel("GPIO pin", self)
                 self.pwm_freq_label= QLabel("Frequency", self)
                 self.pwm_duty_label = QLabel("Duty cycle", self)
 
-                self.gpio_port_select = QComboBox(self)
-                self.gpio_pin_select = QLineEdit(self)
+                self.gpio_pin_select = QComboBox(self)
                 self.pwm_freq_select = QLineEdit(self)
                 self.pwm_duty_select = QLineEdit(self)
 
-                self.gpio_port_select.addItem("Port A",functional_test_pb2.gpioPort.GPIO_PORT_A)
-                self.gpio_port_select.addItem("Port B",functional_test_pb2.gpioPort.GPIO_PORT_B)
-                self.gpio_port_select.addItem("Port C",functional_test_pb2.gpioPort.GPIO_PORT_C)
-
-                self.gpio_pin_select.setValidator(self.gpioValidator)
-                self.gpio_pin_select.setPlaceholderText("0..15")
+                length = len(sequence.list_gpio_pins)
+                for i in range(length):
+                    self.gpio_pin_select.addItem(sequence.list_gpio_pins[i],i)
 
                 self.pwm_freq_select.setValidator(self.freqValidator)
                 self.pwm_freq_select.setPlaceholderText("0..1000")
@@ -420,14 +381,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.pwm_duty_select.setValidator(self.dutyValidator)
                 self.pwm_duty_select.setPlaceholderText("0..100")
 
-                self.options_layout.addWidget(self.gpio_port_label,0,0)
-                self.options_layout.addWidget(self.gpio_pin_label,1,0)
-                self.options_layout.addWidget(self.pwm_freq_label,2,0)
-                self.options_layout.addWidget(self.pwm_duty_label,3,0)
-                self.options_layout.addWidget(self.gpio_port_select,0,2)
-                self.options_layout.addWidget(self.gpio_pin_select,1,2)
-                self.options_layout.addWidget(self.pwm_freq_select,2,2)
-                self.options_layout.addWidget(self.pwm_duty_select,3,2)
+                self.options_layout.addWidget(self.gpio_pin_label,0,0)
+                self.options_layout.addWidget(self.pwm_freq_label,1,0)
+                self.options_layout.addWidget(self.pwm_duty_label,2,0)
+                self.options_layout.addWidget(self.gpio_pin_select,0,2)
+                self.options_layout.addWidget(self.pwm_freq_select,1,2)
+                self.options_layout.addWidget(self.pwm_duty_select,2,2)
 
                 self.options_layout.addItem(self.spacerItem,4,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
@@ -490,38 +449,21 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("SPI Dir:",self.cmd.spi.direction)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
-            self.cmd.gpio.port = self.gpio_port_select.currentData()
-            if sequence.is_empty(self.gpio_pin_select.text()):
-                self.cmd.gpio.pin = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
-            else:
-                self.cmd.gpio.pin = int(self.gpio_pin_select.text())
+            self.cmd.gpio.pin = self.gpio_pin_select.currentData()
             self.cmd.gpio.direction = self.gpio_direction_select.currentData()
             self.cmd.gpio.pinState = self.gpio_state_select.currentData()
-            print("GPIO port:", self.cmd.gpio.port)
             print("GPIO pin:", self.cmd.gpio.pin)
             print("GPIO dir:",self.cmd.gpio.direction)
             print("GPIO state:",self.cmd.gpio.pinState)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
-            self.cmd.analog_in.port = self.gpio_port_select.currentData()
-            if self.gpio_pin_select.isEnabled():
-                if sequence.is_empty(self.gpio_pin_select.text()):
-                    self.cmd.analog_in.pin = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
-                else:
-                    self.cmd.analog_in.pin = int(self.gpio_pin_select.text())
-            else:
-                self.cmd.analog_in.pin = 0
+            self.cmd.analog_in.pin = self.gpio_pin_select.currentData()
             self.cmd.analog_in.resolution = self.adc_resolution_select.currentData()
-            print("GPIO port:", self.cmd.analog_in.port)
             print("GPIO pin:", self.cmd.analog_in.pin)
             print("ADC resolution:",self.cmd.analog_in.resolution)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
-            self.cmd.analog_out.port = self.gpio_port_select.currentData()
-            if sequence.is_empty(self.gpio_pin_select.text()):
-                self.cmd.analog_out.pin = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
-            else:
-                self.cmd.analog_out.pin = int(self.gpio_pin_select.text())
+            self.cmd.analog_out.pin = self.gpio_pin_select.currentData()
             if sequence.is_empty(self.pwm_freq_select.text()):
                 self.cmd.analog_out.frequency = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
             else:
@@ -530,7 +472,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.cmd.analog_out.dutyCycle = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
             else:
                 self.cmd.analog_out.dutyCycle = int(self.pwm_duty_select.text())
-            print("GPIO port:", self.cmd.analog_out.port)
             print("GPIO pin:", self.cmd.analog_out.pin)
             print("PWM Freq",self.cmd.analog_out.frequency)
             print("PWM Duty",self.cmd.analog_out.dutyCycle)

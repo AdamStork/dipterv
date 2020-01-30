@@ -85,8 +85,8 @@ message spiMessage{
 
 // digitalGPIO options
 enum gpioDirection{
-	GPIO_INPUT = 0;
-	GPIO_OUTPUT = 1;
+	GPIO_OUTPUT = 0;
+	GPIO_INPUT = 1;
 }
 
 enum gpioPinState{
@@ -94,27 +94,38 @@ enum gpioPinState{
 	GPIO_HIGH = 1;
 }
 
-
-enum gpioPort{
-	GPIO_PORT_A = 0;
-	GPIO_PORT_B = 1;
-	GPIO_PORT_C = 2;
-	GPIO_TEMP_SENSOR = 3;
-	GPIO_VREFINT = 4;
-	GPIO_VBAT = 5;
+enum gpioPins{
+	PA0 = 0;
+	PA1 = 1;
+	PA2 = 2;
+	PA3 = 3;
+	PA4 = 4;
+	PA5 = 5;	
+	PA6 = 6;
+	PA7 = 7;
+	PB0 = 8;
+	PB1 = 9;
+	PC0 = 10;
+	PC1 = 11;
+	PC2 = 12;
+	PC3 = 13;
+	PC4 = 14;
+	PC5 = 15;
+	TEMP = 16;
+	VREFINT = 17;
+	VBAT = 18;
 }
 
 message digitalGPIO{
- required gpioPort port= 1;
- required uint32 pin = 2;
- required gpioDirection direction = 3; 	 // Input/output
- required gpioPinState pinState = 4;	// Low, high
+ required gpioPins pin = 1;
+ required gpioDirection direction = 2; 	 // Input/output
+ required gpioPinState pinState = 3;	// Low, high
 }
 
 
 
 // Analog IN message
-enum ADC_RESOLUTION{		
+enum adcResolution{		
 	ADC_12_BITS = 0;
 	ADC_10_BITS = 1;
 	ADC_8_BITS = 2;
@@ -123,19 +134,17 @@ enum ADC_RESOLUTION{
 
 
 message analogIN{		
- required gpioPort port= 1;
- required uint32 pin = 2;
- required ADC_RESOLUTION resolution = 3;
+ required gpioPins pin = 1;
+ required adcResolution resolution = 2;
 }
 
 
 
 // Analog OUT message
 message analogOUT{
- required gpioPort port = 1;
- required uint32 pin = 2;
- required uint32 frequency = 3;
- required uint32 dutyCycle = 4;
+ required gpioPins pin = 1;
+ required uint32 frequency = 2;
+ required uint32 dutyCycle = 3;
 }
 
 
