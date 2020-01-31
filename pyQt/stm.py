@@ -33,6 +33,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.save_seq_button.clicked.connect(self.save_seq)
         self.load_seq_button.clicked.connect(self.load_seq)
         self.send_seq_button.clicked.connect(self.send_seq)
+        self.clear_button.clicked.connect(self.clear_response)
         self.fill_cmd_box()
         # flags: avoid command reselection
         self.I2C_active = False
@@ -144,6 +145,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     sequence.add_test_object_to_test_list(test_object, self.test_list)          # Add object to test list
                 file.close()
 
+    # Send sequence via serial port
     def send_seq(self):
         for i in range(len(self.test_list)):
             pb = sequence.make_protobuf_command_from_test_object(self.test_list[i])    # Make protobuf command
@@ -177,6 +179,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.scroll_layout.addWidget(responseLabel)
             last_widget = self.scroll_layout.itemAt(self.scroll_layout.count()-1).widget()
             QtCore.QTimer.singleShot(0, partial(self.scrollArea.ensureWidgetVisible, last_widget))
+
+    # Clear response (scrollArea)
+    def clear_response(self):
+        self.delete_all_child_widget(self.scroll_layout)    # delete children widgets
+        self.scroll_layout.addStretch()                     # Add stretch for scroll area
 
 
     # Fill combobox with commands
@@ -293,6 +300,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.spi_command_select,2,2)
                 self.options_layout.addWidget(self.spi_dummyclocks_select,3,2)
                 self.options_layout.addWidget(self.spi_direction_select,4,2)
+
+                self.options_layout.addItem(self.spacerItem,5,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:

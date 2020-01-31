@@ -181,13 +181,6 @@
       </rect>
      </property>
      <layout class="QGridLayout" name="cmd_layout">
-      <item row="3" column="0">
-       <widget class="QPushButton" name="sequence_add_button">
-        <property name="text">
-         <string>Add to sequence</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="select_cmd_label">
         <property name="text">
@@ -235,11 +228,18 @@
            <x>10</x>
            <y>20</y>
            <width>211</width>
-           <height>131</height>
+           <height>151</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="options_layout"/>
         </widget>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="sequence_add_button">
+        <property name="text">
+         <string>Add to sequence</string>
+        </property>
        </widget>
       </item>
      </layout>
@@ -255,15 +255,15 @@
      </rect>
     </property>
     <property name="title">
-     <string>Response (hex)</string>
+     <string>Response</string>
     </property>
     <widget class="QScrollArea" name="scrollArea">
      <property name="geometry">
       <rect>
-       <x>19</x>
-       <y>30</y>
-       <width>331</width>
-       <height>131</height>
+       <x>9</x>
+       <y>20</y>
+       <width>341</width>
+       <height>121</height>
       </rect>
      </property>
      <property name="verticalScrollBarPolicy">
@@ -280,8 +280,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>312</width>
-        <height>129</height>
+        <width>322</width>
+        <height>119</height>
        </rect>
       </property>
       <widget class="QWidget" name="verticalLayoutWidget">
@@ -289,8 +289,8 @@
         <rect>
          <x>10</x>
          <y>9</y>
-         <width>291</width>
-         <height>111</height>
+         <width>311</width>
+         <height>101</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="scroll_layout">
@@ -300,6 +300,25 @@
        </layout>
       </widget>
      </widget>
+    </widget>
+    <widget class="QWidget" name="verticalLayoutWidget_5">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>140</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="clear_button_layout">
+      <item>
+       <widget class="QPushButton" name="clear_button">
+        <property name="text">
+         <string>Clear response</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </widget>
    <widget class="QGroupBox" name="config_GB">
