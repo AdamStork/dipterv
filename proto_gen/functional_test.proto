@@ -29,7 +29,7 @@ enum i2cBus{
 message i2cMessage{
  required i2cBus bus = 1;
  required uint32 address = 2;
- required uint32 reg = 3;
+ required uint32 register = 3;
  required i2cDirection direction = 4; 	// 1: read, 0: write
 }
 
@@ -75,11 +75,10 @@ enum spiBus{
 
 message spiMessage{
  required spiBus bus = 1;
- optional spiMode mode = 2;		// master only, full_duplex
- required clockMode clock = 3;	//ide esetleg hintet megjeleniteni
- required uint32 command = 4;
- required spiDirection direction = 5;
- optional uint32 dummyclocks = 6;
+ required clockMode mode = 2;	//ide esetleg hintet megjeleniteni
+ required uint32 command = 3;
+ required spiDirection direction = 4;
+ optional uint32 dummyclocks = 5;
 }
 
 
@@ -119,7 +118,7 @@ enum gpioPins{
 message digitalGPIO{
  required gpioPins pin = 1;
  required gpioDirection direction = 2; 	 // Input/output
- required gpioPinState pinState = 3;	// Low, high
+ required gpioPinState state = 3;	// Low, high
 }
 
 

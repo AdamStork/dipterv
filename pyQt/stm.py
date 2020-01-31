@@ -163,12 +163,15 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # If serial write is unsuccessful, then display it on scrollArea and return immediately.
                 successLabel = QLabel(command_send_success)
                 self.scroll_layout.addWidget(successLabel)
-                return
+#                return
 
             # Print current command
             self.sequence_list.setCurrentRow(i)
             currentCommand = "Cmd: " + self.sequence_list.currentItem().text()
+            myFont = QFont()
+            myFont.setItalic(True)                          # Create own font style
             currentCommandLabel = QLabel(currentCommand)
+            currentCommandLabel.setFont(myFont)             # Set own font style for command print
 
             # Print serial read response
             response = "Response:"
@@ -428,18 +431,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.cmd.i2c.address = int(self.i2c_addr_select.text(),16)      # Convert to int
             if sequence.is_empty(self.i2c_reg_select.text()):
-                self.cmd.i2c.reg = 0
+                self.cmd.i2c.register = 0
             else:
-                self.cmd.i2c.reg = int(self.i2c_reg_select.text(),16)           # Convert to int
+                self.cmd.i2c.register = int(self.i2c_reg_select.text(),16)           # Convert to int
             self.cmd.i2c.direction = self.i2c_rw_select.currentData()
             print("I2C Bus:", self.cmd.i2c.bus)
             print("I2C Addr:", self.cmd.i2c.address)
-            print("I2C Reg:", self.cmd.i2c.reg)
+            print("I2C Reg:", self.cmd.i2c.register)
             print("I2C Dir:", self.cmd.i2c.direction)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             self.cmd.spi.bus = self.spi_bus_select.currentData()
-            self.cmd.spi.clock = self.spi_clockmode_select.currentData()
+            self.cmd.spi.mode = self.spi_clockmode_select.currentData()
             if sequence.is_empty(self.spi_command_select.text()):
                 self.cmd.spi.command = 0
             else:
@@ -450,7 +453,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.cmd.spi.dummyclocks = int(self.spi_dummyclocks_select.text(),16)
             self.cmd.spi.direction = self.spi_direction_select.currentData()
             print("SPI Bus:", self.cmd.spi.bus)
-            print("SPI Clock:",self.cmd.spi.clock)
+            print("SPI Clock:",self.cmd.spi.mode)
             print("SPI Cmd:",self.cmd.spi.command)
             print("SPI Dummy:",self.cmd.spi.dummyclocks)
             print("SPI Dir:",self.cmd.spi.direction)
@@ -458,10 +461,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
             self.cmd.gpio.pin = self.gpio_pin_select.currentData()
             self.cmd.gpio.direction = self.gpio_direction_select.currentData()
-            self.cmd.gpio.pinState = self.gpio_state_select.currentData()
+            self.cmd.gpio.state = self.gpio_state_select.currentData()
             print("GPIO pin:", self.cmd.gpio.pin)
             print("GPIO dir:",self.cmd.gpio.direction)
-            print("GPIO state:",self.cmd.gpio.pinState)
+            print("GPIO state:",self.cmd.gpio.state)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
             self.cmd.analog_in.pin = self.gpio_pin_select.currentData()

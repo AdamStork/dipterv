@@ -10,7 +10,18 @@
 
 # teszt fuggvenyek: create_command, add_data_depending_on... reszet lehetne kulonbontani ide.
 
-#    choose_pin() -> lehetne  egy dictionary a pinlista: https://jaxenter.com/implement-switch-case-statement-python-138315.html
-#    add_pins_to_combobox() - ezt a masik fajlba
+
+import functional_test_pb2
+import sequence
+
+# Make protobuf encoded command for i2c read
+def command_i2c(test_object):
+    command = functional_test_pb2.Command()
+    command.commandType = test_object.commandType
 
 
+
+
+
+# layoutbol kimentés lokális változokba és paraméterként átadás i2c_read fvnek pl.
+# i2c_read fv: cmd = Command(), cmd.commandType= ... return command? ezt a commandot meg ki lehet mar kuldeni serialon keresztul
