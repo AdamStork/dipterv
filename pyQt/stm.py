@@ -168,10 +168,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Print current command
             self.sequence_list.setCurrentRow(i)
             currentCommand = "Cmd: " + self.sequence_list.currentItem().text()
-            myFont = QFont()
-            myFont.setItalic(True)                          # Create own font style
+            italicFont = QFont()
+            italicFont.setItalic(True)                          # Create own font style
             currentCommandLabel = QLabel(currentCommand)
-            currentCommandLabel.setFont(myFont)             # Set own font style for command print
+            currentCommandLabel.setFont(italicFont)             # Set own font style for command print
 
             # Print serial read response
             response = "Response:"
@@ -423,76 +423,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.AnalogRead_active = False
         self.AnalogWrite_active = False
 
-    # Add data depending on command type
-    def add_data_depending_on_cmd_type(self, cmdType):
-        print("Add data depending on cmd type")
-        if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
-            self.cmd.i2c.bus = self.i2c_bus_select.currentData()
-            if sequence.is_empty(self.i2c_addr_select.text()):
-                self.cmd.i2c.address = 0
-            else:
-                self.cmd.i2c.address = int(self.i2c_addr_select.text(),16)      # Convert to int
-            if sequence.is_empty(self.i2c_reg_select.text()):
-                self.cmd.i2c.register = 0
-            else:
-                self.cmd.i2c.register = int(self.i2c_reg_select.text(),16)           # Convert to int
-            self.cmd.i2c.direction = self.i2c_rw_select.currentData()
-            print("I2C Bus:", self.cmd.i2c.bus)
-            print("I2C Addr:", self.cmd.i2c.address)
-            print("I2C Reg:", self.cmd.i2c.register)
-            print("I2C Dir:", self.cmd.i2c.direction)
-
-        elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
-            self.cmd.spi.bus = self.spi_bus_select.currentData()
-            self.cmd.spi.mode = self.spi_clockmode_select.currentData()
-            if sequence.is_empty(self.spi_command_select.text()):
-                self.cmd.spi.command = 0
-            else:
-                self.cmd.spi.command = int(self.spi_command_select.text(),16)
-            if sequence.is_empty(self.spi_dummyclocks_select.text()):
-                self.cmd.spi.dummyclocks = 0
-            else:
-                self.cmd.spi.dummyclocks = int(self.spi_dummyclocks_select.text(),16)
-            self.cmd.spi.direction = self.spi_direction_select.currentData()
-            print("SPI Bus:", self.cmd.spi.bus)
-            print("SPI Clock:",self.cmd.spi.mode)
-            print("SPI Cmd:",self.cmd.spi.command)
-            print("SPI Dummy:",self.cmd.spi.dummyclocks)
-            print("SPI Dir:",self.cmd.spi.direction)
-
-        elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
-            self.cmd.gpio.pin = self.gpio_pin_select.currentData()
-            self.cmd.gpio.direction = self.gpio_direction_select.currentData()
-            self.cmd.gpio.state = self.gpio_state_select.currentData()
-            print("GPIO pin:", self.cmd.gpio.pin)
-            print("GPIO dir:",self.cmd.gpio.direction)
-            print("GPIO state:",self.cmd.gpio.state)
-
-        elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
-            self.cmd.analog_in.pin = self.gpio_pin_select.currentData()
-            self.cmd.analog_in.resolution = self.adc_resolution_select.currentData()
-            print("GPIO pin:", self.cmd.analog_in.pin)
-            print("ADC resolution:",self.cmd.analog_in.resolution)
-
-        elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
-            self.cmd.analog_out.pin = self.gpio_pin_select.currentData()
-            if sequence.is_empty(self.pwm_freq_select.text()):
-                self.cmd.analog_out.frequency = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
-            else:
-                self.cmd.analog_out.frequency= int(self.pwm_freq_select.text())
-            if sequence.is_empty(self.pwm_duty_select.text()):
-                self.cmd.analog_out.dutyCycle = 0                                  # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
-            else:
-                self.cmd.analog_out.dutyCycle = int(self.pwm_duty_select.text())
-            print("GPIO pin:", self.cmd.analog_out.pin)
-            print("PWM Freq",self.cmd.analog_out.frequency)
-            print("PWM Duty",self.cmd.analog_out.dutyCycle)
-
-        elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
-            print("LED test")
-#            self.cmd.commandType = 6
-
-
     # Get number of response bytes depending on command type
     def read_data_depending_on_cmd_type(self, cmdType):
         print("Read data depending on cmd type:",cmdType)
@@ -538,16 +468,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #            vbar = self.scrollArea.verticalScrollBar()
 #            vbar.setValue(vbar.maximum())
 
-
-
-    # Create protocol buffer encoded command
-    def create_protobuf_command(self):
-        self.cmd = functional_test_pb2.Command()
-        self.cmd.commandType = self.cmd_box.currentData()
-        self.add_data_depending_on_cmd_type(self.cmd.commandType)
-        return self.cmd.SerializeToString()
-
-
     # Connect to a serial port
     def connect(self):
         try:
@@ -585,8 +505,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Serialize command and options, then send out data via UART
     def send_command(self):
-        pb = self.create_protobuf_command()    # make command
-        self.LL.link_frame_data(pb)            # frame data
+        test_object = sequence.make_test_object_from_options(self)              # Make test object from selected options
+        if test_object == None:
+            return
+        pb = sequence.make_protobuf_command_from_test_object(test_object)       # Make protobuf encoded command from test object
+        str_test_object = sequence.make_string_from_test_object(test_object)    # Make string from test object
+        self.LL.link_frame_data(pb)                                             # Frame protobuf encoded data
         print("TxBuffer: ",self.LL.tx_buffer)
         try:
             self.ser.write(self.LL.tx_buffer)
@@ -599,8 +523,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 command_send_success = 'Error while sending command'
             else:
                 command_send_success = 'Port is not open'
+        italicFont = QFont()
+        italicFont.setItalic(True)
+        commandStringLabel = QLabel(str_test_object)
+        commandStringLabel.setFont(italicFont)
+        self.scroll_layout.addWidget(commandStringLabel)
         commandSendingLabel = QLabel(command_send_success)
         self.scroll_layout.addWidget(commandSendingLabel)
+
 
 
 

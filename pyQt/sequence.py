@@ -154,7 +154,7 @@ dict_adc_res = {
 
 
 
-# @rief     Classes that represent the tests
+# @brief     Classes that represent the tests
 class i2c_test:
     def __init__(self, cmdType = None, bus = None, address = None, register = None, direction = None):
         self.cmdType = cmdType
@@ -192,7 +192,6 @@ class analog_write:
         self.pin = pin
         self.frequency = frequency
         self.dutyCycle = dutyCycle
-
 
 
 # @brief        Make test objects from the selected options and add it to test_list.
@@ -270,6 +269,8 @@ def make_test_object_from_options(UI):
         return selectedCommand
 #        sequence.append(selectedCommand)
 #        add_test_object_to_test_list(selectedCommand, test_list)
+    else:
+        return None
 
 
 # @brief            Delete test object from test_list on given index
