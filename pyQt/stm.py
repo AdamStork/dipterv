@@ -319,9 +319,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_direction_select = QComboBox(self)
                 self.gpio_state_select = QComboBox(self)
 
-                length = len(sequence.list_gpio_pins) - 3       # End of list contains special, analog input pins (temp, vrefint, vbat)
+                length = len(sequence.dict_gpio_digital_pins)
                 for i in range(length):
-                    self.gpio_pin_select.addItem(sequence.list_gpio_pins[i],i)
+                    self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
+#                    stra = "Key:" + str(list(sequence.dict_gpio_digital_pins.keys())[i]) + " Val:" + str(list(sequence.dict_gpio_digital_pins.values())[i])
+#                    print(stra)
 
                 self.gpio_direction_select.addItem("Input",functional_test_pb2.gpioDirection.GPIO_INPUT)
                 self.gpio_direction_select.addItem("Output",functional_test_pb2.gpioDirection.GPIO_OUTPUT)
@@ -352,9 +354,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_pin_select = QComboBox(self)
                 self.adc_resolution_select = QComboBox(self)
 
-                length = len(sequence.list_gpio_pins)
+                length = len(sequence.dict_gpio_analog_pins)
                 for i in range(length):
-                    self.gpio_pin_select.addItem(sequence.list_gpio_pins[i],i)
+                    self.gpio_pin_select.addItem(list(sequence.dict_gpio_analog_pins.keys())[i],list(sequence.dict_gpio_analog_pins.values())[i] )
 
                 self.adc_resolution_select.addItem("12 bits",functional_test_pb2.adcResolution.ADC_12_BITS)
                 self.adc_resolution_select.addItem("10 bits",functional_test_pb2.adcResolution.ADC_10_BITS)
@@ -381,9 +383,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.pwm_freq_select = QLineEdit(self)
                 self.pwm_duty_select = QLineEdit(self)
 
-                length = len(sequence.list_gpio_pins)
+                length = len(sequence.dict_gpio_digital_pins)
                 for i in range(length):
-                    self.gpio_pin_select.addItem(sequence.list_gpio_pins[i],i)
+                    self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
 
                 self.pwm_freq_select.setValidator(self.freqValidator)
                 self.pwm_freq_select.setPlaceholderText("0..1000")

@@ -5,7 +5,8 @@
 import functional_test_pb2
 import commands
 
-# @Note: For value <-> string conversion lists are used.
+# @Note: For value <-> string conversion dictionaries are used, which are converted to lists during the key-value search.
+#        The reason for this kind of storage is that the management of dictionaries are easy. (Adding, removing items, dynamic handling etc.)
 
 #Function list:
 #    make_test_object_from_options(UI)
@@ -20,22 +21,137 @@ import commands
 #    make_protobuf_command_from_test_object(test_object)
 
 
-
-
-# @brief    List of strings for value <-> string conversion
+# List of command types
 list_cmd_types = ["I2C","SPI","GPIO","Analog_read","PWM"]
-list_i2c_rw = ["Write","Read"]
-list_i2c_bus = ["Invalid","I2C1","I2C2", "I2C3"]
 
-list_spi_bus = ["Invalid","SPI1","SPI2", "SPI3"]
-list_spi_mode = ["0", "1", "2", "3"]
-list_spi_rw = ["Transmit","Receive"]
 
-list_gpio_rw = ["Output","Input"]
-list_gpio_state = ["Low", "High"]
-list_gpio_pins = ["PA0","PA1","PA4","PA5", "PA6", "PA7","PB0","PB1", "PC0", "PC1","PC2","PC3", "PC4", "PC5","Temp","Vrefint", "Vbat"]
+# I2C dictionaries
+dict_i2c_rw = {
+    "Write": 0,
+    "Read": 1
+}
 
-list_adc_res = ["12 bits", "10 bits", "8 bits", "6 bits"]
+dict_i2c_bus = {
+    "I2C1": 1,
+    "I2C2": 2,
+    "I2C3": 3
+}
+
+
+# SPI dictionaries
+dict_spi_rw = {
+    "Transmit": 0,
+    "Receive": 1
+}
+
+dict_spi_bus = {
+    "SPI1": 1,
+    "SPI2": 2,
+    "SPI3": 3
+}
+
+dict_spi_mode = {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3
+}
+
+
+# GPIO dictionaries
+dict_gpio_rw = {
+    "Output": 0,
+    "Input": 1
+}
+
+
+dict_gpio_state = {
+    "Low": 0,
+    "High": 1
+}
+
+dict_gpio_digital_pins = {
+    "PA0": 0,
+    "PA1": 1,
+    "PA2": 2,
+    "PA3": 3,
+    "PA4": 4,
+    "PA5": 5,
+    "PA6": 6,
+    "PA7": 7,
+    "PA8": 8,
+    "PA9": 9,
+    "PA10": 10,
+    "PA11": 11,
+    "PA12": 12,
+    "PA13": 13,
+    "PA14": 14,
+    "PA15": 15,
+    "PB0": 20,
+    "PB1": 21,
+    "PB2": 22,
+    "PB3": 23,
+    "PB4": 24,
+    "PB5": 25,
+    "PB6": 26,
+    "PB7": 27,
+    "PB8": 28,
+    "PB9": 29,
+    "PB10": 30,
+    "PB11": 31,
+    "PB12": 32,
+    "PB13": 33,
+    "PB14": 34,
+    "PB15": 35,
+    "PC0": 40,
+    "PC1": 41,
+    "PC2": 42,
+    "PC3": 43,
+    "PC4": 44,
+    "PC5": 45,
+    "PC6": 46,
+    "PC7": 47,
+    "PC8": 48,
+    "PC9": 49,
+    "PC10": 50,
+    "PC11": 51,
+    "PC12": 52,
+    "PC13": 53,
+    "PC14": 54,
+    "PC15": 55,
+}
+
+
+# ADC dictionaries
+dict_gpio_analog_pins = {
+    "PA0": 0,
+    "PA1": 1,
+    "PA2": 2,
+    "PA3": 3,
+    "PA4": 4,
+    "PA5": 5,
+    "PA6": 6,
+    "PA7": 7,
+    "PB0": 20,
+    "PB1": 21,
+    "PC0": 40,
+    "PA1": 41,
+    "PC2": 42,
+    "PC3": 43,
+    "PC4": 44,
+    "PC5": 45,
+    "Temp": 60,
+    "Vrefint": 61,
+    "Vbat": 62
+}
+
+dict_adc_res = {
+    "12 bits": 0,
+    "10 bits": 1,
+    "8 bits": 2,
+    "6 bits": 3,
+}
+
 
 
 # @rief     Classes that represent the tests
@@ -191,33 +307,33 @@ def make_string_from_test_object(test_object):
     string = ""
     if test_object.cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
         string += "I2C"
-        string += "  Bus: " + list_i2c_bus[test_object.bus]
+        string += "  Bus: " + list(dict_i2c_bus.keys())[list(dict_i2c_bus.values()).index(test_object.bus)]
         string += "  Addr: " + "0x{:02X}".format(test_object.address)
         string += "  Reg: " + "0x{:02X}".format(test_object.register)
-        string += "  R/W: " + list_i2c_rw[test_object.direction]
+        string += "  R/W: " + list(dict_i2c_rw.keys())[list(dict_i2c_rw.values()).index(test_object.direction)]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
         string += "SPI"
-        string += "  Bus: " + list_spi_bus[test_object.bus]
-        string += "  Mode: " + str(test_object.mode)
+        string += "  Bus: " + list(dict_spi_bus.keys())[list(dict_spi_bus.values()).index(test_object.bus)]
+        string += "  Mode: " + list(dict_spi_mode.keys())[list(dict_spi_mode.values()).index(test_object.mode)]
         string += "  Cmd: " + "0x{:02X}".format(test_object.command)
         string += "  Dummy: " + str(test_object.dummyclocks)
-        string += "  R/W: " + list_spi_rw[test_object.direction]
+        string += "  R/W: " + list(dict_spi_rw.keys())[list(dict_spi_rw.values()).index(test_object.direction)]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         string += "GPIO"
-        string += "  Pin: " + list_gpio_pins[test_object.pin]
-        string += "  R/W: " + list_gpio_rw[test_object.direction]
-        string += "  State: " + list_gpio_state[test_object.state]
+        string += "  Pin: " +   list(dict_gpio_digital_pins.keys())[list(dict_gpio_digital_pins.values()).index(test_object.pin)]
+        string += "  R/W: " +   list(dict_gpio_rw.keys())[list(dict_gpio_rw.values()).index(test_object.direction)]
+        string += "  State: " + list(dict_gpio_state.keys())[list(dict_gpio_state.values()).index(test_object.state)]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
         string += "Analog_read"
-        string += "  Pin: " + list_gpio_pins[test_object.pin]
-        string += "  Res: " + list_adc_res[test_object.resolution]
+        string += "  Pin: " + list(dict_gpio_analog_pins.keys())[list(dict_gpio_analog_pins.values()).index(test_object.pin)]
+        string += "  Res: " + list(dict_adc_res.keys())[list(dict_adc_res.values()).index(test_object.resolution)]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
         string += "PWM"
-        string += "  Pin: " + list_gpio_pins[test_object.pin]
+        string += "  Pin: " + list(dict_gpio_digital_pins.keys())[list(dict_gpio_digital_pins.values()).index(test_object.pin)]
         string += "  Freq: " + str(test_object.frequency)
         string += "  Duty: " + str(test_object.dutyCycle)
 
@@ -233,10 +349,10 @@ def make_test_object_from_string(string):
     if words[0] == list_cmd_types[0]:
         test_object = i2c_test()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.I2C_test
-        test_object.bus = list_i2c_bus.index( words[1][5:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
+        test_object.bus = list(dict_i2c_bus.values())[list(dict_i2c_bus.keys()).index(words[1][5:])]
         test_object.address = int(words[2][6:],16)
         test_object.register = int(words[3][5:],16)
-        test_object.direction = list_i2c_rw.index(words[4][5:])
+        test_object.direction = list(dict_i2c_rw.values())[list(dict_i2c_rw.keys()).index(words[4][5:])]
         return test_object
 #        print("Test object:")
 #        print("cmd:",test_object.cmdType)
@@ -247,11 +363,11 @@ def make_test_object_from_string(string):
     elif words[0] == list_cmd_types[1]:
         test_object = spi_test()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.SPI_test
-        test_object.bus = list_spi_bus.index( words[1][5:]) # Get relevant part of string and find index in list. The same number is defined as enum in .proto
-        test_object.mode = list_spi_mode.index(words[2][6:])
+        test_object.bus = list(dict_spi_bus.values())[list(dict_spi_bus.keys()).index(words[1][5:])]
+        test_object.mode = list(dict_spi_mode.values())[list(dict_spi_mode.keys()).index(words[2][6:])]
         test_object.command = int(words[3][7:],16)
         test_object.dummyclocks = int(words[4][7:])
-        test_object.direction = list_spi_rw.index(words[5][5:])
+        test_object.direction = list(dict_spi_rw.values())[list(dict_spi_rw.keys()).index(words[5][5:])]
         return test_object
 #        print("Test object: ")
 #        print("cmd:",test_object.cmdType)
@@ -263,9 +379,9 @@ def make_test_object_from_string(string):
     elif words[0] == list_cmd_types[2]:
         test_object = gpio_digital()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.GPIO_digital
-        test_object.pin = list_gpio_pins.index(words[1][5:])
-        test_object.direction = list_gpio_rw.index(words[2][5:])
-        test_object.state = list_gpio_state.index(words[3][7:])
+        test_object.pin = list(dict_gpio_digital_pins.values())[list(dict_gpio_digital_pins.keys()).index(words[1][5:])]
+        test_object.direction = list(dict_gpio_rw.values())[list(dict_gpio_rw.keys()).index(words[2][5:])]
+        test_object.state = list(dict_gpio_state.values())[list(dict_gpio_state.keys()).index(words[3][7:])]
         return test_object
 #        print("Test object: ")
 #        print("cmd:",test_object.cmdType)
@@ -275,8 +391,8 @@ def make_test_object_from_string(string):
     elif words[0] == list_cmd_types[3]:
         test_object = analog_read()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.Analog_read
-        test_object.pin = list_gpio_pins.index(words[1][5:])
-        test_object.resolution = list_adc_res.index(words[2][5:])
+        test_object.pin = list(dict_gpio_analog_pins.values())[list(dict_gpio_analog_pins.keys()).index(words[1][5:])]
+        test_object.resolution = list(dict_adc_res.values())[list(dict_adc_res.keys()).index(words[2][5:])]
         return test_object
 #        print("Test object:")
 #        print("cmd:",test_object.cmdType)
@@ -285,7 +401,7 @@ def make_test_object_from_string(string):
     elif words[0] == list_cmd_types[4]:
         test_object = analog_write()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.Analog_write
-        test_object.pin = list_gpio_pins.index(words[1][5:])
+        test_object.pin = list(dict_gpio_digital_pins.values())[list(dict_gpio_digital_pins.keys()).index(words[1][5:])]
         test_object.frequency = int(words[2][6:])
         test_object.dutyCycle = int(words[3][6:])
         return test_object
