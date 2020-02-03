@@ -34,6 +34,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.load_seq_button.clicked.connect(self.load_seq)
         self.send_seq_button.clicked.connect(self.send_seq)
         self.clear_button.clicked.connect(self.clear_response)
+        self.cfg_browse_button.clicked.connect(self.browse_cfg)
+        self.cfg_load_button.clicked.connect(self.load_cfg)
+        self.cfg_checkbox.stateChanged.connect(self.checkbox_state_changed)
         self.fill_cmd_box()
         # flags: avoid command reselection
         self.I2C_active = False
@@ -53,6 +56,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.helpLabel_list = []
         self.scroll_layout.addStretch()                            # Add stretch for scroll area
         self.container_widget.setLayout(self.scroll_layout)        # Set layout for scrollArea container widget
+        self.cfg_browse_button.setEnabled(False)
+        self.cfg_load_button.setEnabled(False)
+        self.cfg_file_path.setEnabled(False)
 
     # Move up row (Move up QListWidgetItem)
     def move_up(self):
@@ -188,6 +194,24 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.delete_all_child_widget(self.scroll_layout)    # delete children widgets
         self.scroll_layout.addStretch()                     # Add stretch for scroll area
 
+
+    def browse_cfg(self):
+        print("TODO browse")
+        # QFileDialog load: path megadas
+
+    def load_cfg(self):
+        print("TODO load")
+        # File beolvasas, soronkent analyze, config.py fuggvenyek alapjan available BUS, pins etc.
+
+    def checkbox_state_changed(self):
+        if self.cfg_checkbox.isChecked():
+            self.cfg_browse_button.setEnabled(True)
+            self.cfg_load_button.setEnabled(True)
+            self.cfg_file_path.setEnabled(True)
+        else:
+            self.cfg_browse_button.setEnabled(False)
+            self.cfg_load_button.setEnabled(False)
+            self.cfg_file_path.setEnabled(False)
 
     # Fill combobox with commands
     def fill_cmd_box(self):
