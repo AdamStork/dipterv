@@ -3,7 +3,6 @@
 #   #######################################
 
 import functional_test_pb2
-import commands
 
 # @Note: For value <-> string conversion dictionaries are used, which are converted to lists during the key-value search.
 #        The reason for this kind of storage is that the management of dictionaries are easy. (Adding, removing items, dynamic handling etc.)
@@ -51,10 +50,10 @@ dict_spi_bus = {
 }
 
 dict_spi_mode = {
-    "0": 0,
-    "1": 1,
-    "2": 2,
-    "3": 3
+    "Mode 0": 0,
+    "Mode 1": 1,
+    "Mode 2": 2,
+    "Mode 3": 3
 }
 
 

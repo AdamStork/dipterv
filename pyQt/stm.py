@@ -161,8 +161,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     command_send_success = 'Port is not open'
                 # If serial write is unsuccessful, then display it on scrollArea and return immediately.
-                successLabel = QLabel(command_send_success)
-                self.scroll_layout.addWidget(successLabel)
+#                successLabel = QLabel(command_send_success)
+#                self.scroll_layout.addWidget(successLabel)
 #                return
 
             # Print current command
@@ -174,7 +174,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             currentCommandLabel.setFont(italicFont)             # Set own font style for command print
 
             # Print serial read response
-            response = "Response:"
+            response = "Response: " + command_send_success
             responseLabel = QLabel(response)
 
             # Add widgets (labels) to scrollArea
@@ -236,12 +236,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_reg_select = QLineEdit(self)
                 self.i2c_rw_select = QComboBox(self)
 
-                self.i2c_bus_select.addItem("I2C1",functional_test_pb2.i2cBus.I2C1)  # TODO: melyik buszok elerhetok: addItem()
-                self.i2c_bus_select.addItem("I2C2",functional_test_pb2.i2cBus.I2C2)
-                self.i2c_bus_select.addItem("I2C3",functional_test_pb2.i2cBus.I2C3)
+                for i in range(len(sequence.dict_i2c_bus)):
+                    self.i2c_bus_select.addItem(list(sequence.dict_i2c_bus.keys())[i],list(sequence.dict_i2c_bus.values())[i] )
 
-                self.i2c_rw_select.addItem("Read",functional_test_pb2.i2cDirection.I2C_read)
-                self.i2c_rw_select.addItem("Write",functional_test_pb2.i2cDirection.I2C_write)          
+                self.i2c_rw_select.addItem(list(sequence.dict_i2c_rw.keys())[0],list(sequence.dict_i2c_rw.values())[0])
+                self.i2c_rw_select.addItem(list(sequence.dict_i2c_rw.keys())[1],list(sequence.dict_i2c_rw.values())[1])
 
                 self.i2c_addr_select.setValidator(self.byteValidator)
                 self.i2c_addr_select.setPlaceholderText("0xFF")
@@ -276,22 +275,19 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spi_dummyclocks_select = QLineEdit(self)
                 self.spi_direction_select = QComboBox(self)
 
-                self.spi_bus_select.addItem("SPI1",functional_test_pb2.spiBus.SPI1)
-                self.spi_bus_select.addItem("SPI2",functional_test_pb2.spiBus.SPI2)
-                self.spi_bus_select.addItem("SPI3",functional_test_pb2.spiBus.SPI3)
+                for i in range(len(sequence.dict_spi_bus)):
+                    self.spi_bus_select.addItem(list(sequence.dict_spi_bus.keys())[i],list(sequence.dict_spi_bus.values())[i] )
 
-                self.spi_clockmode_select.addItem("Mode 0",functional_test_pb2.clockMode.MODE_0)
-                self.spi_clockmode_select.addItem("Mode 1",functional_test_pb2.clockMode.MODE_1)
-                self.spi_clockmode_select.addItem("Mode 2",functional_test_pb2.clockMode.MODE_2)
-                self.spi_clockmode_select.addItem("Mode 3",functional_test_pb2.clockMode.MODE_3)
+                for i in range(len(sequence.dict_spi_mode)):
+                    self.spi_clockmode_select.addItem(list(sequence.dict_spi_mode.keys())[i],list(sequence.dict_spi_mode.values())[i] )
 
                 self.spi_command_select.setValidator(self.byteValidator)
                 self.spi_command_select.setPlaceholderText("0xFF")
                 self.spi_dummyclocks_select.setValidator(self.decValidator)
                 self.spi_dummyclocks_select.setPlaceholderText("0..99")
 
-                self.spi_direction_select.addItem("Transmit",functional_test_pb2.spiDirection.SPI_TRANSMIT)
-                self.spi_direction_select.addItem("Receive",functional_test_pb2.spiDirection.SPI_RECEIVE)
+                self.spi_direction_select.addItem(list(sequence.dict_spi_rw.keys())[0],list(sequence.dict_spi_rw.values())[0])
+                self.spi_direction_select.addItem(list(sequence.dict_spi_rw.keys())[1],list(sequence.dict_spi_rw.values())[1])
 
                 self.options_layout.addWidget(self.spi_bus_label,0,0)
                 self.options_layout.addWidget(self.spi_clockmode_label,1,0)
@@ -319,19 +315,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_direction_select = QComboBox(self)
                 self.gpio_state_select = QComboBox(self)
 
-                length = len(sequence.dict_gpio_digital_pins)
-                for i in range(length):
+                for i in range(len(sequence.dict_gpio_digital_pins)):
                     self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
 #                    stra = "Key:" + str(list(sequence.dict_gpio_digital_pins.keys())[i]) + " Val:" + str(list(sequence.dict_gpio_digital_pins.values())[i])
 #                    print(stra)
 
-                self.gpio_direction_select.addItem("Input",functional_test_pb2.gpioDirection.GPIO_INPUT)
-                self.gpio_direction_select.addItem("Output",functional_test_pb2.gpioDirection.GPIO_OUTPUT)
+                self.gpio_direction_select.addItem(list(sequence.dict_gpio_rw.keys())[0],list(sequence.dict_gpio_rw.values())[0])
+                self.gpio_direction_select.addItem(list(sequence.dict_gpio_rw.keys())[1],list(sequence.dict_gpio_rw.values())[1])
 
-                self.gpio_state_select.addItem("Low",functional_test_pb2.gpioPinState.GPIO_LOW)
-                self.gpio_state_select.addItem("High",functional_test_pb2.gpioPinState.GPIO_HIGH)
+                self.gpio_state_select.addItem(list(sequence.dict_gpio_state.keys())[0],list(sequence.dict_gpio_state.values())[0])
+                self.gpio_state_select.addItem(list(sequence.dict_gpio_state.keys())[1],list(sequence.dict_gpio_state.values())[1])
 
-                self.gpio_state_select.setEnabled(False)
+                self.gpio_state_select.setEnabled(True)
                 self.gpio_direction_select.activated[str].connect(self.on_changed_gpio_dir)
 
                 self.options_layout.addWidget(self.gpio_pin_label,0,0)
@@ -354,14 +349,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_pin_select = QComboBox(self)
                 self.adc_resolution_select = QComboBox(self)
 
-                length = len(sequence.dict_gpio_analog_pins)
-                for i in range(length):
+                for i in range(len(sequence.dict_gpio_analog_pins)):
                     self.gpio_pin_select.addItem(list(sequence.dict_gpio_analog_pins.keys())[i],list(sequence.dict_gpio_analog_pins.values())[i] )
 
-                self.adc_resolution_select.addItem("12 bits",functional_test_pb2.adcResolution.ADC_12_BITS)
-                self.adc_resolution_select.addItem("10 bits",functional_test_pb2.adcResolution.ADC_10_BITS)
-                self.adc_resolution_select.addItem("8 bits",functional_test_pb2.adcResolution.ADC_8_BITS)
-                self.adc_resolution_select.addItem("6 bits",functional_test_pb2.adcResolution.ADC_6_BITS)
+                for i in range(len(sequence.dict_adc_res)):
+                    self.adc_resolution_select.addItem(list(sequence.dict_adc_res.keys())[i],list(sequence.dict_adc_res.values())[i] )
 
                 self.options_layout.addWidget(self.gpio_pin_label,0,0)
                 self.options_layout.addWidget(self.adc_resolution_label,1,0)
@@ -383,8 +375,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.pwm_freq_select = QLineEdit(self)
                 self.pwm_duty_select = QLineEdit(self)
 
-                length = len(sequence.dict_gpio_digital_pins)
-                for i in range(length):
+                for i in range(len(sequence.dict_gpio_digital_pins)):
                     self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
 
                 self.pwm_freq_select.setValidator(self.freqValidator)
