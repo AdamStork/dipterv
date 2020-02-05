@@ -8,6 +8,7 @@ from functools import partial
 
 import functional_test_pb2
 import sequence
+import config
 from link_layer import link_layer
 
 ui_path = os.path.dirname(os.path.abspath(__file__))
@@ -144,8 +145,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             with file:
                 data_line = file.readlines()
                 for i in range(len(data_line)):
-                    data_line[i] = data_line[i].rstrip()
-#                    print(data_line[i])
+                    data_line[i] = data_line[i].rstrip()    # Remove trailing characters: \n
+                    print(data_line[i])
                     self.sequence_list.insertItem(self.sequence_list.count(),data_line[i])      # Add string line to sequence
                     test_object = sequence.make_test_object_from_string(data_line[i])           # Make object from string line
                     sequence.add_test_object_to_test_list(test_object, self.test_list)          # Add object to test list
@@ -194,14 +195,21 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.delete_all_child_widget(self.scroll_layout)    # delete children widgets
         self.scroll_layout.addStretch()                     # Add stretch for scroll area
 
-
+    # Browse and get path of CubeMX config file (.ioc)
     def browse_cfg(self):
-        print("TODO browse")
-        # QFileDialog load: path megadas
+        dialog = QFileDialog(self)
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        dialog.setNameFilters(["CubeMX files (*.ioc)"])
+        filenames = []
+        if dialog.exec_():
+            filenames = dialog.selectedFiles()
+            self.cfg_file_path.setText(filenames[0])
 
+    # Load CubeMX config file: open and analyze file, then refill combo boxes
     def load_cfg(self):
-        print("TODO load")
-        # File beolvasas, soronkent analyze, config.py fuggvenyek alapjan available BUS, pins etc.
+        path = self.cfg_file_path.text()
+        config.process_config_file(path)
+        # todo: refill_combo_boxes() ...
 
     def checkbox_state_changed(self):
         if self.cfg_checkbox.isChecked():
