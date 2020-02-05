@@ -122,6 +122,12 @@ dict_gpio_digital_pins = {
 
 
 # ADC dictionaries
+dict_adc_channels = {
+    "ADC1": 1,
+    "ADC2": 2,
+    "ADC3": 3,
+}
+
 dict_gpio_analog_pins = {
     "PA0": 0,
     "PA1": 1,
@@ -152,6 +158,15 @@ dict_adc_res = {
 }
 
 
+# USART dictionaries
+dict_usart_bus = {
+    "USART1": 1,
+    "USART2": 2,
+    "USART3": 3,
+    "USART4": 4,
+    "USART5": 5,
+    "USART6": 6,
+}
 
 # @brief     Classes that represent the tests
 class i2c_test:
