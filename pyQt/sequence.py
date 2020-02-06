@@ -36,6 +36,12 @@ dict_i2c_bus = {
     "I2C3": 3
 }
 
+dict_i2c_speedmode = {
+    "Standard": 1,
+    "Fast (Tlow/Thigh = 2)": 2,
+    "Fast (Tlow/Thigh = 16/9)": 3
+}
+
 
 # SPI dictionaries
 dict_spi_rw = {
@@ -56,6 +62,29 @@ dict_spi_mode = {
     "Mode 3": 3
 }
 
+dict_spi_operating_mode = {
+    "Full Duplex Master": 0,
+    "Half Dupley Master": 1,
+    "Transmit Only Master": 2
+}
+
+dict_spi_frame_format = {
+    "Motorola (MSB first)": 0,
+    "Motorola (LSB first)": 1,
+    "TI": 2
+}
+
+dict_spi_data_size = {
+    "8 bits": 0,
+    "16 bits": 1,
+}
+
+dict_spi_hardware_nss = {
+    "Disable": 0,
+    "NSS Input": 1,
+    "NSS Output": 2
+}
+
 
 # GPIO dictionaries
 dict_gpio_rw = {
@@ -66,7 +95,14 @@ dict_gpio_rw = {
 
 dict_gpio_state = {
     "Low": 0,
-    "High": 1
+    "High": 1,
+    "N/A": 2
+}
+
+dict_gpio_pull = {
+    "No Pull": 0,
+    "Pull-up": 1,
+    "Pull-down": 2
 }
 
 dict_gpio_digital_pins = {
@@ -157,6 +193,12 @@ dict_adc_res = {
     "6 bits": 3,
 }
 
+dict_adc_clock_prescaler = {
+    "PCLK2/4": 0,
+    "PCLK2/6": 1,
+    "PCLK2/8": 2,
+}
+
 
 # USART dictionaries
 dict_usart_bus = {
@@ -167,6 +209,42 @@ dict_usart_bus = {
     "USART5": 5,
     "USART6": 6,
 }
+
+dict_usart_direction = {
+    "RX and TX": 0,
+    "RX only": 1,
+    "TX only": 2,
+}
+
+dict_usart_word_length = {
+    "8 bits": 0,
+    "9 bits": 1,
+}
+
+dict_usart_parity = {
+    "None": 0,
+    "Even": 1,
+    "Odd": 2,
+}
+
+dict_usart_stop_bits = {
+    "1 bit": 1,
+    "2 bits": 2,
+}
+
+dict_usart_mode = {
+    "Asynchronous": 0,
+    "Synchronous": 1,
+}
+
+dict_usart_hw_flow = {
+    "Disable": 0,
+    "CTS only": 1,
+    "RTS only": 2,
+    "CTS and RTS": 3,
+}
+
+
 
 # @brief     Classes that represent the tests
 class i2c_test:
