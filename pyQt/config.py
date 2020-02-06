@@ -23,20 +23,24 @@ dict_available_analog_pins = {}
 
 # Process config file line-by-line
 def process_config_file(path):
-    file = open(path, 'r')
-    with file:
-        data_line = file.readlines()
-        for i in range(len(data_line)):
-            data_line[i] = data_line[i].rstrip()     # Remove trailing characters: \n
-            check_dataline_for_available_buses(data_line[i])
-            check_data_line_for_available_pins(data_line[i])
-        print("Available I2C buses:", dict_available_i2c_buses)
-        print("Available SPI buses:", dict_available_spi_buses)
-        print("Available USART buses:", dict_available_usart_buses)
-        print("Available ADC channels:", dict_available_adc_instances)
-        print("Available GPIO digital pins:", dict_available_digital_pins)
-        print("Available ADC pins:", dict_available_analog_pins)
-        file.close()
+    try:
+        file = open(path, 'r')
+        with file:
+            data_line = file.readlines()
+            for i in range(len(data_line)):
+                data_line[i] = data_line[i].rstrip()     # Remove trailing characters: \n
+                check_dataline_for_available_buses(data_line[i])
+                check_data_line_for_available_pins(data_line[i])
+            print("Available I2C buses:", dict_available_i2c_buses)
+            print("Available SPI buses:", dict_available_spi_buses)
+            print("Available USART buses:", dict_available_usart_buses)
+            print("Available ADC channels:", dict_available_adc_instances)
+            print("Available GPIO digital pins:", dict_available_digital_pins)
+            print("Available ADC pins:", dict_available_analog_pins)
+            file.close()
+        return True
+    except:
+        return False
 
 
 # Check data line from file for available i2c/spi/usart buses and ADC channels

@@ -209,9 +209,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Load CubeMX config file: open and analyze file, then reload current command options view
     def load_cfg(self):
         path = self.cfg_file_path.text()
-        config.process_config_file(path)
-        self.use_config_file = True
-        self.on_changed_cmd_box()           # Reload current view, call function explicitly
+        success = config.process_config_file(path)
+        if(success == True):
+            self.use_config_file = True
+            self.on_changed_cmd_box()           # Reload current view, call function explicitly
+        else:
+            self.use_config_file = False
+            errorLabel = QLabel("No such file or directory")
+            self.scroll_layout.addWidget(errorLabel)
 
     def checkbox_state_changed(self):
         if self.cfg_checkbox.isChecked():
