@@ -220,10 +220,12 @@ def make_test_object_from_options(UI):
         selectedCommand.bus = UI.i2c_bus_select.currentData()
         if is_empty(UI.i2c_addr_select.text()):
             selectedCommand.address = 0
+            UI.i2c_addr_select.setText("0x00")
         else:
             selectedCommand.address = int(UI.i2c_addr_select.text(),16)      # Convert to int
         if is_empty(UI.i2c_reg_select.text()):
             selectedCommand.register = 0
+            UI.i2c_reg_select.setText("0x00")
         else:
             selectedCommand.register = int(UI.i2c_reg_select.text(),16)           # Convert to int
         selectedCommand.direction = UI.i2c_rw_select.currentData()
@@ -238,10 +240,12 @@ def make_test_object_from_options(UI):
         selectedCommand.mode = UI.spi_clockmode_select.currentData()
         if is_empty(UI.spi_command_select.text()):
             selectedCommand.command = 0
+            UI.spi_command_select.setText("0x00")
         else:
             selectedCommand.command = int(UI.spi_command_select.text(),16)
         if is_empty(UI.spi_dummyclocks_select.text()):
             selectedCommand.dummyclocks = 0
+            UI.spi_dummyclocks_select.setText("0")
         else:
             selectedCommand.dummyclocks = int(UI.spi_dummyclocks_select.text())
         selectedCommand.direction = UI.spi_direction_select.currentData()
@@ -273,11 +277,13 @@ def make_test_object_from_options(UI):
         selectedCommand.cmdType = cmdType
         selectedCommand.pin = UI.gpio_pin_select.currentData()
         if is_empty(UI.pwm_freq_select.text()):
-            selectedCommand.frequency = 0                               # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
+            selectedCommand.frequency = 0
+            UI.pwm_freq_select.setText("0")
         else:
             selectedCommand.frequency = int(UI.pwm_freq_select.text())
         if is_empty(UI.pwm_duty_select.text()):
-            selectedCommand.dutyCycle = 0                               # !!!!!! IDE egy flaget ami jelzi h empty, es hibat dob, ne engedje kikuldeni
+            selectedCommand.dutyCycle = 0
+            UI.pwm_duty_select.setText("0")
         else:
             selectedCommand.dutyCycle = int(UI.pwm_duty_select.text())
         return selectedCommand

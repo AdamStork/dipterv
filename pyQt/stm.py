@@ -61,6 +61,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cfg_load_button.setEnabled(False)
         self.cfg_file_path.setEnabled(False)
         self.use_config_file = False
+        # Create own font style
+        self.italicFont = QFont()
+        self.italicFont.setItalic(True)
 
     # Move up row (Move up QListWidgetItem)
     def move_up(self):
@@ -90,9 +93,16 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Delete row
     def delete_row(self):
-        currentRow = self.sequence_list.currentRow()        # Get index of current row
-        self.sequence_list.takeItem(currentRow)             # Delete current row (listWidgetitem)
-        sequence.delete_test_object_from_test_list(self.test_list, currentRow)    # Delete test from test list
+        try:
+            currentRow = self.sequence_list.currentRow()        # Get index of current row
+            self.sequence_list.takeItem(currentRow)             # Delete current row (listWidgetitem)
+            sequence.delete_test_object_from_test_list(self.test_list, currentRow)    # Delete test from test list
+            testObjectDeletedLabel = QLabel("Test removed from sequence.")
+            testObjectDeletedLabel.setFont(self.italicFont)
+            self.scroll_layout.addWidget(testObjectDeletedLabel)
+        except:
+            return
+
 #        print("len seq:", len(self.sequence_list))
 #        print("len test:", len(self.test_list))
 #        print("")
@@ -106,6 +116,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sequence.add_test_object_to_test_list(test_object, self.test_list)                              # Add test object to test list
         command_to_add = sequence.make_string_from_test_object(self.test_list[len(self.test_list)-1])   # Make string from test object
         self.sequence_list.insertItem(self.sequence_list.count(),command_to_add)                        # Add string to sequence list
+        testObjectAddedLabel = QLabel("Test added to sequence.")
+        testObjectAddedLabel.setFont(self.italicFont)
+        self.scroll_layout.addWidget(testObjectAddedLabel)
 #        print("len seq:", len(self.sequence_list))
 #        print("len test:", len(self.test_list))
 
@@ -176,10 +189,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Print current command
             self.sequence_list.setCurrentRow(i)
             currentCommand = "Cmd: " + self.sequence_list.currentItem().text()
-            italicFont = QFont()
-            italicFont.setItalic(True)                          # Create own font style
             currentCommandLabel = QLabel(currentCommand)
-            currentCommandLabel.setFont(italicFont)             # Set own font style for command print
+            currentCommandLabel.setFont(self.italicFont)             # Set own font style for command print
 
             # Print serial read response
             response = "Response: " + command_send_success
@@ -575,10 +586,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 command_send_success = 'Error while sending command'
             else:
                 command_send_success = 'Port is not open'
-        italicFont = QFont()
-        italicFont.setItalic(True)
         commandStringLabel = QLabel(str_test_object)
-        commandStringLabel.setFont(italicFont)
+        commandStringLabel.setFont(self.italicFont)
         self.scroll_layout.addWidget(commandStringLabel)
         commandSendingLabel = QLabel(command_send_success)
         self.scroll_layout.addWidget(commandSendingLabel)
