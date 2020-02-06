@@ -25,7 +25,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.connect_button.clicked.connect(self.connect)
         self.cmd_button.clicked.connect(self.send_command)
         self.close_button.clicked.connect(self.close_port)
-        self.cmd_box.activated[str].connect(self.on_changed)
+        self.cmd_box.activated[str].connect(self.on_changed_cmd_box)
         self.move_up_button.clicked.connect(self.move_up)
         self.move_down_button.clicked.connect(self.move_down)
         self.delete_row_button.clicked.connect(self.delete_row)
@@ -60,6 +60,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cfg_browse_button.setEnabled(False)
         self.cfg_load_button.setEnabled(False)
         self.cfg_file_path.setEnabled(False)
+        self.use_config_file = False
 
     # Move up row (Move up QListWidgetItem)
     def move_up(self):
@@ -205,11 +206,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             filenames = dialog.selectedFiles()
             self.cfg_file_path.setText(filenames[0])
 
-    # Load CubeMX config file: open and analyze file, then refill combo boxes
+    # Load CubeMX config file: open and analyze file, then reload current command options view
     def load_cfg(self):
         path = self.cfg_file_path.text()
         config.process_config_file(path)
-        # todo: refill_combo_boxes() ...
+        self.use_config_file = True
+        self.on_changed_cmd_box()           # Reload current view, call function explicitly
 
     def checkbox_state_changed(self):
         if self.cfg_checkbox.isChecked():
@@ -220,6 +222,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cfg_browse_button.setEnabled(False)
             self.cfg_load_button.setEnabled(False)
             self.cfg_file_path.setEnabled(False)
+            self.use_config_file = False
+            self.on_changed_cmd_box()
 
     # Fill combobox with commands
     def fill_cmd_box(self):
@@ -238,7 +242,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.gpio_state_select.setEnabled(True)
 
     # Called whenever a command is selected
-    def on_changed(self,text):
+    def on_changed_cmd_box(self):
         print("CmdType:",self.cmd_box.currentData())
         self.delete_all_child_widget(self.options_layout)
         self.show_data_depending_on_cmd_type(self.cmd_box.currentData())
@@ -268,8 +272,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_reg_select = QLineEdit(self)
                 self.i2c_rw_select = QComboBox(self)
 
-                for i in range(len(sequence.dict_i2c_bus)):
-                    self.i2c_bus_select.addItem(list(sequence.dict_i2c_bus.keys())[i],list(sequence.dict_i2c_bus.values())[i] )
+                if self.use_config_file == True:
+                    for i in range(len(config.dict_available_i2c_buses)):
+                        self.i2c_bus_select.addItem(list(config.dict_available_i2c_buses.keys())[i],list(config.dict_available_i2c_buses.values())[i] )
+                else:
+                    for i in range(len(sequence.dict_i2c_bus)):
+                        self.i2c_bus_select.addItem(list(sequence.dict_i2c_bus.keys())[i],list(sequence.dict_i2c_bus.values())[i] )
 
                 self.i2c_rw_select.addItem(list(sequence.dict_i2c_rw.keys())[0],list(sequence.dict_i2c_rw.values())[0])
                 self.i2c_rw_select.addItem(list(sequence.dict_i2c_rw.keys())[1],list(sequence.dict_i2c_rw.values())[1])
@@ -307,8 +315,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spi_dummyclocks_select = QLineEdit(self)
                 self.spi_direction_select = QComboBox(self)
 
-                for i in range(len(sequence.dict_spi_bus)):
-                    self.spi_bus_select.addItem(list(sequence.dict_spi_bus.keys())[i],list(sequence.dict_spi_bus.values())[i] )
+                if self.use_config_file == True:
+                    for i in range(len(config.dict_available_spi_buses)):
+                        self.spi_bus_select.addItem(list(config.dict_available_spi_buses.keys())[i],list(config.dict_available_spi_buses.values())[i] )
+                else:
+                    for i in range(len(sequence.dict_spi_bus)):
+                        self.spi_bus_select.addItem(list(sequence.dict_spi_bus.keys())[i],list(sequence.dict_spi_bus.values())[i] )
 
                 for i in range(len(sequence.dict_spi_mode)):
                     self.spi_clockmode_select.addItem(list(sequence.dict_spi_mode.keys())[i],list(sequence.dict_spi_mode.values())[i] )
@@ -347,10 +359,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_direction_select = QComboBox(self)
                 self.gpio_state_select = QComboBox(self)
 
-                for i in range(len(sequence.dict_gpio_digital_pins)):
-                    self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
-#                    stra = "Key:" + str(list(sequence.dict_gpio_digital_pins.keys())[i]) + " Val:" + str(list(sequence.dict_gpio_digital_pins.values())[i])
-#                    print(stra)
+                if self.use_config_file == True:
+                    for i in range(len(config.dict_available_digital_pins)):
+                        self.gpio_pin_select.addItem(list(config.dict_available_digital_pins.keys())[i],list(config.dict_available_digital_pins.values())[i] )
+                else:
+                    for i in range(len(sequence.dict_gpio_digital_pins)):
+                        self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
+    #                    stra = "Key:" + str(list(sequence.dict_gpio_digital_pins.keys())[i]) + " Val:" + str(list(sequence.dict_gpio_digital_pins.values())[i])
+    #                    print(stra)
 
                 self.gpio_direction_select.addItem(list(sequence.dict_gpio_rw.keys())[0],list(sequence.dict_gpio_rw.values())[0])
                 self.gpio_direction_select.addItem(list(sequence.dict_gpio_rw.keys())[1],list(sequence.dict_gpio_rw.values())[1])
@@ -381,8 +397,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_pin_select = QComboBox(self)
                 self.adc_resolution_select = QComboBox(self)
 
-                for i in range(len(sequence.dict_gpio_analog_pins)):
-                    self.gpio_pin_select.addItem(list(sequence.dict_gpio_analog_pins.keys())[i],list(sequence.dict_gpio_analog_pins.values())[i] )
+                if self.use_config_file == True:
+                    for i in range(len(config.dict_available_analog_pins)):
+                        self.gpio_pin_select.addItem(list(config.dict_available_analog_pins.keys())[i],list(config.dict_available_analog_pins.values())[i] )
+                else:
+                    for i in range(len(sequence.dict_gpio_analog_pins)):
+                        self.gpio_pin_select.addItem(list(sequence.dict_gpio_analog_pins.keys())[i],list(sequence.dict_gpio_analog_pins.values())[i] )
 
                 for i in range(len(sequence.dict_adc_res)):
                     self.adc_resolution_select.addItem(list(sequence.dict_adc_res.keys())[i],list(sequence.dict_adc_res.values())[i] )
@@ -407,8 +427,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.pwm_freq_select = QLineEdit(self)
                 self.pwm_duty_select = QLineEdit(self)
 
-                for i in range(len(sequence.dict_gpio_digital_pins)):
-                    self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
+                if self.use_config_file == True:
+                    for i in range(len(config.dict_available_digital_pins)):
+                        self.gpio_pin_select.addItem(list(config.dict_available_digital_pins.keys())[i],list(config.dict_available_digital_pins.values())[i] )
+                else:
+                    for i in range(len(sequence.dict_gpio_digital_pins)):
+                        self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
 
                 self.pwm_freq_select.setValidator(self.freqValidator)
                 self.pwm_freq_select.setPlaceholderText("0..1000")
