@@ -122,7 +122,7 @@ dict_gpio_digital_pins = {
 
 
 # ADC dictionaries
-dict_adc_channels = {
+dict_adc_instances = {
     "ADC1": 1,
     "ADC2": 2,
     "ADC3": 3,
