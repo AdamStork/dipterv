@@ -25,12 +25,20 @@ enum i2cBus{
 	I2C3 = 3;
 }
 
+enum i2cSpeedMode{
+	I2C_SPEED_MODE_STANDARD = 1;
+	I2C_SPEED_MODE_FAST_TLOW_THIGH_2 = 2;
+	I2C_SPEED_MODE_FAST_TLOW_THIGH_16_9 = 3;
+}
+
 // Master only
 message i2cMessage{
  required i2cBus bus = 1;
  required uint32 address = 2;
  required uint32 register = 3;
  required i2cDirection direction = 4; 	// 1: read, 0: write
+ required i2cSpeedMode speedMode = 5;
+ required uint32 clockSpeed = 6;
 }
 
 
@@ -38,30 +46,19 @@ message i2cMessage{
 
 // SPI options
 // only master modes should be available
-enum spiMode{
-	FULL_DUPLEX_MASTER = 0;		
-	FULL_DUPLEX_SLAVE = 1;
-	HALF_DUPLEX_MASTER = 2;
-	HALF_DUPLEX_SLAVE = 3;
-	RECEIVE_ONLY_MASTER = 4;
-	RECEIVE_ONLY_SLAVE = 5;
-	TRANSMIT_ONLY_MASTER = 6;
-	TRANSMIT_ONLY_SLAVE = 7;
-}
-
 enum spiDirection{
  SPI_TRANSMIT = 0;
  SPI_RECEIVE = 1;
 }
 
 enum clockMode{
-	MODE_0 = 0;
-	MODE_1 = 1;
-	MODE_2 = 2;
-	MODE_3 = 3;
+	SPI_MODE_0 = 0;
+	SPI_MODE_1 = 1;
+	SPI_MODE_2 = 2;
+	SPI_MODE_3 = 3;
 }
 
-enum hardwareNSS{
+enum spiHardwareNSS{
 	DISABLE = 0;
 	NSS_INPUT = 1;
 	NSS_OUTPUT = 2;
@@ -73,13 +70,35 @@ enum spiBus{
 	SPI3 = 3;
 }
 
+enum spiOperatingMode{
+	SPI_MODE_FULL_DUPLEX_MASTER = 0;
+	SPI_MODE_HALF_DUPLEX_MASTER = 1;
+	SPI_MODE_TRANSMIT_ONLY_MASTER = 2;	
+}
+
+enum spiFrameFormat{
+	SPI_FRAME_FORMAT_MOTOROLA_MSB_FIRST = 0;
+	SPI_FRAME_FORMAT_MOTOROLA_LSB_FIRST = 1;
+	SPI_FRAME_FORMAT_TI = 2;
+}
+
+enum spiDataSize{
+	SPI_DATA_SIZE_8_BITS = 0;
+	SPI_DATA_SIZE_16_BITS = 1;
+}
+
 message spiMessage{
  required spiBus bus = 1;
  required clockMode mode = 2;	//ide esetleg hintet megjeleniteni
  required uint32 command = 3;
  required spiDirection direction = 4;
- optional uint32 dummyclocks = 5;
+ required uint32 dummyclocks = 5;
+ required spiOperatingMode operatingMode = 6;
+ required spiHardwareNSS hardwareNSS = 7;
+ required spiFrameFormat frameFormat = 8;
+ required spiDataSize dataSize = 9;
 }
+
 
 
 // digitalGPIO options
@@ -91,6 +110,7 @@ enum gpioDirection{
 enum gpioPinState{
 	GPIO_LOW = 0;
 	GPIO_HIGH = 1;
+	GPIO_NON_APPLICABLE = 2;
 }
 
 enum gpioPins{
@@ -148,16 +168,29 @@ enum gpioPins{
 }
 
 
+enum gpioPull{
+	GPIO_NO_PULL = 0;
+	GPIO_PULL_UP = 1;
+	GPIO_PULL_DOWN = 2;
+}
 
 message digitalGPIO{
  required gpioPins pin = 1;
  required gpioDirection direction = 2; 	 // Input/output
  required gpioPinState state = 3;	// Low, high
+ required gpioPull pull = 4;
 }
 
 
 
 // Analog IN message
+enum adcInstance{		
+	ADC1 = 1;
+	ADC2 = 2;
+	ADC3 = 3;
+}
+
+
 enum adcResolution{		
 	ADC_12_BITS = 0;
 	ADC_10_BITS = 1;
@@ -165,10 +198,17 @@ enum adcResolution{
 	ADC_6_BITS = 3;
 }
 
+enum adcClockPrescaler{		
+	ADC_PCLK2_DIVIDED_BY_4 = 0;
+	ADC_PCLK2_DIVIDED_BY_6 = 1;
+	ADC_PCLK2_DIVIDED_BY_8 = 2;
+}
 
 message analogIN{		
- required gpioPins pin = 1;
- required adcResolution resolution = 2;
+ required adcInstance instance = 1;
+ required gpioPins pin = 2;
+ required adcResolution resolution = 3;
+ required adcClockPrescaler clockPrescaler = 4;
 }
 
 
@@ -180,6 +220,60 @@ message analogOUT{
  required uint32 dutyCycle = 3;
 }
 
+
+// USART message
+enum usartBus{
+	USART1 = 1;
+	USART2 = 2;
+	USART3 = 3;
+	USART4 = 4;
+	USART5 = 5;
+	USART6 = 6;	
+}
+
+enum usartDirection{
+	USART_RX_AND_TX = 0;
+	USART_RX = 1;
+	USART_TX = 2;	
+}
+
+enum usartWordLength{
+	USART_8_BITS = 0;
+	USART_9_BITS = 1;
+}
+
+enum usartParity{
+	USART_PARITY_NONE = 0;
+	USART_PARITY_EVEN = 1;
+	USART_PARITY_ODD = 2;
+}
+
+enum usartStopBits{
+	USART_STOP_BITS_1 = 1;
+	USART_STOP_BITS_2 = 2;
+}
+
+enum usartMode{
+	USART_MODE_ASYNCHRONOUS = 0;
+	USART_MODE_SYNCHRONOUS = 1;
+}
+
+enum usartHardwareFlowControl{
+	USART_HW_FLOW_DISABLE = 0;
+	USART_HW_FLOW_CTS_ONLY = 1;
+	USART_HW_FLOW_RTS_ONLY = 2;
+	USART_HW_FLOW_CTS_AND_RTS = 3;	
+}
+
+message usartMessage{
+ required usartBus bus = 1;
+ required usartMode mode = 2;
+ required uint32 baudRate = 3;
+ required usartWordLength wordLength = 4;
+ required usartParity parity = 5;
+ required usartStopBits stopBits = 6;
+ required usartDirection direction = 7;
+}
 
 
 enum successfulWrite{
@@ -203,7 +297,8 @@ message Command{
  required CommandTypeEnum commandType = 1;
  optional	i2cMessage	i2c = 2;
  optional	spiMessage	spi = 3;
- optional	digitalGPIO	gpio = 4;
+ optional usartMessage usart = 4;
+ optional	digitalGPIO	gpio = 5;
  optional analogIN analog_in = 6;
  optional analogOUT	analog_out = 7;
  optional uint32 responseRead = 10;					// Register value
