@@ -18,6 +18,7 @@ dict_available_adc_instances = {}
 dict_available_usart_buses = {}
 dict_available_digital_pins = {}
 dict_available_analog_pins = {}
+dict_mcu_info = {}
 
 
 
@@ -30,13 +31,15 @@ def process_config_file(path):
             for i in range(len(data_line)):
                 data_line[i] = data_line[i].rstrip()     # Remove trailing characters: \n
                 check_dataline_for_available_buses(data_line[i])
-                check_data_line_for_available_pins(data_line[i])
+                check_dataline_for_available_pins(data_line[i])
+                check_dataline_for_mcu_info(data_line[i])
             print("Available I2C buses:", dict_available_i2c_buses)
             print("Available SPI buses:", dict_available_spi_buses)
             print("Available USART buses:", dict_available_usart_buses)
             print("Available ADC channels:", dict_available_adc_instances)
             print("Available GPIO digital pins:", dict_available_digital_pins)
             print("Available ADC pins:", dict_available_analog_pins)
+            print("MCU info:",dict_mcu_info)
             file.close()
         return True
     except:
@@ -77,7 +80,7 @@ def check_dataline_for_available_buses(data_line):
 
 
 # Check data line from file for available digital/analog pins
-def check_data_line_for_available_pins(data_line):
+def check_dataline_for_available_pins(data_line):
     words = data_line.split(".")
     if words[0] in sequence.dict_gpio_digital_pins:
         new_words = words[1].split("=")
@@ -93,3 +96,14 @@ def check_data_line_for_available_pins(data_line):
             gpio_analog_key = possible_pin
             gpio_analog_value = list(sequence.dict_gpio_analog_pins.values())[list(sequence.dict_gpio_analog_pins.keys()).index(possible_pin)]
             dict_available_analog_pins[gpio_analog_key] = gpio_analog_value
+
+
+# Check data line from file for MCU Family info
+def check_dataline_for_mcu_info(data_line):
+    words = data_line.split(".")            # There are lines where there is no '=', so split must be first done for '.'
+    if words[0] == "Mcu":
+        new_words = words[1].split("=")
+        if new_words[0] == "Family":
+            dict_mcu_info[new_words[0]] = new_words[1]
+
+

@@ -224,6 +224,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if(success == True):
             self.use_config_file = True
             self.on_changed_cmd_box()           # Reload current view, call function explicitly
+            deviceInfo = "Config loaded. MCU Family: " + str(config.dict_mcu_info["Family"])
+            deviceInfoLabel = QLabel(deviceInfo)
+            self.scroll_layout.addWidget(deviceInfoLabel)
         else:
             self.use_config_file = False
             errorLabel = QLabel("No such file or directory")
@@ -240,6 +243,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cfg_file_path.setEnabled(False)
             self.use_config_file = False
             self.on_changed_cmd_box()
+            deviceInfoLabel = QLabel("Config removed.")
+            self.scroll_layout.addWidget(deviceInfoLabel)
 
     # Fill combobox with commands
     def fill_cmd_box(self):
