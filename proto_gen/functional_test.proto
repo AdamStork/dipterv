@@ -26,9 +26,13 @@ enum i2cBus{
 }
 
 enum i2cSpeedMode{
-	I2C_SPEED_MODE_STANDARD = 1;
-	I2C_SPEED_MODE_FAST_TLOW_THIGH_2 = 2;
-	I2C_SPEED_MODE_FAST_TLOW_THIGH_16_9 = 3;
+	I2C_SPEED_MODE_STANDARD = 0;
+	I2C_SPEED_MODE_FAST = 1;
+}
+
+enum i2cFastModeDutyCycle{
+	I2C_DUTY_CYCLE_TLOW_THIGH_2 = 0;
+	I2C_DUTY_CYCLE_TLOW_THIGH_16_9 = 1;
 }
 
 // Master only
@@ -39,6 +43,7 @@ message i2cMessage{
  required i2cDirection direction = 4; 	// 1: read, 0: write
  required i2cSpeedMode speedMode = 5;
  required uint32 clockSpeed = 6;
+ optional i2cFastModeDutyCycle dutyCycle = 7;
 }
 
 
@@ -77,14 +82,18 @@ enum spiOperatingMode{
 }
 
 enum spiFrameFormat{
-	SPI_FRAME_FORMAT_MOTOROLA_MSB_FIRST = 0;
-	SPI_FRAME_FORMAT_MOTOROLA_LSB_FIRST = 1;
-	SPI_FRAME_FORMAT_TI = 2;
+	SPI_FRAME_FORMAT_MOTOROLA = 0;
+	SPI_FRAME_FORMAT_TI = 1;
 }
 
 enum spiDataSize{
 	SPI_DATA_SIZE_8_BITS = 0;
 	SPI_DATA_SIZE_16_BITS = 1;
+}
+
+enum spiFirstBit{
+	SPI_FIRST_BIT_MSB = 0;
+	SPI_FIRST_BIT_LSB = 1;
 }
 
 message spiMessage{
@@ -97,6 +106,7 @@ message spiMessage{
  required spiHardwareNSS hardwareNSS = 7;
  required spiFrameFormat frameFormat = 8;
  required spiDataSize dataSize = 9;
+ optional spiFirstBit firstBit = 10;
 }
 
 

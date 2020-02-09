@@ -61,9 +61,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cfg_load_button.setEnabled(False)
         self.cfg_file_path.setEnabled(False)
         self.use_config_file = False
-        # Create own font style
-        self.italicFont = QFont()
-        self.italicFont.setItalic(True)
 
     # Move up row (Move up QListWidgetItem)
     def move_up(self):
@@ -97,12 +94,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             currentRow = self.sequence_list.currentRow()        # Get index of current row
             self.sequence_list.takeItem(currentRow)             # Delete current row (listWidgetitem)
             sequence.delete_test_object_from_test_list(self.test_list, currentRow)    # Delete test from test list
-            testObjectDeletedLabel = QLabel("Test removed from sequence.")
-            testObjectDeletedLabel.setFont(self.italicFont)
-            self.scroll_layout.addWidget(testObjectDeletedLabel)
         except:
             return
-
+#        testObjectDeletedLabel = QLabel("Test removed from list.")
+#        self.scroll_layout.addWidget(testObjectDeletedLabel)
 #        print("len seq:", len(self.sequence_list))
 #        print("len test:", len(self.test_list))
 #        print("")
@@ -116,9 +111,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sequence.add_test_object_to_test_list(test_object, self.test_list)                              # Add test object to test list
         command_to_add = sequence.make_string_from_test_object(self.test_list[len(self.test_list)-1])   # Make string from test object
         self.sequence_list.insertItem(self.sequence_list.count(),command_to_add)                        # Add string to sequence list
-        testObjectAddedLabel = QLabel("Test added to sequence.")
-        testObjectAddedLabel.setFont(self.italicFont)
-        self.scroll_layout.addWidget(testObjectAddedLabel)
 #        print("len seq:", len(self.sequence_list))
 #        print("len test:", len(self.test_list))
 
@@ -189,8 +181,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Print current command
             self.sequence_list.setCurrentRow(i)
             currentCommand = "Cmd: " + self.sequence_list.currentItem().text()
+            italicFont = QFont()
+            italicFont.setItalic(True)                          # Create own font style
             currentCommandLabel = QLabel(currentCommand)
-            currentCommandLabel.setFont(self.italicFont)             # Set own font style for command print
+            currentCommandLabel.setFont(italicFont)             # Set own font style for command print
 
             # Print serial read response
             response = "Response: " + command_send_success
@@ -224,9 +218,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if(success == True):
             self.use_config_file = True
             self.on_changed_cmd_box()           # Reload current view, call function explicitly
-            deviceInfo = "Config loaded. MCU Family: " + str(config.dict_mcu_info["Family"])
-            deviceInfoLabel = QLabel(deviceInfo)
-            self.scroll_layout.addWidget(deviceInfoLabel)
         else:
             self.use_config_file = False
             errorLabel = QLabel("No such file or directory")
@@ -243,8 +234,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cfg_file_path.setEnabled(False)
             self.use_config_file = False
             self.on_changed_cmd_box()
-            deviceInfoLabel = QLabel("Config removed.")
-            self.scroll_layout.addWidget(deviceInfoLabel)
 
     # Fill combobox with commands
     def fill_cmd_box(self):
@@ -259,12 +248,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_changed_gpio_dir(self):
         if self.gpio_direction_select.currentData() == functional_test_pb2.gpioDirection.GPIO_INPUT:
             self.gpio_state_select.setEnabled(False)
-            self.gpio_state_select.addItem(list(sequence.dict_gpio_state.keys())[2],list(sequence.dict_gpio_state.values())[2]) # Add and set N/A option
-            self.gpio_state_select.setCurrentIndex(2)
         else:
-            self.gpio_state_select.removeItem(2)        # Remove N/A option
             self.gpio_state_select.setEnabled(True)
-
 
     # Called whenever a command is selected
     def on_changed_cmd_box(self):
@@ -272,19 +257,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.delete_all_child_widget(self.options_layout)
         self.show_data_depending_on_cmd_type(self.cmd_box.currentData())
         self.show()
-
-    def on_changed_i2c_clock_speed(self):
-        if self.i2c_speed_mode_select.currentData() == list(sequence.dict_i2c_speedmode.values())[0]:
-            self.i2c_clock_speed_select.setText("100000")           # Set default value to 100000 in case standard mode selected
-#            item = self.options_layout.takeAt(6)
-#            widget = item.widget()
-#            if widget is not None:
-#                widget.deleteLater()
-
-        else:
-            self.i2c_clock_speed_select.setText("400000")           # Set default value to 400000 in case standard mode selected
-            self.options_layout.addWidget(self.i2c_duty_cycle_label,6,0)
-            self.options_layout.addWidget(self.i2c_duty_cycle_select,6,2)
 
     # Show data depending on the command type selected
     def show_data_depending_on_cmd_type(self,cmdType):
@@ -305,19 +277,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_addr_label = QLabel("I2C address", self)
                 self.i2c_reg_label = QLabel("I2C register", self)
                 self.i2c_rw_label = QLabel("I2C R/W", self)
-                self.i2c_speed_mode_label = QLabel("I2C speed mode",self)
-                self.i2c_clock_speed_label = QLabel("I2C clock speed",self)
-                self.i2c_duty_cycle_label = QLabel("I2C duty cycle", self)
-
                 self.i2c_bus_select = QComboBox(self)
                 self.i2c_addr_select = QLineEdit(self)
                 self.i2c_reg_select = QLineEdit(self)
                 self.i2c_rw_select = QComboBox(self)
-                self.i2c_speed_mode_select = QComboBox(self)
-                self.i2c_clock_speed_select = QLineEdit(self)
-                self.i2c_duty_cycle_select = QComboBox(self)
 
-                # Fill I2C bus combobox
                 if self.use_config_file == True:
                     for i in range(len(config.dict_available_i2c_buses)):
                         self.i2c_bus_select.addItem(list(config.dict_available_i2c_buses.keys())[i],list(config.dict_available_i2c_buses.values())[i] )
@@ -325,46 +289,24 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     for i in range(len(sequence.dict_i2c_bus)):
                         self.i2c_bus_select.addItem(list(sequence.dict_i2c_bus.keys())[i],list(sequence.dict_i2c_bus.values())[i] )
 
-                # Fill I2C direction combobox
                 self.i2c_rw_select.addItem(list(sequence.dict_i2c_rw.keys())[0],list(sequence.dict_i2c_rw.values())[0])
                 self.i2c_rw_select.addItem(list(sequence.dict_i2c_rw.keys())[1],list(sequence.dict_i2c_rw.values())[1])
 
-                # Fill I2C speed mode combobox
-                self.i2c_speed_mode_select.addItem(list(sequence.dict_i2c_speedmode.keys())[0],list(sequence.dict_i2c_speedmode.values())[0])
-                self.i2c_speed_mode_select.addItem(list(sequence.dict_i2c_speedmode.keys())[1],list(sequence.dict_i2c_speedmode.values())[1])
-
-                # Fill I2C fast mode duty cycle combobox
-                self.i2c_duty_cycle_select.addItem(list(sequence.dict_i2c_duty_cycle.keys())[0],list(sequence.dict_i2c_duty_cycle.values())[0])
-                self.i2c_duty_cycle_select.addItem(list(sequence.dict_i2c_duty_cycle.keys())[1],list(sequence.dict_i2c_duty_cycle.values())[1])
-
-                # Set validators and placeholders for input fields
                 self.i2c_addr_select.setValidator(self.byteValidator)
                 self.i2c_addr_select.setPlaceholderText("0xFF")
-
                 self.i2c_reg_select.setValidator(self.byteValidator)
                 self.i2c_reg_select.setPlaceholderText("0xFF")
 
-                # Set default value for clock speed
-                self.i2c_clock_speed_select.setText("100000")
-                self.i2c_speed_mode_select.activated[str].connect(self.on_changed_i2c_clock_speed)
-
-                # Add widgets to layout
                 self.options_layout.addWidget(self.i2c_bus_label,0,0)
                 self.options_layout.addWidget(self.i2c_addr_label,1,0)
                 self.options_layout.addWidget(self.i2c_reg_label,2,0)
                 self.options_layout.addWidget(self.i2c_rw_label,3,0)
-                self.options_layout.addWidget(self.i2c_speed_mode_label,4,0)
-                self.options_layout.addWidget(self.i2c_clock_speed_label,5,0)
-
                 self.options_layout.addWidget(self.i2c_bus_select,0,2)
                 self.options_layout.addWidget(self.i2c_addr_select,1,2)
                 self.options_layout.addWidget(self.i2c_reg_select,2,2)
                 self.options_layout.addWidget(self.i2c_rw_select,3,2)
-                self.options_layout.addWidget(self.i2c_speed_mode_select,4,2)
-                self.options_layout.addWidget(self.i2c_clock_speed_select,5,2)
 
-                # Layout settings
-                self.options_layout.addItem(self.spacerItem,7,0)
+                self.options_layout.addItem(self.spacerItem,4,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
@@ -372,26 +314,17 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.SPI_active == False:
                 self.SPI_active = True
                 self.spi_bus_label = QLabel("SPI bus", self)
-                self.spi_clockmode_label = QLabel("SPI clock mode", self)
+                self.spi_clockmode_label = QLabel("SPI mode", self)
                 self.spi_command_label = QLabel("SPI command", self)
                 self.spi_dummyclocks_label = QLabel("SPI dummy clocks", self)
-                self.spi_operating_mode_label = QLabel("SPI operating mode", self)
-                self.spi_hardware_nss_label = QLabel("SPI hardware NSS",self)
-                self.spi_frame_format_label = QLabel("SPI frame format", self)
-                self.spi_data_size_label = QLabel("SPI data size", self)
-                self.spi_first_bit_label = QLabel("SPI first bit", self)
+                self.spi_direction_label = QLabel("SPI direction", self)     # Needed for response (register value or write success)
 
                 self.spi_bus_select = QComboBox(self)
                 self.spi_clockmode_select = QComboBox(self)
                 self.spi_command_select = QLineEdit(self)
                 self.spi_dummyclocks_select = QLineEdit(self)
-                self.spi_operating_mode_select = QComboBox(self)
-                self.spi_hardware_nss_select = QComboBox(self)
-                self.spi_frame_format_select = QComboBox(self)
-                self.spi_data_size_select = QComboBox(self)
-                self.spi_first_bit_select = QComboBox(self)
+                self.spi_direction_select = QComboBox(self)
 
-                # Fill SPI bus combobox
                 if self.use_config_file == True:
                     for i in range(len(config.dict_available_spi_buses)):
                         self.spi_bus_select.addItem(list(config.dict_available_spi_buses.keys())[i],list(config.dict_available_spi_buses.values())[i] )
@@ -399,59 +332,29 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     for i in range(len(sequence.dict_spi_bus)):
                         self.spi_bus_select.addItem(list(sequence.dict_spi_bus.keys())[i],list(sequence.dict_spi_bus.values())[i] )
 
-                # Fill SPI clock mode combobox
                 for i in range(len(sequence.dict_spi_mode)):
                     self.spi_clockmode_select.addItem(list(sequence.dict_spi_mode.keys())[i],list(sequence.dict_spi_mode.values())[i] )
 
-                # Set placeholders and validators for input field
                 self.spi_command_select.setValidator(self.byteValidator)
                 self.spi_command_select.setPlaceholderText("0xFF")
-
                 self.spi_dummyclocks_select.setValidator(self.decValidator)
                 self.spi_dummyclocks_select.setPlaceholderText("0..99")
 
-                # Fill SPI operating mode combobox
-                for i in range(len(sequence.dict_spi_operating_mode)):
-                    self.spi_operating_mode_select.addItem(list(sequence.dict_spi_operating_mode.keys())[i],list(sequence.dict_spi_operating_mode.values())[i] )
+                self.spi_direction_select.addItem(list(sequence.dict_spi_rw.keys())[0],list(sequence.dict_spi_rw.values())[0])
+                self.spi_direction_select.addItem(list(sequence.dict_spi_rw.keys())[1],list(sequence.dict_spi_rw.values())[1])
 
-                # Fill SPI hardware NSS combobox
-                for i in range(len(sequence.dict_spi_hardware_nss)):
-                    self.spi_hardware_nss_select.addItem(list(sequence.dict_spi_hardware_nss.keys())[i],list(sequence.dict_spi_hardware_nss.values())[i] )
-
-                # Fill SPI frame format combobox
-                for i in range(len(sequence.dict_spi_frame_format)):
-                    self.spi_frame_format_select.addItem(list(sequence.dict_spi_frame_format.keys())[i],list(sequence.dict_spi_frame_format.values())[i] )
-
-                # Fill SPI data size combobox
-                for i in range(len(sequence.dict_spi_data_size)):
-                    self.spi_data_size_select.addItem(list(sequence.dict_spi_data_size.keys())[i],list(sequence.dict_spi_data_size.values())[i] )
-
-                # Fill SPI first bit combobox
-                for i in range(len(sequence.dict_spi_first_bit)):
-                    self.spi_first_bit_select.addItem(list(sequence.dict_spi_first_bit.keys())[i],list(sequence.dict_spi_first_bit.values())[i] )
-
-
-                # Add widgets to layout
                 self.options_layout.addWidget(self.spi_bus_label,0,0)
                 self.options_layout.addWidget(self.spi_clockmode_label,1,0)
                 self.options_layout.addWidget(self.spi_command_label,2,0)
                 self.options_layout.addWidget(self.spi_dummyclocks_label,3,0)
-                self.options_layout.addWidget(self.spi_operating_mode_label,4,0)
-                self.options_layout.addWidget(self.spi_hardware_nss_label,5,0)
-                self.options_layout.addWidget(self.spi_frame_format_label,6,0)
-                self.options_layout.addWidget(self.spi_data_size_label,7,0)
-
+                self.options_layout.addWidget(self.spi_direction_label,4,0)
                 self.options_layout.addWidget(self.spi_bus_select,0,2)
                 self.options_layout.addWidget(self.spi_clockmode_select,1,2)
                 self.options_layout.addWidget(self.spi_command_select,2,2)
                 self.options_layout.addWidget(self.spi_dummyclocks_select,3,2)
-                self.options_layout.addWidget(self.spi_operating_mode_select,4,2)
-                self.options_layout.addWidget(self.spi_hardware_nss_select,5,2)
-                self.options_layout.addWidget(self.spi_frame_format_select,6,2)
-                self.options_layout.addWidget(self.spi_data_size_select,7,2)
+                self.options_layout.addWidget(self.spi_direction_select,4,2)
 
-                # Layout settings
-                self.options_layout.addItem(self.spacerItem,9,0)
+                self.options_layout.addItem(self.spacerItem,5,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
@@ -461,34 +364,25 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_pin_label = QLabel("GPIO pin", self)
                 self.gpio_direction_label = QLabel("GPIO direction", self)
                 self.gpio_state_label = QLabel("GPIO state", self)
-                self.gpio_pull_label = QLabel("GPIO pull-up/pull-down", self)
 
                 self.gpio_pin_select = QComboBox(self)
                 self.gpio_direction_select = QComboBox(self)
                 self.gpio_state_select = QComboBox(self)
-                self.gpio_pull_select = QComboBox(self)
 
-
-                # Fill GPIO digital pins combobox
                 if self.use_config_file == True:
                     for i in range(len(config.dict_available_digital_pins)):
                         self.gpio_pin_select.addItem(list(config.dict_available_digital_pins.keys())[i],list(config.dict_available_digital_pins.values())[i] )
                 else:
                     for i in range(len(sequence.dict_gpio_digital_pins)):
                         self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
+    #                    stra = "Key:" + str(list(sequence.dict_gpio_digital_pins.keys())[i]) + " Val:" + str(list(sequence.dict_gpio_digital_pins.values())[i])
+    #                    print(stra)
 
-                # Fill GPIO direction combobox
                 self.gpio_direction_select.addItem(list(sequence.dict_gpio_rw.keys())[0],list(sequence.dict_gpio_rw.values())[0])
                 self.gpio_direction_select.addItem(list(sequence.dict_gpio_rw.keys())[1],list(sequence.dict_gpio_rw.values())[1])
 
-                # Fill GPIO state combobox
                 self.gpio_state_select.addItem(list(sequence.dict_gpio_state.keys())[0],list(sequence.dict_gpio_state.values())[0])
                 self.gpio_state_select.addItem(list(sequence.dict_gpio_state.keys())[1],list(sequence.dict_gpio_state.values())[1])
-
-                # Fill GPIO pull-up/pull-down combobox
-                self.gpio_pull_select.addItem(list(sequence.dict_gpio_pull.keys())[0],list(sequence.dict_gpio_pull.values())[0])
-                self.gpio_pull_select.addItem(list(sequence.dict_gpio_pull.keys())[1],list(sequence.dict_gpio_pull.values())[1])
-                self.gpio_pull_select.addItem(list(sequence.dict_gpio_pull.keys())[2],list(sequence.dict_gpio_pull.values())[2])
 
                 self.gpio_state_select.setEnabled(True)
                 self.gpio_direction_select.activated[str].connect(self.on_changed_gpio_dir)
@@ -507,25 +401,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("AnalogRead optons")
             if self.AnalogRead_active == False:
                 self.AnalogRead_active = True
-                self.adc_instance_label = QLabel("ADC Instance", self)
-                self.gpio_pin_label = QLabel("ADC pin", self)
+                self.gpio_pin_label = QLabel("GPIO pin", self)
                 self.adc_resolution_label = QLabel("ADC resolution", self)
-                self.adc_clock_prescaler_label = QLabel("ADC clock prescaler", self)
 
-                self.adc_instance_select = QComboBox(self)
                 self.gpio_pin_select = QComboBox(self)
                 self.adc_resolution_select = QComboBox(self)
-                self.adc_clock_prescaler_select = QComboBox(self)
 
-                # Fill ADC instance combobox
-                if self.use_config_file == True:
-                    for i in range(len(config.dict_available_adc_instances)):
-                        self.adc_instance_select.addItem(list(config.dict_available_adc_instances.keys())[i],list(config.dict_available_adc_instances.values())[i] )
-                else:
-                    for i in range(len(sequence.dict_adc_instances)):
-                        self.adc_instance_select.addItem(list(sequence.dict_adc_instances.keys())[i],list(sequence.dict_adc_instances.values())[i] )
-
-                # Fill ADC pins combobox
                 if self.use_config_file == True:
                     for i in range(len(config.dict_available_analog_pins)):
                         self.gpio_pin_select.addItem(list(config.dict_available_analog_pins.keys())[i],list(config.dict_available_analog_pins.values())[i] )
@@ -533,26 +414,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     for i in range(len(sequence.dict_gpio_analog_pins)):
                         self.gpio_pin_select.addItem(list(sequence.dict_gpio_analog_pins.keys())[i],list(sequence.dict_gpio_analog_pins.values())[i] )
 
-                # Fill ADC resolution combobox
                 for i in range(len(sequence.dict_adc_res)):
                     self.adc_resolution_select.addItem(list(sequence.dict_adc_res.keys())[i],list(sequence.dict_adc_res.values())[i] )
 
-                # Fill ADC clock prescaler combobox
-                for i in range(len(sequence.dict_adc_clock_prescaler)):
-                    self.adc_clock_prescaler_select.addItem(list(sequence.dict_adc_clock_prescaler.keys())[i],list(sequence.dict_adc_clock_prescaler.values())[i] )
+                self.options_layout.addWidget(self.gpio_pin_label,0,0)
+                self.options_layout.addWidget(self.adc_resolution_label,1,0)
+                self.options_layout.addWidget(self.gpio_pin_select,0,2)
+                self.options_layout.addWidget(self.adc_resolution_select,1,2)
 
-                # Add widgets to layout
-                self.options_layout.addWidget(self.adc_instance_label,0,0)
-                self.options_layout.addWidget(self.gpio_pin_label,1,0)
-                self.options_layout.addWidget(self.adc_resolution_label,2,0)
-                self.options_layout.addWidget(self.adc_clock_prescaler_label,3,0)
-
-                self.options_layout.addWidget(self.adc_instance_select,0,2)
-                self.options_layout.addWidget(self.gpio_pin_select,1,2)
-                self.options_layout.addWidget(self.adc_resolution_select,2,2)
-                self.options_layout.addWidget(self.adc_clock_prescaler_select,3,2)
-
-                # Layout settings
                 self.options_layout.addItem(self.spacerItem,4,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
 
@@ -711,8 +580,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 command_send_success = 'Error while sending command'
             else:
                 command_send_success = 'Port is not open'
+        italicFont = QFont()
+        italicFont.setItalic(True)
         commandStringLabel = QLabel(str_test_object)
-        commandStringLabel.setFont(self.italicFont)
+        commandStringLabel.setFont(italicFont)
         self.scroll_layout.addWidget(commandStringLabel)
         commandSendingLabel = QLabel(command_send_success)
         self.scroll_layout.addWidget(commandSendingLabel)

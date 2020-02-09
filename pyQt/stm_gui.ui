@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>700</width>
-    <height>510</height>
+    <height>550</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>700</width>
-    <height>510</height>
+    <height>550</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>700</width>
-    <height>510</height>
+    <height>550</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -165,7 +165,7 @@
       <x>10</x>
       <y>200</y>
       <width>291</width>
-      <height>281</height>
+      <height>311</height>
      </rect>
     </property>
     <property name="title">
@@ -177,7 +177,7 @@
        <x>20</x>
        <y>20</y>
        <width>241</width>
-       <height>241</height>
+       <height>281</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="cmd_layout">
@@ -231,7 +231,7 @@
            <x>10</x>
            <y>20</y>
            <width>211</width>
-           <height>151</height>
+           <height>201</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="options_layout"/>
@@ -252,7 +252,7 @@
     <property name="geometry">
      <rect>
       <x>320</x>
-      <y>310</y>
+      <y>340</y>
       <width>361</width>
       <height>171</height>
      </rect>
@@ -383,7 +383,7 @@
       <x>320</x>
       <y>10</y>
       <width>361</width>
-      <height>291</height>
+      <height>321</height>
      </rect>
     </property>
     <property name="title">
@@ -449,7 +449,7 @@
        <x>10</x>
        <y>30</y>
        <width>241</width>
-       <height>251</height>
+       <height>281</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="sequence_list_layout">
@@ -462,7 +462,7 @@
      <property name="geometry">
       <rect>
        <x>260</x>
-       <y>250</y>
+       <y>280</y>
        <width>91</width>
        <height>31</height>
       </rect>
