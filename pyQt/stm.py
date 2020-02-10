@@ -43,6 +43,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.I2C_active = False
         self.LED_active = False
         self.SPI_active = False
+        self.USART_active = False
         self.GPIO_active = False
         self.AnalogRead_active = False
         self.AnalogWrite_active = False
@@ -251,6 +252,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cmd_box.addItem("Click to select...",functional_test_pb2.CommandTypeEnum.LED_test)
         self.cmd_box.addItem("I2C test",functional_test_pb2.CommandTypeEnum.I2C_test)
         self.cmd_box.addItem("SPI test",functional_test_pb2.CommandTypeEnum.SPI_test)
+        self.cmd_box.addItem("USART test", functional_test_pb2.USART_test)
         self.cmd_box.addItem("GPIO digital",functional_test_pb2.CommandTypeEnum.GPIO_digital)
         self.cmd_box.addItem("Analog read",functional_test_pb2.CommandTypeEnum.Analog_read)
         self.cmd_box.addItem("PWM",functional_test_pb2.CommandTypeEnum.Analog_write)
@@ -273,6 +275,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.show_data_depending_on_cmd_type(self.cmd_box.currentData())
         self.show()
 
+
     # Called when I2C clock speed option is changed: add/remove widgets and set parent
     def on_changed_i2c_speed_mode(self):
         if self.i2c_speed_mode_select.currentData() == list(sequence.dict_i2c_speedmode.values())[0]:
@@ -286,13 +289,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.options_layout.addWidget(self.i2c_duty_cycle_label,6,0)
             self.options_layout.addWidget(self.i2c_duty_cycle_select,6,2)
 
+
     # Called when SPI frame format option is changed: add/remove widgets and set parent
     def on_changed_spi_frame_format(self):
         if self.spi_frame_format_select.currentData() == list(sequence.dict_spi_frame_format.values())[0]:
             self.options_layout.addWidget(self.spi_first_bit_label,7,0)
-            self.options_layout.addWidget(self.spi_first_bit_select,7,1)
+            self.options_layout.addWidget(self.spi_first_bit_select,7,2)
             self.options_layout.addWidget(self.spi_clockmode_label,8,0)
-            self.options_layout.addWidget(self.spi_clockmode_select,8,1)
+            self.options_layout.addWidget(self.spi_clockmode_select,8,2)
         else:
             self.options_layout.removeWidget(self.spi_first_bit_label)
             self.options_layout.removeWidget(self.spi_first_bit_select)
@@ -303,6 +307,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.spi_clockmode_label.setParent(None)
             self.spi_clockmode_select.setParent(None)
 
+
     # Called when SPI hardware NSS option is changed: enables/disable 'TI' frame format option
     def on_changed_spi_hardware_nss(self):
         if self.spi_hardware_nss_select.currentData() == list(sequence.dict_spi_hardware_nss.values())[0]:  # Disable 'TI' if hardware NSS is disabled
@@ -312,9 +317,45 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.spi_frame_format_select.model().item(1).setEnabled(True)
 
+    # Called when USART mode setting is changed
+    def on_changed_usart_mode(self):
+        # If 'Asynchronous' mode is selected: remove clock settings if necessary, add HW Flow Control settings
+        if self.usart_mode_select.currentData() == list(sequence.dict_usart_mode.values())[0]:
+            if self.options_layout.count() > 7:         # No remove is necessary at first call
+                self.options_layout.removeWidget(self.usart_clock_polarity_label)
+                self.options_layout.removeWidget(self.usart_clock_phase_label)
+                self.options_layout.removeWidget(self.usart_clock_last_bit_label)
+                self.options_layout.removeWidget(self.usart_clock_polarity_select)
+                self.options_layout.removeWidget(self.usart_clock_phase_select)
+                self.options_layout.removeWidget(self.usart_clock_last_bit_select)
+                self.usart_clock_polarity_label.setParent(None)
+                self.usart_clock_phase_label.setParent(None)
+                self.usart_clock_last_bit_label.setParent(None)
+                self.usart_clock_polarity_select.setParent(None)
+                self.usart_clock_phase_select.setParent(None)
+                self.usart_clock_last_bit_select.setParent(None)
+
+            self.options_layout.addWidget(self.usart_hw_flow_control_label,7,0)
+            self.options_layout.addWidget(self.usart_hw_flow_control_select,7,2)
+        # If 'Synchronous' mode is selected: remove HW flow control settings if necessary, add clock settings
+        else:
+            self.options_layout.removeWidget(self.usart_hw_flow_control_label)
+            self.options_layout.removeWidget(self.usart_hw_flow_control_select)
+            self.usart_hw_flow_control_label.setParent(None)
+            self.usart_hw_flow_control_select.setParent(None)
+            self.options_layout.addWidget(self.usart_clock_polarity_label,7,0)
+            self.options_layout.addWidget(self.usart_clock_phase_label,8,0)
+            self.options_layout.addWidget(self.usart_clock_last_bit_label,9,0)
+            self.options_layout.addWidget(self.usart_clock_polarity_select,7,2)
+            self.options_layout.addWidget(self.usart_clock_phase_select,8,2)
+            self.options_layout.addWidget(self.usart_clock_last_bit_select,9,2)
+
+
+
     # Show data depending on the command type selected
     def show_data_depending_on_cmd_type(self,cmdType):
         self.spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding) # Row Spacer if needed
+        self.options_layout.setColumnMinimumWidth(0,80)
 
         if cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
             print("LED options")
@@ -391,7 +432,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Layout settings
                 self.options_layout.addItem(self.spacerItem,7,0)
-                self.options_layout.setColumnMinimumWidth(1,40)
+                self.options_layout.setColumnMinimumWidth(1,10)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             print("SPI options")
@@ -471,17 +512,17 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.spi_frame_format_label,5,0)
                 self.options_layout.addWidget(self.spi_data_size_label,6,0)
 
-                self.options_layout.addWidget(self.spi_bus_select,0,1)
-                self.options_layout.addWidget(self.spi_command_select,1,1)
-                self.options_layout.addWidget(self.spi_dummyclocks_select,2,1)
-                self.options_layout.addWidget(self.spi_operating_mode_select,3,1)
-                self.options_layout.addWidget(self.spi_hardware_nss_select,4,1)
-                self.options_layout.addWidget(self.spi_frame_format_select,5,1)
-                self.options_layout.addWidget(self.spi_data_size_select,6,1)
+                self.options_layout.addWidget(self.spi_bus_select,0,2)
+                self.options_layout.addWidget(self.spi_command_select,1,2)
+                self.options_layout.addWidget(self.spi_dummyclocks_select,2,2)
+                self.options_layout.addWidget(self.spi_operating_mode_select,3,2)
+                self.options_layout.addWidget(self.spi_hardware_nss_select,4,2)
+                self.options_layout.addWidget(self.spi_frame_format_select,5,2)
+                self.options_layout.addWidget(self.spi_data_size_select,6,2)
 
                 # Layout settings
                 self.options_layout.addItem(self.spacerItem,9,0)
-#                self.options_layout.setColumnMinimumWidth(1,40)
+                self.options_layout.setColumnMinimumWidth(1,0)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
             print("GPIO digital optons")
@@ -519,9 +560,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_pull_select.addItem(list(sequence.dict_gpio_pull.keys())[1],list(sequence.dict_gpio_pull.values())[1])
                 self.gpio_pull_select.addItem(list(sequence.dict_gpio_pull.keys())[2],list(sequence.dict_gpio_pull.values())[2])
 
+                # Connect signal and call function explicitly
                 self.gpio_state_select.setEnabled(True)
                 self.gpio_direction_select.activated[str].connect(self.on_changed_gpio_dir)
 
+                # Add widgets to layout
                 self.options_layout.addWidget(self.gpio_pin_label,0,0)
                 self.options_layout.addWidget(self.gpio_direction_label,1,0)
                 self.options_layout.addWidget(self.gpio_state_label,2,0)
@@ -529,6 +572,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.gpio_direction_select,1,2)
                 self.options_layout.addWidget(self.gpio_state_select,2,2)
 
+                # Layout settings
                 self.options_layout.addItem(self.spacerItem,4,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
 
@@ -597,6 +641,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.pwm_freq_select = QLineEdit(self)
                 self.pwm_duty_select = QLineEdit(self)
 
+                # Fill GPIO pins combobox
                 if self.use_config_file == True:
                     for i in range(len(config.dict_available_digital_pins)):
                         self.gpio_pin_select.addItem(list(config.dict_available_digital_pins.keys())[i],list(config.dict_available_digital_pins.values())[i] )
@@ -604,21 +649,126 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     for i in range(len(sequence.dict_gpio_digital_pins)):
                         self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
 
+                # Set validators and placeholders for input fields
                 self.pwm_freq_select.setValidator(self.freqValidator)
                 self.pwm_freq_select.setPlaceholderText("0..1000")
 
                 self.pwm_duty_select.setValidator(self.dutyValidator)
                 self.pwm_duty_select.setPlaceholderText("0..100")
 
+                # Add widgets to layout
                 self.options_layout.addWidget(self.gpio_pin_label,0,0)
                 self.options_layout.addWidget(self.pwm_freq_label,1,0)
                 self.options_layout.addWidget(self.pwm_duty_label,2,0)
+
                 self.options_layout.addWidget(self.gpio_pin_select,0,2)
                 self.options_layout.addWidget(self.pwm_freq_select,1,2)
                 self.options_layout.addWidget(self.pwm_duty_select,2,2)
 
+                # Layout settings
                 self.options_layout.addItem(self.spacerItem,4,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
+
+        elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
+            print("USART optons")
+            if self.USART_active == False:
+                self.USART_active = True
+                self.usart_bus_label = QLabel("Bus", self)
+                self.usart_mode_label = QLabel("Mode", self)
+                self.usart_baudrate_label = QLabel("Baud Rate", self)
+                self.usart_word_length_label = QLabel("Word Length", self)
+                self.usart_parity_label = QLabel("Parity", self)
+                self.usart_stop_bits_label = QLabel("Stop Bits", self)
+                self.usart_direction_label = QLabel("Direction", self)
+                self.usart_clock_polarity_label = QLabel("Clock Polarity", self)
+                self.usart_clock_phase_label = QLabel("Clock Phase", self)
+                self.usart_clock_last_bit_label = QLabel("Clock Last Bit", self)
+                self.usart_hw_flow_control_label = QLabel("HW Flow control", self)
+
+                self.usart_bus_select = QComboBox(self)
+                self.usart_mode_select = QComboBox(self)
+                self.usart_baudrate_select = QLineEdit(self)
+                self.usart_word_length_select = QComboBox(self)
+                self.usart_parity_select = QComboBox(self)
+                self.usart_stop_bits_select = QComboBox(self)
+                self.usart_direction_select = QComboBox(self)
+                self.usart_clock_polarity_select = QComboBox(self)
+                self.usart_clock_phase_select = QComboBox(self)
+                self.usart_clock_last_bit_select = QComboBox(self)
+                self.usart_hw_flow_control_select = QComboBox(self)
+
+                # Fill USART bus combobox
+                if self.use_config_file == True:
+                    for i in range(len(config.dict_available_usart_buses)):
+                        self.usart_bus_select.addItem(list(config.dict_available_usart_buses.keys())[i],list(config.dict_available_usart_buses.values())[i] )
+                else:
+                    for i in range(len(sequence.dict_usart_bus)):
+                        self.usart_bus_select.addItem(list(sequence.dict_usart_bus.keys())[i],list(sequence.dict_usart_bus.values())[i] )
+
+                # Fill USART mode select combobox
+                for i in range(len(sequence.dict_usart_mode)):
+                    self.usart_mode_select.addItem(list(sequence.dict_usart_mode.keys())[i],list(sequence.dict_usart_mode.values())[i] )
+
+                # Fill USART word length combobox
+                for i in range(len(sequence.dict_usart_word_length)):
+                    self.usart_word_length_select.addItem(list(sequence.dict_usart_word_length.keys())[i],list(sequence.dict_usart_word_length.values())[i] )
+
+                # Fill USART parity combobox
+                for i in range(len(sequence.dict_usart_parity)):
+                    self.usart_parity_select.addItem(list(sequence.dict_usart_parity.keys())[i],list(sequence.dict_usart_parity.values())[i] )
+
+                # Fill USART stop bits combobox
+                for i in range(len(sequence.dict_usart_stop_bits)):
+                    self.usart_stop_bits_select.addItem(list(sequence.dict_usart_stop_bits.keys())[i],list(sequence.dict_usart_stop_bits.values())[i] )
+
+                # Fill USART direction combobox
+                for i in range(len(sequence.dict_usart_direction)):
+                    self.usart_direction_select.addItem(list(sequence.dict_usart_direction.keys())[i],list(sequence.dict_usart_direction.values())[i] )
+
+                # Fill USART clock polarity combobox
+                for i in range(len(sequence.dict_usart_clock_polarity)):
+                    self.usart_clock_polarity_select.addItem(list(sequence.dict_usart_clock_polarity.keys())[i],list(sequence.dict_usart_clock_polarity.values())[i] )
+
+                # Fill USART clock polarity combobox
+                for i in range(len(sequence.dict_usart_clock_phase)):
+                    self.usart_clock_phase_select.addItem(list(sequence.dict_usart_clock_phase.keys())[i],list(sequence.dict_usart_clock_phase.values())[i] )
+
+                # Fill USART clock last bit combobox
+                for i in range(len(sequence.dict_usart_clock_last_bit)):
+                    self.usart_clock_last_bit_select.addItem(list(sequence.dict_usart_clock_last_bit.keys())[i],list(sequence.dict_usart_clock_last_bit.values())[i] )
+
+                # Fill USART HW Flow Control combobox
+                for i in range(len(sequence.dict_usart_hw_flow)):
+                    self.usart_hw_flow_control_select.addItem(list(sequence.dict_usart_hw_flow.keys())[i],list(sequence.dict_usart_hw_flow.values())[i] )
+
+                # Set placeholder for input field
+                self.usart_baudrate_select.setPlaceholderText("115200")
+
+                # Connect signal and call function explicitly
+                self.usart_mode_select.activated[str].connect(self.on_changed_usart_mode)
+                self.on_changed_usart_mode()
+
+                # Add widgets to layout
+                self.options_layout.addWidget(self.usart_bus_label,0,0)
+                self.options_layout.addWidget(self.usart_mode_label,1,0)
+                self.options_layout.addWidget(self.usart_baudrate_label,2,0)
+                self.options_layout.addWidget(self.usart_word_length_label,3,0)
+                self.options_layout.addWidget(self.usart_parity_label,4,0)
+                self.options_layout.addWidget(self.usart_stop_bits_label,5,0)
+                self.options_layout.addWidget(self.usart_direction_label,6,0)
+
+                self.options_layout.addWidget(self.usart_bus_select,0,2)
+                self.options_layout.addWidget(self.usart_mode_select,1,2)
+                self.options_layout.addWidget(self.usart_baudrate_select,2,2)
+                self.options_layout.addWidget(self.usart_word_length_select,3,2)
+                self.options_layout.addWidget(self.usart_parity_select,4,2)
+                self.options_layout.addWidget(self.usart_stop_bits_select,5,2)
+                self.options_layout.addWidget(self.usart_direction_select,6,2)
+
+                # Layout settings
+                self.options_layout.addItem(self.spacerItem,10,0)
+                self.options_layout.setColumnMinimumWidth(1,10)
+
 
     # Delete all child widget from a layout
     def delete_all_child_widget(self, layout):
@@ -637,6 +787,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.I2C_active = False
         self.SPI_active = False
         self.GPIO_active = False
+        self.USART_active = False
         self.AnalogRead_active = False
         self.AnalogWrite_active = False
 

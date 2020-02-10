@@ -5,9 +5,10 @@ enum CommandTypeEnum{
   LED_test = 0;
   I2C_test = 1;
   SPI_test = 2;
-  GPIO_digital = 3;
-  Analog_read = 4;		// Analog in, ADC config
-  Analog_write = 5;		// Analog out, PWM
+  USART_test = 3;
+  GPIO_digital = 4;
+  Analog_read = 5;		// Analog in, ADC config
+  Analog_write = 6;		// Analog out, PWM
 }
 
 
@@ -301,6 +302,7 @@ message usartMessage{
  optional usartClockPolarity clockPolarity = 8;
  optional usartClockPhase clockPhase = 9;
  optional usartClockLastBit clockLastBit = 10;
+ optional usartHardwareFlowControl hwFlowControl = 11;
 }
 
 

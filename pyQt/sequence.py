@@ -21,7 +21,7 @@ import functional_test_pb2
 
 
 # List of command types
-list_cmd_types = ["I2C","SPI","GPIO","Analog_read","PWM"]
+list_cmd_types = ["I2C","SPI","USART","GPIO","Analog_read","PWM"]
 
 
 # I2C dictionaries
