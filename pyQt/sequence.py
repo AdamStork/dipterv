@@ -46,11 +46,6 @@ dict_i2c_duty_cycle = {
     "T_low/T_high = 16/9": 1,
 }
 
-# SPI dictionaries
-#dict_spi_rw = {
-#    "Transmit": 0,
-#    "Receive": 1
-#}
 
 dict_spi_bus = {
     "SPI1": 1,
@@ -267,35 +262,62 @@ dict_usart_clock_last_bit = {
 
 # @brief     Classes that represent the tests
 class i2c_test:
-    def __init__(self, cmdType = None, bus = None, address = None, register = None, direction = None):
+    def __init__(self, cmdType = None, bus = None, address = None, register = None, direction = None, speedMode = None, clockSpeed = None, dutyCycle = None):
         self.cmdType = cmdType
         self.bus = bus
         self.address = address
         self.register = register
         self.direction = direction
+        self.speedMode = speedMode
+        self.clockSpeed = clockSpeed
+        self.dutyCycle = dutyCycle
 
 class spi_test:
-    def __init__(self, cmdType = None, bus = None, mode = None, command = None, dummyclocks = None, direction = None):
+    def __init__(self, cmdType = None, bus = None, mode = None, command = None, dummyclocks = None, operatingMode = None, hardwareNSS = None, frameFormat = None,
+    dataSize = None, firstBit = None):
         self.cmdType = cmdType
         self.bus = bus
         self.mode = mode
         self.command = command
-        self.direction = direction
         self.dummyclocks = dummyclocks
+        self.operatingMode = operatingMode
+        self.hardwareNSS = hardwareNSS
+        self.frameFormat = frameFormat
+        self.dataSize = dataSize
+        self.firstBit = firstBit
+
+class usart_test:
+    def __init__(self, cmdType = None, bus = None, mode = None, baudRate = None, wordLength = None, parity = None, stopBits = None, direction = None,
+    clockPolarity = None, clockPhase = None, clockLastBit = None, hwFlowControl = None):
+        self.cmdType = cmdType
+        self.bus = bus
+        self.mode = mode
+        self.baudRate = baudRate
+        self.wordLength = wordLength
+        self.parity = parity
+        self.stopBits = stopBits
+        self.direction = direction
+        self.clockPolarity = clockPolarity
+        self.clockPhase = clockPhase
+        self.clockLastBit = clockLastBit
+        self.hwFlowControl = hwFlowControl
 
 
 class gpio_digital:
-    def __init__(self, cmdType = None, pin = None, direction = None, state = None):
+    def __init__(self, cmdType = None, pin = None, direction = None, state = None, pull = None):
         self.cmdType = cmdType
         self.pin = pin
         self.direction = direction
         self.state = state
+        self.pull = pull
 
 class analog_read:
-    def __init__(self, cmdType = None, pin = None, resolution = None):
+    def __init__(self, cmdType = None, instance = None, pin = None, resolution = None, clockPrescaler = None):
         self.cmdType = cmdType
+        self.instance = instance
         self.pin = pin
         self.resolution = resolution
+        self.clockPrescaler = clockPrescaler
 
 class analog_write:
     def __init__(self, cmdType = None, pin = None, frequency = None, dutyCycle = None):
@@ -326,6 +348,11 @@ def make_test_object_from_options(UI):
         else:
             selectedCommand.register = int(UI.i2c_reg_select.text(),16)           # Convert to int
         selectedCommand.direction = UI.i2c_rw_select.currentData()
+        selectedCommand.speedMode = UI.i2c_speed_mode_select.currentData()
+        selectedCommand.clockSpeed = int(UI.i2c_clock_speed_select.text())
+        if UI.i2c_speed_mode_select.currentData() == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, save duty cycle option as well
+            selectedCommand.dutyCycle = UI.i2c_duty_cycle_select.currentData()
+
         return selectedCommand
 #        sequence.append(selectedCommand)
 #        add_test_object_to_test_list(selectedCommand, test_list)
@@ -334,7 +361,6 @@ def make_test_object_from_options(UI):
         selectedCommand = spi_test()
         selectedCommand.cmdType = cmdType
         selectedCommand.bus = UI.spi_bus_select.currentData()
-        selectedCommand.mode = UI.spi_clockmode_select.currentData()
         if is_empty(UI.spi_command_select.text()):
             selectedCommand.command = 0
             UI.spi_command_select.setText("0x00")
@@ -345,10 +371,37 @@ def make_test_object_from_options(UI):
             UI.spi_dummyclocks_select.setText("0")
         else:
             selectedCommand.dummyclocks = int(UI.spi_dummyclocks_select.text())
-        selectedCommand.direction = UI.spi_direction_select.currentData()
+        selectedCommand.operatingMode = UI.spi_operating_mode_select.currentData()
+        selectedCommand.hardwareNSS = UI.spi_hardware_nss_select.currentData()
+        selectedCommand.frameFormat = UI.spi_frame_format_select.currentData()
+        selectedCommand.dataSize = UI.spi_data_size_select.currentData()
+        if UI.spi_frame_format_select.currentData() == list(dict_spi_frame_format.values())[0]: # If 'Motorola' option is selected, save first bit and clock settings as well
+            selectedCommand.firstBit = UI.spi_first_bit_select.currentData()
+            selectedCommand.mode = UI.spi_clockmode_select.currentData()
         return selectedCommand
 #        sequence.append(selectedCommand)
 #        add_test_object_to_test_list(selectedCommand, test_list)
+
+    elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
+        selectedCommand = usart_test()
+        selectedCommand.cmdType = cmdType
+        selectedCommand.bus = UI.usart_bus_select.currentData()
+        selectedCommand.mode = UI.usart_mode_select.currentData()
+        if is_empty(UI.usart_baudrate_select.text()):
+            selectedCommand.baudRate = 0
+            UI.usart_baudrate_select.setText("0")
+        else:
+            selectedCommand.baudRate = int(UI.usart_baudrate_select.text())
+        selectedCommand.wordLength = UI.usart_word_length_select.currentData()
+        selectedCommand.parity = UI.usart_parity_select.currentData()
+        selectedCommand.stopBits = UI.usart_stop_bits_select.currentData()
+        selectedCommand.direction = UI.usart_direction_select.currentData()
+        if UI.usart_mode_select.currentData() == list(dict_usart_mode.values())[0]:     # If 'Asynchronous' mode is selected, save HW flow control settings
+            selectedCommand.hwFlowControl = UI.usart_hw_flow_control_select.currentData()
+        elif UI.usart_mode_select.currentData() == list(dict_usart_mode.values())[1]:   # If 'Synchronous' mode is selected, save clock settings
+            selectedCommand.clockPolarity = UI.usart_clock_polarity_select.currentData()
+            selectedCommand.clockPhase = UI.usart_clock_phase_select.currentData()
+            selectedCommand.clockLastBit = UI.usart_clock_last_bit_select.currentData()
 
     elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         selectedCommand = gpio_digital()
@@ -356,6 +409,7 @@ def make_test_object_from_options(UI):
         selectedCommand.pin = UI.gpio_pin_select.currentData()
         selectedCommand.direction = UI.gpio_direction_select.currentData()
         selectedCommand.state = UI.gpio_state_select.currentData()
+        selectedCommand.pull = UI.gpio_pull_select.currentData()
         return selectedCommand
 #        sequence.append(selectedCommand)
 #        add_test_object_to_test_list(selectedCommand, test_list)
@@ -363,8 +417,10 @@ def make_test_object_from_options(UI):
     elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
         selectedCommand = analog_read()
         selectedCommand.cmdType = cmdType
+        selectedCommand.instance = UI.adc_instance_select.currentData()
         selectedCommand.pin = UI.gpio_pin_select.currentData()
         selectedCommand.resolution = UI.adc_resolution_select.currentData()
+        selectedCommand.clockPrescaler = UI.adc_clock_prescaler_select.currentData()
         return selectedCommand
 #        sequence.append(selectedCommand)
 #        add_test_object_to_test_list(selectedCommand, test_list)
@@ -436,7 +492,7 @@ def make_string_from_test_object(test_object):
         string += "  Mode: " + list(dict_spi_mode.keys())[list(dict_spi_mode.values()).index(test_object.mode)]
         string += "  Cmd: " + "0x{:02X}".format(test_object.command)
         string += "  Dummy: " + str(test_object.dummyclocks)
-        string += "  R/W: " + list(dict_spi_rw.keys())[list(dict_spi_rw.values()).index(test_object.direction)]
+#        string += "  R/W: " + list(dict_spi_rw.keys())[list(dict_spi_rw.values()).index(test_object.direction)]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         string += "GPIO"
@@ -542,22 +598,50 @@ def make_protobuf_command_from_test_object(test_object):
         cmd.i2c.address = test_object.address
         cmd.i2c.register = test_object.register
         cmd.i2c.direction = test_object.direction
+        cmd.i2c.speedMode = test_object.speedMode
+        cmd.i2c.clockSpeed = test_object.clockSpeed
+        if test_object.speedMode == list(dict_i2c_speedmode.values())[1]:
+            cmd.i2c.dutyCycle = test_object.dutyCycle
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
         cmd.spi.bus = test_object.bus
         cmd.spi.mode = test_object.mode
         cmd.spi.command = test_object.command
         cmd.spi.dummyclocks = test_object.dummyclocks
-        cmd.spi.direction = test_object.direction
+        cmd.spi.operatingMode = test_object.operatingMode
+        cmd.spi.hardwareNSS = test_object.hardwareNSS
+        cmd.spi.frameFormat = test_object.frameFormat
+        cmd.spi.dataSize = test_object.dataSize
+        if test_object.frameFormat == list(dict_spi_frame_format.values())[0]:
+            cmd.spi.firstBit = test_object.firstBit
+            cmd.spi.mode = test_object.mode
+
+    elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
+        cmd.usart.bus = test_object.bus
+        cmd.usart.mode = test_object.mode
+        cmd.usart.baudRate = test_object.baudRate
+        cmd.usart.wordLength = test_object.wordLength
+        cmd.usart.parity = test_object.parity
+        cmd.usart.stopBits = test_object.stopBits
+        cmd.usart.direction = test_object.direction
+        if test_object.mode == list(dict_usart_mode.values())[0]:
+            cmd.usart.hwFlowControl = test_object.hwFlowControl
+        elif test_object.mode == list(dict_usart_mode.values())[1]:
+            cmd.usart.clockPolarity = test_object.clockPolarity
+            cmd.usart.clockPhase = test_object.clockPhase
+            cmd.usart.clockLastBit = test_object.clockLastBit
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         cmd.gpio.pin = test_object.pin
         cmd.gpio.direction = test_object.direction
         cmd.gpio.state = test_object.state
+        cmd.gpio.pull = test_object.pull
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
+        cmd.analog_in.instance = test_object.instance
         cmd.analog_in.pin  = test_object.pin
         cmd.analog_in.resolution = test_object.resolution
+        cmd.analog_in.clockPrescaler = test_object.clockPrescaler
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
         cmd.analog_out.pin = test_object.pin

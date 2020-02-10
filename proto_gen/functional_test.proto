@@ -52,11 +52,6 @@ message i2cMessage{
 
 // SPI options
 // only master modes should be available
-enum spiDirection{
- SPI_TRANSMIT = 0;
- SPI_RECEIVE = 1;
-}
-
 enum clockMode{
 	SPI_MODE_0 = 0;
 	SPI_MODE_1 = 1;
@@ -101,13 +96,12 @@ message spiMessage{
  required spiBus bus = 1;
  required clockMode mode = 2;	//ide esetleg hintet megjeleniteni
  required uint32 command = 3;
- required spiDirection direction = 4;
- required uint32 dummyclocks = 5;
- required spiOperatingMode operatingMode = 6;
- required spiHardwareNSS hardwareNSS = 7;
- required spiFrameFormat frameFormat = 8;
- required spiDataSize dataSize = 9;
- optional spiFirstBit firstBit = 10;
+ required uint32 dummyclocks = 4;
+ required spiOperatingMode operatingMode = 5;
+ required spiHardwareNSS hardwareNSS = 6;
+ required spiFrameFormat frameFormat = 7;
+ required spiDataSize dataSize = 8;
+ optional spiFirstBit firstBit = 9;
 }
 
 

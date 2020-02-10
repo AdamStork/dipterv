@@ -568,9 +568,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.gpio_pin_label,0,0)
                 self.options_layout.addWidget(self.gpio_direction_label,1,0)
                 self.options_layout.addWidget(self.gpio_state_label,2,0)
+                self.options_layout.addWidget(self.gpio_pull_label,3,0)
+
                 self.options_layout.addWidget(self.gpio_pin_select,0,2)
                 self.options_layout.addWidget(self.gpio_direction_select,1,2)
                 self.options_layout.addWidget(self.gpio_state_select,2,2)
+                self.options_layout.addWidget(self.gpio_pull_select,3,2)
 
                 # Layout settings
                 self.options_layout.addItem(self.spacerItem,4,0)

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\x15\x66unctional_test.proto\"\xc7\x01\n\ni2cMessage\x12\x14\n\x03\x62us\x18\x01 \x02(\x0e\x32\x07.i2cBus\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x02(\r\x12\x10\n\x08register\x18\x03 \x02(\r\x12 \n\tdirection\x18\x04 \x02(\x0e\x32\r.i2cDirection\x12 \n\tspeedMode\x18\x05 \x02(\x0e\x32\r.i2cSpeedMode\x12\x12\n\nclockSpeed\x18\x06 \x02(\r\x12(\n\tdutyCycle\x18\x07 \x01(\x0e\x32\x15.i2cFastModeDutyCycle\"\xba\x02\n\nspiMessage\x12\x14\n\x03\x62us\x18\x01 \x02(\x0e\x32\x07.spiBus\x12\x18\n\x04mode\x18\x02 \x02(\x0e\x32\n.clockMode\x12\x0f\n\x07\x63ommand\x18\x03 \x02(\r\x12 \n\tdirection\x18\x04 \x02(\x0e\x32\r.spiDirection\x12\x13\n\x0b\x64ummyclocks\x18\x05 \x02(\r\x12(\n\roperatingMode\x18\x06 \x02(\x0e\x32\x11.spiOperatingMode\x12$\n\x0bhardwareNSS\x18\x07 \x02(\x0e\x32\x0f.spiHardwareNSS\x12$\n\x0b\x66rameFormat\x18\x08 \x02(\x0e\x32\x0f.spiFrameFormat\x12\x1e\n\x08\x64\x61taSize\x18\t \x02(\x0e\x32\x0c.spiDataSize\x12\x1e\n\x08\x66irstBit\x18\n \x01(\x0e\x32\x0c.spiFirstBit\"\x7f\n\x0b\x64igitalGPIO\x12\x16\n\x03pin\x18\x01 \x02(\x0e\x32\t.gpioPins\x12!\n\tdirection\x18\x02 \x02(\x0e\x32\x0e.gpioDirection\x12\x1c\n\x05state\x18\x03 \x02(\x0e\x32\r.gpioPinState\x12\x17\n\x04pull\x18\x04 \x02(\x0e\x32\t.gpioPull\"\x92\x01\n\x08\x61nalogIN\x12\x1e\n\x08instance\x18\x01 \x02(\x0e\x32\x0c.adcInstance\x12\x16\n\x03pin\x18\x02 \x02(\x0e\x32\t.gpioPins\x12\"\n\nresolution\x18\x03 \x02(\x0e\x32\x0e.adcResolution\x12*\n\x0e\x63lockPrescaler\x18\x04 \x02(\x0e\x32\x12.adcClockPrescaler\"I\n\tanalogOUT\x12\x16\n\x03pin\x18\x01 \x02(\x0e\x32\t.gpioPins\x12\x11\n\tfrequency\x18\x02 \x02(\r\x12\x11\n\tdutyCycle\x18\x03 \x02(\r\"\x8a\x03\n\x0cusartMessage\x12\x16\n\x03\x62us\x18\x01 \x02(\x0e\x32\t.usartBus\x12\x18\n\x04mode\x18\x02 \x02(\x0e\x32\n.usartMode\x12\x10\n\x08\x62\x61udRate\x18\x03 \x02(\r\x12$\n\nwordLength\x18\x04 \x02(\x0e\x32\x10.usartWordLength\x12\x1c\n\x06parity\x18\x05 \x02(\x0e\x32\x0c.usartParity\x12 \n\x08stopBits\x18\x06 \x02(\x0e\x32\x0e.usartStopBits\x12\"\n\tdirection\x18\x07 \x02(\x0e\x32\x0f.usartDirection\x12*\n\rclockPolarity\x18\x08 \x01(\x0e\x32\x13.usartClockPolarity\x12$\n\nclockPhase\x18\t \x01(\x0e\x32\x10.usartClockPhase\x12(\n\x0c\x63lockLastBit\x18\n \x01(\x0e\x32\x12.usartClockLastBit\x12\x30\n\rhwFlowControl\x18\x0b \x01(\x0e\x32\x19.usartHardwareFlowControl\"\x9b\x02\n\x07\x43ommand\x12%\n\x0b\x63ommandType\x18\x01 \x02(\x0e\x32\x10.CommandTypeEnum\x12\x18\n\x03i2c\x18\x02 \x01(\x0b\x32\x0b.i2cMessage\x12\x18\n\x03spi\x18\x03 \x01(\x0b\x32\x0b.spiMessage\x12\x1c\n\x05usart\x18\x04 \x01(\x0b\x32\r.usartMessage\x12\x1a\n\x04gpio\x18\x05 \x01(\x0b\x32\x0c.digitalGPIO\x12\x1c\n\tanalog_in\x18\x06 \x01(\x0b\x32\t.analogIN\x12\x1e\n\nanalog_out\x18\x07 \x01(\x0b\x32\n.analogOUT\x12\x14\n\x0cresponseRead\x18\n \x01(\r\x12\'\n\rresponseWrite\x18\x0b \x01(\x0e\x32\x10.successfulWrite*\x80\x01\n\x0f\x43ommandTypeEnum\x12\x0c\n\x08LED_test\x10\x00\x12\x0c\n\x08I2C_test\x10\x01\x12\x0c\n\x08SPI_test\x10\x02\x12\x0e\n\nUSART_test\x10\x03\x12\x10\n\x0cGPIO_digital\x10\x04\x12\x0f\n\x0b\x41nalog_read\x10\x05\x12\x10\n\x0c\x41nalog_write\x10\x06*+\n\x0ci2cDirection\x12\r\n\tI2C_write\x10\x00\x12\x0c\n\x08I2C_read\x10\x01*&\n\x06i2cBus\x12\x08\n\x04I2C1\x10\x01\x12\x08\n\x04I2C2\x10\x02\x12\x08\n\x04I2C3\x10\x03*D\n\x0ci2cSpeedMode\x12\x1b\n\x17I2C_SPEED_MODE_STANDARD\x10\x00\x12\x17\n\x13I2C_SPEED_MODE_FAST\x10\x01*[\n\x14i2cFastModeDutyCycle\x12\x1f\n\x1bI2C_DUTY_CYCLE_TLOW_THIGH_2\x10\x00\x12\"\n\x1eI2C_DUTY_CYCLE_TLOW_THIGH_16_9\x10\x01*1\n\x0cspiDirection\x12\x10\n\x0cSPI_TRANSMIT\x10\x00\x12\x0f\n\x0bSPI_RECEIVE\x10\x01*K\n\tclockMode\x12\x0e\n\nSPI_MODE_0\x10\x00\x12\x0e\n\nSPI_MODE_1\x10\x01\x12\x0e\n\nSPI_MODE_2\x10\x02\x12\x0e\n\nSPI_MODE_3\x10\x03*<\n\x0espiHardwareNSS\x12\x0b\n\x07\x44ISABLE\x10\x00\x12\r\n\tNSS_INPUT\x10\x01\x12\x0e\n\nNSS_OUTPUT\x10\x02*&\n\x06spiBus\x12\x08\n\x04SPI1\x10\x01\x12\x08\n\x04SPI2\x10\x02\x12\x08\n\x04SPI3\x10\x03*w\n\x10spiOperatingMode\x12\x1f\n\x1bSPI_MODE_FULL_DUPLEX_MASTER\x10\x00\x12\x1f\n\x1bSPI_MODE_HALF_DUPLEX_MASTER\x10\x01\x12!\n\x1dSPI_MODE_TRANSMIT_ONLY_MASTER\x10\x02*H\n\x0espiFrameFormat\x12\x1d\n\x19SPI_FRAME_FORMAT_MOTOROLA\x10\x00\x12\x17\n\x13SPI_FRAME_FORMAT_TI\x10\x01*B\n\x0bspiDataSize\x12\x18\n\x14SPI_DATA_SIZE_8_BITS\x10\x00\x12\x19\n\x15SPI_DATA_SIZE_16_BITS\x10\x01*;\n\x0bspiFirstBit\x12\x15\n\x11SPI_FIRST_BIT_MSB\x10\x00\x12\x15\n\x11SPI_FIRST_BIT_LSB\x10\x01*0\n\rgpioDirection\x12\x0f\n\x0bGPIO_OUTPUT\x10\x00\x12\x0e\n\nGPIO_INPUT\x10\x01*D\n\x0cgpioPinState\x12\x0c\n\x08GPIO_LOW\x10\x00\x12\r\n\tGPIO_HIGH\x10\x01\x12\x17\n\x13GPIO_NON_APPLICABLE\x10\x02*\xed\x03\n\x08gpioPins\x12\x07\n\x03PA0\x10\x00\x12\x07\n\x03PA1\x10\x01\x12\x07\n\x03PA2\x10\x02\x12\x07\n\x03PA3\x10\x03\x12\x07\n\x03PA4\x10\x04\x12\x07\n\x03PA5\x10\x05\x12\x07\n\x03PA6\x10\x06\x12\x07\n\x03PA7\x10\x07\x12\x07\n\x03PA8\x10\x08\x12\x07\n\x03PA9\x10\t\x12\x08\n\x04PA10\x10\n\x12\x08\n\x04PA11\x10\x0b\x12\x08\n\x04PA12\x10\x0c\x12\x08\n\x04PA13\x10\r\x12\x08\n\x04PA14\x10\x0e\x12\x08\n\x04PA15\x10\x0f\x12\x07\n\x03PB0\x10\x14\x12\x07\n\x03PB1\x10\x15\x12\x07\n\x03PB2\x10\x16\x12\x07\n\x03PB3\x10\x17\x12\x07\n\x03PB4\x10\x18\x12\x07\n\x03PB5\x10\x19\x12\x07\n\x03PB6\x10\x1a\x12\x07\n\x03PB7\x10\x1b\x12\x07\n\x03PB8\x10\x1c\x12\x07\n\x03PB9\x10\x1d\x12\x08\n\x04PB10\x10\x1e\x12\x08\n\x04PB11\x10\x1f\x12\x08\n\x04PB12\x10 \x12\x08\n\x04PB13\x10!\x12\x08\n\x04PB14\x10\"\x12\x08\n\x04PB15\x10#\x12\x07\n\x03PC0\x10(\x12\x07\n\x03PC1\x10)\x12\x07\n\x03PC2\x10*\x12\x07\n\x03PC3\x10+\x12\x07\n\x03PC4\x10,\x12\x07\n\x03PC5\x10-\x12\x07\n\x03PC6\x10.\x12\x07\n\x03PC7\x10/\x12\x07\n\x03PC8\x10\x30\x12\x07\n\x03PC9\x10\x31\x12\x08\n\x04PC10\x10\x32\x12\x08\n\x04PC11\x10\x33\x12\x08\n\x04PC12\x10\x34\x12\x08\n\x04PC13\x10\x35\x12\x08\n\x04PC14\x10\x36\x12\x08\n\x04PC15\x10\x37\x12\x08\n\x04Temp\x10<\x12\x0b\n\x07Vrefint\x10=\x12\x08\n\x04Vbat\x10>*B\n\x08gpioPull\x12\x10\n\x0cGPIO_NO_PULL\x10\x00\x12\x10\n\x0cGPIO_PULL_UP\x10\x01\x12\x12\n\x0eGPIO_PULL_DOWN\x10\x02*+\n\x0b\x61\x64\x63Instance\x12\x08\n\x04\x41\x44\x43\x31\x10\x01\x12\x08\n\x04\x41\x44\x43\x32\x10\x02\x12\x08\n\x04\x41\x44\x43\x33\x10\x03*Q\n\radcResolution\x12\x0f\n\x0b\x41\x44\x43_12_BITS\x10\x00\x12\x0f\n\x0b\x41\x44\x43_10_BITS\x10\x01\x12\x0e\n\nADC_8_BITS\x10\x02\x12\x0e\n\nADC_6_BITS\x10\x03*g\n\x11\x61\x64\x63\x43lockPrescaler\x12\x1a\n\x16\x41\x44\x43_PCLK2_DIVIDED_BY_4\x10\x00\x12\x1a\n\x16\x41\x44\x43_PCLK2_DIVIDED_BY_6\x10\x01\x12\x1a\n\x16\x41\x44\x43_PCLK2_DIVIDED_BY_8\x10\x02*R\n\x08usartBus\x12\n\n\x06USART1\x10\x01\x12\n\n\x06USART2\x10\x02\x12\n\n\x06USART3\x10\x03\x12\n\n\x06USART4\x10\x04\x12\n\n\x06USART5\x10\x05\x12\n\n\x06USART6\x10\x06*A\n\x0eusartDirection\x12\x13\n\x0fUSART_RX_AND_TX\x10\x00\x12\x0c\n\x08USART_RX\x10\x01\x12\x0c\n\x08USART_TX\x10\x02*5\n\x0fusartWordLength\x12\x10\n\x0cUSART_8_BITS\x10\x00\x12\x10\n\x0cUSART_9_BITS\x10\x01*Q\n\x0busartParity\x12\x15\n\x11USART_PARITY_NONE\x10\x00\x12\x15\n\x11USART_PARITY_EVEN\x10\x01\x12\x14\n\x10USART_PARITY_ODD\x10\x02*=\n\rusartStopBits\x12\x15\n\x11USART_STOP_BITS_1\x10\x01\x12\x15\n\x11USART_STOP_BITS_2\x10\x02*D\n\tusartMode\x12\x1b\n\x17USART_MODE_ASYNCHRONOUS\x10\x00\x12\x1a\n\x16USART_MODE_SYNCHRONOUS\x10\x01*\x8c\x01\n\x18usartHardwareFlowControl\x12\x19\n\x15USART_HW_FLOW_DISABLE\x10\x00\x12\x1a\n\x16USART_HW_FLOW_CTS_ONLY\x10\x01\x12\x1a\n\x16USART_HW_FLOW_RTS_ONLY\x10\x02\x12\x1d\n\x19USART_HW_FLOW_CTS_AND_RTS\x10\x03*Q\n\x12usartClockPolarity\x12\x1c\n\x18USART_CLOCK_POLARITY_LOW\x10\x00\x12\x1d\n\x19USART_CLOCK_POLARITY_HIGH\x10\x01*Q\n\x0fusartClockPhase\x12\x1e\n\x1aUSART_CLOCK_PHASE_ONE_EDGE\x10\x00\x12\x1e\n\x1aUSART_CLOCK_PHASE_TWO_EDGE\x10\x01*V\n\x11usartClockLastBit\x12 \n\x1cUSART_CLOCK_LAST_BIT_DISABLE\x10\x00\x12\x1f\n\x1bUSART_CLOCK_LAST_BIT_ENABLE\x10\x01*\xcd\x01\n\x0fsuccessfulWrite\x12\x0b\n\x07LED_SET\x10\x00\x12\x10\n\x0cI2C_WRITE_OK\x10\x01\x12\x12\n\x0eI2C_WRITE_FAIL\x10\x02\x12\x10\n\x0cSPI_WRITE_OK\x10\x03\x12\x12\n\x0eSPI_WRITE_FAIL\x10\x04\x12\x0c\n\x08GPIO_SET\x10\x05\x12\x0e\n\nGPIO_RESET\x10\x06\x12\x13\n\x0fGPIO_WRITE_FAIL\x10\x07\x12\x0b\n\x07PWM_SET\x10\x08\x12\r\n\tPWM_RESET\x10\t\x12\x12\n\x0ePWM_WRITE_FAIL\x10\n')
+  serialized_pb=_b('\n\x15\x66unctional_test.proto\"\xc7\x01\n\ni2cMessage\x12\x14\n\x03\x62us\x18\x01 \x02(\x0e\x32\x07.i2cBus\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x02(\r\x12\x10\n\x08register\x18\x03 \x02(\r\x12 \n\tdirection\x18\x04 \x02(\x0e\x32\r.i2cDirection\x12 \n\tspeedMode\x18\x05 \x02(\x0e\x32\r.i2cSpeedMode\x12\x12\n\nclockSpeed\x18\x06 \x02(\r\x12(\n\tdutyCycle\x18\x07 \x01(\x0e\x32\x15.i2cFastModeDutyCycle\"\x98\x02\n\nspiMessage\x12\x14\n\x03\x62us\x18\x01 \x02(\x0e\x32\x07.spiBus\x12\x18\n\x04mode\x18\x02 \x02(\x0e\x32\n.clockMode\x12\x0f\n\x07\x63ommand\x18\x03 \x02(\r\x12\x13\n\x0b\x64ummyclocks\x18\x04 \x02(\r\x12(\n\roperatingMode\x18\x05 \x02(\x0e\x32\x11.spiOperatingMode\x12$\n\x0bhardwareNSS\x18\x06 \x02(\x0e\x32\x0f.spiHardwareNSS\x12$\n\x0b\x66rameFormat\x18\x07 \x02(\x0e\x32\x0f.spiFrameFormat\x12\x1e\n\x08\x64\x61taSize\x18\x08 \x02(\x0e\x32\x0c.spiDataSize\x12\x1e\n\x08\x66irstBit\x18\t \x01(\x0e\x32\x0c.spiFirstBit\"\x7f\n\x0b\x64igitalGPIO\x12\x16\n\x03pin\x18\x01 \x02(\x0e\x32\t.gpioPins\x12!\n\tdirection\x18\x02 \x02(\x0e\x32\x0e.gpioDirection\x12\x1c\n\x05state\x18\x03 \x02(\x0e\x32\r.gpioPinState\x12\x17\n\x04pull\x18\x04 \x02(\x0e\x32\t.gpioPull\"\x92\x01\n\x08\x61nalogIN\x12\x1e\n\x08instance\x18\x01 \x02(\x0e\x32\x0c.adcInstance\x12\x16\n\x03pin\x18\x02 \x02(\x0e\x32\t.gpioPins\x12\"\n\nresolution\x18\x03 \x02(\x0e\x32\x0e.adcResolution\x12*\n\x0e\x63lockPrescaler\x18\x04 \x02(\x0e\x32\x12.adcClockPrescaler\"I\n\tanalogOUT\x12\x16\n\x03pin\x18\x01 \x02(\x0e\x32\t.gpioPins\x12\x11\n\tfrequency\x18\x02 \x02(\r\x12\x11\n\tdutyCycle\x18\x03 \x02(\r\"\x8a\x03\n\x0cusartMessage\x12\x16\n\x03\x62us\x18\x01 \x02(\x0e\x32\t.usartBus\x12\x18\n\x04mode\x18\x02 \x02(\x0e\x32\n.usartMode\x12\x10\n\x08\x62\x61udRate\x18\x03 \x02(\r\x12$\n\nwordLength\x18\x04 \x02(\x0e\x32\x10.usartWordLength\x12\x1c\n\x06parity\x18\x05 \x02(\x0e\x32\x0c.usartParity\x12 \n\x08stopBits\x18\x06 \x02(\x0e\x32\x0e.usartStopBits\x12\"\n\tdirection\x18\x07 \x02(\x0e\x32\x0f.usartDirection\x12*\n\rclockPolarity\x18\x08 \x01(\x0e\x32\x13.usartClockPolarity\x12$\n\nclockPhase\x18\t \x01(\x0e\x32\x10.usartClockPhase\x12(\n\x0c\x63lockLastBit\x18\n \x01(\x0e\x32\x12.usartClockLastBit\x12\x30\n\rhwFlowControl\x18\x0b \x01(\x0e\x32\x19.usartHardwareFlowControl\"\x9b\x02\n\x07\x43ommand\x12%\n\x0b\x63ommandType\x18\x01 \x02(\x0e\x32\x10.CommandTypeEnum\x12\x18\n\x03i2c\x18\x02 \x01(\x0b\x32\x0b.i2cMessage\x12\x18\n\x03spi\x18\x03 \x01(\x0b\x32\x0b.spiMessage\x12\x1c\n\x05usart\x18\x04 \x01(\x0b\x32\r.usartMessage\x12\x1a\n\x04gpio\x18\x05 \x01(\x0b\x32\x0c.digitalGPIO\x12\x1c\n\tanalog_in\x18\x06 \x01(\x0b\x32\t.analogIN\x12\x1e\n\nanalog_out\x18\x07 \x01(\x0b\x32\n.analogOUT\x12\x14\n\x0cresponseRead\x18\n \x01(\r\x12\'\n\rresponseWrite\x18\x0b \x01(\x0e\x32\x10.successfulWrite*\x80\x01\n\x0f\x43ommandTypeEnum\x12\x0c\n\x08LED_test\x10\x00\x12\x0c\n\x08I2C_test\x10\x01\x12\x0c\n\x08SPI_test\x10\x02\x12\x0e\n\nUSART_test\x10\x03\x12\x10\n\x0cGPIO_digital\x10\x04\x12\x0f\n\x0b\x41nalog_read\x10\x05\x12\x10\n\x0c\x41nalog_write\x10\x06*+\n\x0ci2cDirection\x12\r\n\tI2C_write\x10\x00\x12\x0c\n\x08I2C_read\x10\x01*&\n\x06i2cBus\x12\x08\n\x04I2C1\x10\x01\x12\x08\n\x04I2C2\x10\x02\x12\x08\n\x04I2C3\x10\x03*D\n\x0ci2cSpeedMode\x12\x1b\n\x17I2C_SPEED_MODE_STANDARD\x10\x00\x12\x17\n\x13I2C_SPEED_MODE_FAST\x10\x01*[\n\x14i2cFastModeDutyCycle\x12\x1f\n\x1bI2C_DUTY_CYCLE_TLOW_THIGH_2\x10\x00\x12\"\n\x1eI2C_DUTY_CYCLE_TLOW_THIGH_16_9\x10\x01*K\n\tclockMode\x12\x0e\n\nSPI_MODE_0\x10\x00\x12\x0e\n\nSPI_MODE_1\x10\x01\x12\x0e\n\nSPI_MODE_2\x10\x02\x12\x0e\n\nSPI_MODE_3\x10\x03*<\n\x0espiHardwareNSS\x12\x0b\n\x07\x44ISABLE\x10\x00\x12\r\n\tNSS_INPUT\x10\x01\x12\x0e\n\nNSS_OUTPUT\x10\x02*&\n\x06spiBus\x12\x08\n\x04SPI1\x10\x01\x12\x08\n\x04SPI2\x10\x02\x12\x08\n\x04SPI3\x10\x03*w\n\x10spiOperatingMode\x12\x1f\n\x1bSPI_MODE_FULL_DUPLEX_MASTER\x10\x00\x12\x1f\n\x1bSPI_MODE_HALF_DUPLEX_MASTER\x10\x01\x12!\n\x1dSPI_MODE_TRANSMIT_ONLY_MASTER\x10\x02*H\n\x0espiFrameFormat\x12\x1d\n\x19SPI_FRAME_FORMAT_MOTOROLA\x10\x00\x12\x17\n\x13SPI_FRAME_FORMAT_TI\x10\x01*B\n\x0bspiDataSize\x12\x18\n\x14SPI_DATA_SIZE_8_BITS\x10\x00\x12\x19\n\x15SPI_DATA_SIZE_16_BITS\x10\x01*;\n\x0bspiFirstBit\x12\x15\n\x11SPI_FIRST_BIT_MSB\x10\x00\x12\x15\n\x11SPI_FIRST_BIT_LSB\x10\x01*0\n\rgpioDirection\x12\x0f\n\x0bGPIO_OUTPUT\x10\x00\x12\x0e\n\nGPIO_INPUT\x10\x01*D\n\x0cgpioPinState\x12\x0c\n\x08GPIO_LOW\x10\x00\x12\r\n\tGPIO_HIGH\x10\x01\x12\x17\n\x13GPIO_NON_APPLICABLE\x10\x02*\xed\x03\n\x08gpioPins\x12\x07\n\x03PA0\x10\x00\x12\x07\n\x03PA1\x10\x01\x12\x07\n\x03PA2\x10\x02\x12\x07\n\x03PA3\x10\x03\x12\x07\n\x03PA4\x10\x04\x12\x07\n\x03PA5\x10\x05\x12\x07\n\x03PA6\x10\x06\x12\x07\n\x03PA7\x10\x07\x12\x07\n\x03PA8\x10\x08\x12\x07\n\x03PA9\x10\t\x12\x08\n\x04PA10\x10\n\x12\x08\n\x04PA11\x10\x0b\x12\x08\n\x04PA12\x10\x0c\x12\x08\n\x04PA13\x10\r\x12\x08\n\x04PA14\x10\x0e\x12\x08\n\x04PA15\x10\x0f\x12\x07\n\x03PB0\x10\x14\x12\x07\n\x03PB1\x10\x15\x12\x07\n\x03PB2\x10\x16\x12\x07\n\x03PB3\x10\x17\x12\x07\n\x03PB4\x10\x18\x12\x07\n\x03PB5\x10\x19\x12\x07\n\x03PB6\x10\x1a\x12\x07\n\x03PB7\x10\x1b\x12\x07\n\x03PB8\x10\x1c\x12\x07\n\x03PB9\x10\x1d\x12\x08\n\x04PB10\x10\x1e\x12\x08\n\x04PB11\x10\x1f\x12\x08\n\x04PB12\x10 \x12\x08\n\x04PB13\x10!\x12\x08\n\x04PB14\x10\"\x12\x08\n\x04PB15\x10#\x12\x07\n\x03PC0\x10(\x12\x07\n\x03PC1\x10)\x12\x07\n\x03PC2\x10*\x12\x07\n\x03PC3\x10+\x12\x07\n\x03PC4\x10,\x12\x07\n\x03PC5\x10-\x12\x07\n\x03PC6\x10.\x12\x07\n\x03PC7\x10/\x12\x07\n\x03PC8\x10\x30\x12\x07\n\x03PC9\x10\x31\x12\x08\n\x04PC10\x10\x32\x12\x08\n\x04PC11\x10\x33\x12\x08\n\x04PC12\x10\x34\x12\x08\n\x04PC13\x10\x35\x12\x08\n\x04PC14\x10\x36\x12\x08\n\x04PC15\x10\x37\x12\x08\n\x04Temp\x10<\x12\x0b\n\x07Vrefint\x10=\x12\x08\n\x04Vbat\x10>*B\n\x08gpioPull\x12\x10\n\x0cGPIO_NO_PULL\x10\x00\x12\x10\n\x0cGPIO_PULL_UP\x10\x01\x12\x12\n\x0eGPIO_PULL_DOWN\x10\x02*+\n\x0b\x61\x64\x63Instance\x12\x08\n\x04\x41\x44\x43\x31\x10\x01\x12\x08\n\x04\x41\x44\x43\x32\x10\x02\x12\x08\n\x04\x41\x44\x43\x33\x10\x03*Q\n\radcResolution\x12\x0f\n\x0b\x41\x44\x43_12_BITS\x10\x00\x12\x0f\n\x0b\x41\x44\x43_10_BITS\x10\x01\x12\x0e\n\nADC_8_BITS\x10\x02\x12\x0e\n\nADC_6_BITS\x10\x03*g\n\x11\x61\x64\x63\x43lockPrescaler\x12\x1a\n\x16\x41\x44\x43_PCLK2_DIVIDED_BY_4\x10\x00\x12\x1a\n\x16\x41\x44\x43_PCLK2_DIVIDED_BY_6\x10\x01\x12\x1a\n\x16\x41\x44\x43_PCLK2_DIVIDED_BY_8\x10\x02*R\n\x08usartBus\x12\n\n\x06USART1\x10\x01\x12\n\n\x06USART2\x10\x02\x12\n\n\x06USART3\x10\x03\x12\n\n\x06USART4\x10\x04\x12\n\n\x06USART5\x10\x05\x12\n\n\x06USART6\x10\x06*A\n\x0eusartDirection\x12\x13\n\x0fUSART_RX_AND_TX\x10\x00\x12\x0c\n\x08USART_RX\x10\x01\x12\x0c\n\x08USART_TX\x10\x02*5\n\x0fusartWordLength\x12\x10\n\x0cUSART_8_BITS\x10\x00\x12\x10\n\x0cUSART_9_BITS\x10\x01*Q\n\x0busartParity\x12\x15\n\x11USART_PARITY_NONE\x10\x00\x12\x15\n\x11USART_PARITY_EVEN\x10\x01\x12\x14\n\x10USART_PARITY_ODD\x10\x02*=\n\rusartStopBits\x12\x15\n\x11USART_STOP_BITS_1\x10\x01\x12\x15\n\x11USART_STOP_BITS_2\x10\x02*D\n\tusartMode\x12\x1b\n\x17USART_MODE_ASYNCHRONOUS\x10\x00\x12\x1a\n\x16USART_MODE_SYNCHRONOUS\x10\x01*\x8c\x01\n\x18usartHardwareFlowControl\x12\x19\n\x15USART_HW_FLOW_DISABLE\x10\x00\x12\x1a\n\x16USART_HW_FLOW_CTS_ONLY\x10\x01\x12\x1a\n\x16USART_HW_FLOW_RTS_ONLY\x10\x02\x12\x1d\n\x19USART_HW_FLOW_CTS_AND_RTS\x10\x03*Q\n\x12usartClockPolarity\x12\x1c\n\x18USART_CLOCK_POLARITY_LOW\x10\x00\x12\x1d\n\x19USART_CLOCK_POLARITY_HIGH\x10\x01*Q\n\x0fusartClockPhase\x12\x1e\n\x1aUSART_CLOCK_PHASE_ONE_EDGE\x10\x00\x12\x1e\n\x1aUSART_CLOCK_PHASE_TWO_EDGE\x10\x01*V\n\x11usartClockLastBit\x12 \n\x1cUSART_CLOCK_LAST_BIT_DISABLE\x10\x00\x12\x1f\n\x1bUSART_CLOCK_LAST_BIT_ENABLE\x10\x01*\xcd\x01\n\x0fsuccessfulWrite\x12\x0b\n\x07LED_SET\x10\x00\x12\x10\n\x0cI2C_WRITE_OK\x10\x01\x12\x12\n\x0eI2C_WRITE_FAIL\x10\x02\x12\x10\n\x0cSPI_WRITE_OK\x10\x03\x12\x12\n\x0eSPI_WRITE_FAIL\x10\x04\x12\x0c\n\x08GPIO_SET\x10\x05\x12\x0e\n\nGPIO_RESET\x10\x06\x12\x13\n\x0fGPIO_WRITE_FAIL\x10\x07\x12\x0b\n\x07PWM_SET\x10\x08\x12\r\n\tPWM_RESET\x10\t\x12\x12\n\x0ePWM_WRITE_FAIL\x10\n')
 )
 
 _COMMANDTYPEENUM = _descriptor.EnumDescriptor(
@@ -60,8 +60,8 @@ _COMMANDTYPEENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1581,
-  serialized_end=1709,
+  serialized_start=1547,
+  serialized_end=1675,
 )
 _sym_db.RegisterEnumDescriptor(_COMMANDTYPEENUM)
 
@@ -83,8 +83,8 @@ _I2CDIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1711,
-  serialized_end=1754,
+  serialized_start=1677,
+  serialized_end=1720,
 )
 _sym_db.RegisterEnumDescriptor(_I2CDIRECTION)
 
@@ -110,8 +110,8 @@ _I2CBUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1756,
-  serialized_end=1794,
+  serialized_start=1722,
+  serialized_end=1760,
 )
 _sym_db.RegisterEnumDescriptor(_I2CBUS)
 
@@ -133,8 +133,8 @@ _I2CSPEEDMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1796,
-  serialized_end=1864,
+  serialized_start=1762,
+  serialized_end=1830,
 )
 _sym_db.RegisterEnumDescriptor(_I2CSPEEDMODE)
 
@@ -156,35 +156,12 @@ _I2CFASTMODEDUTYCYCLE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1866,
-  serialized_end=1957,
+  serialized_start=1832,
+  serialized_end=1923,
 )
 _sym_db.RegisterEnumDescriptor(_I2CFASTMODEDUTYCYCLE)
 
 i2cFastModeDutyCycle = enum_type_wrapper.EnumTypeWrapper(_I2CFASTMODEDUTYCYCLE)
-_SPIDIRECTION = _descriptor.EnumDescriptor(
-  name='spiDirection',
-  full_name='spiDirection',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='SPI_TRANSMIT', index=0, number=0,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='SPI_RECEIVE', index=1, number=1,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1959,
-  serialized_end=2008,
-)
-_sym_db.RegisterEnumDescriptor(_SPIDIRECTION)
-
-spiDirection = enum_type_wrapper.EnumTypeWrapper(_SPIDIRECTION)
 _CLOCKMODE = _descriptor.EnumDescriptor(
   name='clockMode',
   full_name='clockMode',
@@ -210,8 +187,8 @@ _CLOCKMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2010,
-  serialized_end=2085,
+  serialized_start=1925,
+  serialized_end=2000,
 )
 _sym_db.RegisterEnumDescriptor(_CLOCKMODE)
 
@@ -237,8 +214,8 @@ _SPIHARDWARENSS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2087,
-  serialized_end=2147,
+  serialized_start=2002,
+  serialized_end=2062,
 )
 _sym_db.RegisterEnumDescriptor(_SPIHARDWARENSS)
 
@@ -264,8 +241,8 @@ _SPIBUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2149,
-  serialized_end=2187,
+  serialized_start=2064,
+  serialized_end=2102,
 )
 _sym_db.RegisterEnumDescriptor(_SPIBUS)
 
@@ -291,8 +268,8 @@ _SPIOPERATINGMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2189,
-  serialized_end=2308,
+  serialized_start=2104,
+  serialized_end=2223,
 )
 _sym_db.RegisterEnumDescriptor(_SPIOPERATINGMODE)
 
@@ -314,8 +291,8 @@ _SPIFRAMEFORMAT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2310,
-  serialized_end=2382,
+  serialized_start=2225,
+  serialized_end=2297,
 )
 _sym_db.RegisterEnumDescriptor(_SPIFRAMEFORMAT)
 
@@ -337,8 +314,8 @@ _SPIDATASIZE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2384,
-  serialized_end=2450,
+  serialized_start=2299,
+  serialized_end=2365,
 )
 _sym_db.RegisterEnumDescriptor(_SPIDATASIZE)
 
@@ -360,8 +337,8 @@ _SPIFIRSTBIT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2452,
-  serialized_end=2511,
+  serialized_start=2367,
+  serialized_end=2426,
 )
 _sym_db.RegisterEnumDescriptor(_SPIFIRSTBIT)
 
@@ -383,8 +360,8 @@ _GPIODIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2513,
-  serialized_end=2561,
+  serialized_start=2428,
+  serialized_end=2476,
 )
 _sym_db.RegisterEnumDescriptor(_GPIODIRECTION)
 
@@ -410,8 +387,8 @@ _GPIOPINSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2563,
-  serialized_end=2631,
+  serialized_start=2478,
+  serialized_end=2546,
 )
 _sym_db.RegisterEnumDescriptor(_GPIOPINSTATE)
 
@@ -629,8 +606,8 @@ _GPIOPINS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2634,
-  serialized_end=3127,
+  serialized_start=2549,
+  serialized_end=3042,
 )
 _sym_db.RegisterEnumDescriptor(_GPIOPINS)
 
@@ -656,8 +633,8 @@ _GPIOPULL = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3129,
-  serialized_end=3195,
+  serialized_start=3044,
+  serialized_end=3110,
 )
 _sym_db.RegisterEnumDescriptor(_GPIOPULL)
 
@@ -683,8 +660,8 @@ _ADCINSTANCE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3197,
-  serialized_end=3240,
+  serialized_start=3112,
+  serialized_end=3155,
 )
 _sym_db.RegisterEnumDescriptor(_ADCINSTANCE)
 
@@ -714,8 +691,8 @@ _ADCRESOLUTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3242,
-  serialized_end=3323,
+  serialized_start=3157,
+  serialized_end=3238,
 )
 _sym_db.RegisterEnumDescriptor(_ADCRESOLUTION)
 
@@ -741,8 +718,8 @@ _ADCCLOCKPRESCALER = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3325,
-  serialized_end=3428,
+  serialized_start=3240,
+  serialized_end=3343,
 )
 _sym_db.RegisterEnumDescriptor(_ADCCLOCKPRESCALER)
 
@@ -780,8 +757,8 @@ _USARTBUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3430,
-  serialized_end=3512,
+  serialized_start=3345,
+  serialized_end=3427,
 )
 _sym_db.RegisterEnumDescriptor(_USARTBUS)
 
@@ -807,8 +784,8 @@ _USARTDIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3514,
-  serialized_end=3579,
+  serialized_start=3429,
+  serialized_end=3494,
 )
 _sym_db.RegisterEnumDescriptor(_USARTDIRECTION)
 
@@ -830,8 +807,8 @@ _USARTWORDLENGTH = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3581,
-  serialized_end=3634,
+  serialized_start=3496,
+  serialized_end=3549,
 )
 _sym_db.RegisterEnumDescriptor(_USARTWORDLENGTH)
 
@@ -857,8 +834,8 @@ _USARTPARITY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3636,
-  serialized_end=3717,
+  serialized_start=3551,
+  serialized_end=3632,
 )
 _sym_db.RegisterEnumDescriptor(_USARTPARITY)
 
@@ -880,8 +857,8 @@ _USARTSTOPBITS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3719,
-  serialized_end=3780,
+  serialized_start=3634,
+  serialized_end=3695,
 )
 _sym_db.RegisterEnumDescriptor(_USARTSTOPBITS)
 
@@ -903,8 +880,8 @@ _USARTMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3782,
-  serialized_end=3850,
+  serialized_start=3697,
+  serialized_end=3765,
 )
 _sym_db.RegisterEnumDescriptor(_USARTMODE)
 
@@ -934,8 +911,8 @@ _USARTHARDWAREFLOWCONTROL = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3853,
-  serialized_end=3993,
+  serialized_start=3768,
+  serialized_end=3908,
 )
 _sym_db.RegisterEnumDescriptor(_USARTHARDWAREFLOWCONTROL)
 
@@ -957,8 +934,8 @@ _USARTCLOCKPOLARITY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3995,
-  serialized_end=4076,
+  serialized_start=3910,
+  serialized_end=3991,
 )
 _sym_db.RegisterEnumDescriptor(_USARTCLOCKPOLARITY)
 
@@ -980,8 +957,8 @@ _USARTCLOCKPHASE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=4078,
-  serialized_end=4159,
+  serialized_start=3993,
+  serialized_end=4074,
 )
 _sym_db.RegisterEnumDescriptor(_USARTCLOCKPHASE)
 
@@ -1003,8 +980,8 @@ _USARTCLOCKLASTBIT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=4161,
-  serialized_end=4247,
+  serialized_start=4076,
+  serialized_end=4162,
 )
 _sym_db.RegisterEnumDescriptor(_USARTCLOCKLASTBIT)
 
@@ -1062,8 +1039,8 @@ _SUCCESSFULWRITE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=4250,
-  serialized_end=4455,
+  serialized_start=4165,
+  serialized_end=4370,
 )
 _sym_db.RegisterEnumDescriptor(_SUCCESSFULWRITE)
 
@@ -1084,8 +1061,6 @@ I2C_SPEED_MODE_STANDARD = 0
 I2C_SPEED_MODE_FAST = 1
 I2C_DUTY_CYCLE_TLOW_THIGH_2 = 0
 I2C_DUTY_CYCLE_TLOW_THIGH_16_9 = 1
-SPI_TRANSMIT = 0
-SPI_RECEIVE = 1
 SPI_MODE_0 = 0
 SPI_MODE_1 = 1
 SPI_MODE_2 = 2
@@ -1318,50 +1293,43 @@ _SPIMESSAGE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='direction', full_name='spiMessage.direction', index=3,
-      number=4, type=14, cpp_type=8, label=2,
+      name='dummyclocks', full_name='spiMessage.dummyclocks', index=3,
+      number=4, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='dummyclocks', full_name='spiMessage.dummyclocks', index=4,
-      number=5, type=13, cpp_type=3, label=2,
+      name='operatingMode', full_name='spiMessage.operatingMode', index=4,
+      number=5, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='operatingMode', full_name='spiMessage.operatingMode', index=5,
+      name='hardwareNSS', full_name='spiMessage.hardwareNSS', index=5,
       number=6, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='hardwareNSS', full_name='spiMessage.hardwareNSS', index=6,
+      name='frameFormat', full_name='spiMessage.frameFormat', index=6,
       number=7, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='frameFormat', full_name='spiMessage.frameFormat', index=7,
+      name='dataSize', full_name='spiMessage.dataSize', index=7,
       number=8, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='dataSize', full_name='spiMessage.dataSize', index=8,
-      number=9, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='firstBit', full_name='spiMessage.firstBit', index=9,
-      number=10, type=14, cpp_type=8, label=1,
+      name='firstBit', full_name='spiMessage.firstBit', index=8,
+      number=9, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -1379,7 +1347,7 @@ _SPIMESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=228,
-  serialized_end=542,
+  serialized_end=508,
 )
 
 
@@ -1430,8 +1398,8 @@ _DIGITALGPIO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=544,
-  serialized_end=671,
+  serialized_start=510,
+  serialized_end=637,
 )
 
 
@@ -1482,8 +1450,8 @@ _ANALOGIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=674,
-  serialized_end=820,
+  serialized_start=640,
+  serialized_end=786,
 )
 
 
@@ -1527,8 +1495,8 @@ _ANALOGOUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=822,
-  serialized_end=895,
+  serialized_start=788,
+  serialized_end=861,
 )
 
 
@@ -1628,8 +1596,8 @@ _USARTMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=898,
-  serialized_end=1292,
+  serialized_start=864,
+  serialized_end=1258,
 )
 
 
@@ -1715,8 +1683,8 @@ _COMMAND = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1295,
-  serialized_end=1578,
+  serialized_start=1261,
+  serialized_end=1544,
 )
 
 _I2CMESSAGE.fields_by_name['bus'].enum_type = _I2CBUS
@@ -1725,7 +1693,6 @@ _I2CMESSAGE.fields_by_name['speedMode'].enum_type = _I2CSPEEDMODE
 _I2CMESSAGE.fields_by_name['dutyCycle'].enum_type = _I2CFASTMODEDUTYCYCLE
 _SPIMESSAGE.fields_by_name['bus'].enum_type = _SPIBUS
 _SPIMESSAGE.fields_by_name['mode'].enum_type = _CLOCKMODE
-_SPIMESSAGE.fields_by_name['direction'].enum_type = _SPIDIRECTION
 _SPIMESSAGE.fields_by_name['operatingMode'].enum_type = _SPIOPERATINGMODE
 _SPIMESSAGE.fields_by_name['hardwareNSS'].enum_type = _SPIHARDWARENSS
 _SPIMESSAGE.fields_by_name['frameFormat'].enum_type = _SPIFRAMEFORMAT
@@ -1770,7 +1737,6 @@ DESCRIPTOR.enum_types_by_name['i2cDirection'] = _I2CDIRECTION
 DESCRIPTOR.enum_types_by_name['i2cBus'] = _I2CBUS
 DESCRIPTOR.enum_types_by_name['i2cSpeedMode'] = _I2CSPEEDMODE
 DESCRIPTOR.enum_types_by_name['i2cFastModeDutyCycle'] = _I2CFASTMODEDUTYCYCLE
-DESCRIPTOR.enum_types_by_name['spiDirection'] = _SPIDIRECTION
 DESCRIPTOR.enum_types_by_name['clockMode'] = _CLOCKMODE
 DESCRIPTOR.enum_types_by_name['spiHardwareNSS'] = _SPIHARDWARENSS
 DESCRIPTOR.enum_types_by_name['spiBus'] = _SPIBUS
