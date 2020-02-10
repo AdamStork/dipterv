@@ -273,18 +273,44 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.show_data_depending_on_cmd_type(self.cmd_box.currentData())
         self.show()
 
-    def on_changed_i2c_clock_speed(self):
+    # Called when I2C clock speed option is changed: add/remove widgets and set parent
+    def on_changed_i2c_speed_mode(self):
         if self.i2c_speed_mode_select.currentData() == list(sequence.dict_i2c_speedmode.values())[0]:
             self.i2c_clock_speed_select.setText("100000")           # Set default value to 100000 in case standard mode selected
-#            item = self.options_layout.takeAt(6)
-#            widget = item.widget()
-#            if widget is not None:
-#                widget.deleteLater()
-
+            self.options_layout.removeWidget(self.i2c_duty_cycle_label)
+            self.options_layout.removeWidget(self.i2c_duty_cycle_select)
+            self.i2c_duty_cycle_label.setParent(None)
+            self.i2c_duty_cycle_select.setParent(None)
         else:
             self.i2c_clock_speed_select.setText("400000")           # Set default value to 400000 in case standard mode selected
             self.options_layout.addWidget(self.i2c_duty_cycle_label,6,0)
             self.options_layout.addWidget(self.i2c_duty_cycle_select,6,2)
+
+    # Called when SPI frame format option is changed: add/remove widgets and set parent
+    def on_changed_spi_frame_format(self):
+        if self.spi_frame_format_select.currentData() == list(sequence.dict_spi_frame_format.values())[0]:
+            self.options_layout.addWidget(self.spi_first_bit_label,7,0)
+            self.options_layout.addWidget(self.spi_first_bit_select,7,1)
+            self.options_layout.addWidget(self.spi_clockmode_label,8,0)
+            self.options_layout.addWidget(self.spi_clockmode_select,8,1)
+        else:
+            self.options_layout.removeWidget(self.spi_first_bit_label)
+            self.options_layout.removeWidget(self.spi_first_bit_select)
+            self.options_layout.removeWidget(self.spi_clockmode_label)
+            self.options_layout.removeWidget(self.spi_clockmode_select)
+            self.spi_first_bit_label.setParent(None)
+            self.spi_first_bit_select.setParent(None)
+            self.spi_clockmode_label.setParent(None)
+            self.spi_clockmode_select.setParent(None)
+
+    # Called when SPI hardware NSS option is changed: enables/disable 'TI' frame format option
+    def on_changed_spi_hardware_nss(self):
+        if self.spi_hardware_nss_select.currentData() == list(sequence.dict_spi_hardware_nss.values())[0]:  # Disable 'TI' if hardware NSS is disabled
+            self.spi_frame_format_select.model().item(1).setEnabled(False)
+            self.spi_frame_format_select.setCurrentIndex(0)     # Set frame format to 'Motorola'
+            self.on_changed_spi_frame_format()                  # Call function explicitly to show special options
+        else:
+            self.spi_frame_format_select.model().item(1).setEnabled(True)
 
     # Show data depending on the command type selected
     def show_data_depending_on_cmd_type(self,cmdType):
@@ -344,9 +370,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_reg_select.setValidator(self.byteValidator)
                 self.i2c_reg_select.setPlaceholderText("0xFF")
 
-                # Set default value for clock speed
-                self.i2c_clock_speed_select.setText("100000")
-                self.i2c_speed_mode_select.activated[str].connect(self.on_changed_i2c_clock_speed)
+                # Connect signals and call functions explicitly
+                self.i2c_speed_mode_select.activated[str].connect(self.on_changed_i2c_speed_mode)
+                self.on_changed_i2c_speed_mode()
 
                 # Add widgets to layout
                 self.options_layout.addWidget(self.i2c_bus_label,0,0)
@@ -430,29 +456,32 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for i in range(len(sequence.dict_spi_first_bit)):
                     self.spi_first_bit_select.addItem(list(sequence.dict_spi_first_bit.keys())[i],list(sequence.dict_spi_first_bit.values())[i] )
 
+                # Connect signals and call functions explicitly
+                self.spi_frame_format_select.activated[str].connect(self.on_changed_spi_frame_format)
+                self.spi_hardware_nss_select.activated[str].connect(self.on_changed_spi_hardware_nss)
+                self.on_changed_spi_frame_format()
+                self.on_changed_spi_hardware_nss()
 
                 # Add widgets to layout
                 self.options_layout.addWidget(self.spi_bus_label,0,0)
-                self.options_layout.addWidget(self.spi_clockmode_label,1,0)
-                self.options_layout.addWidget(self.spi_command_label,2,0)
-                self.options_layout.addWidget(self.spi_dummyclocks_label,3,0)
-                self.options_layout.addWidget(self.spi_operating_mode_label,4,0)
-                self.options_layout.addWidget(self.spi_hardware_nss_label,5,0)
-                self.options_layout.addWidget(self.spi_frame_format_label,6,0)
-                self.options_layout.addWidget(self.spi_data_size_label,7,0)
+                self.options_layout.addWidget(self.spi_command_label,1,0)
+                self.options_layout.addWidget(self.spi_dummyclocks_label,2,0)
+                self.options_layout.addWidget(self.spi_operating_mode_label,3,0)
+                self.options_layout.addWidget(self.spi_hardware_nss_label,4,0)
+                self.options_layout.addWidget(self.spi_frame_format_label,5,0)
+                self.options_layout.addWidget(self.spi_data_size_label,6,0)
 
-                self.options_layout.addWidget(self.spi_bus_select,0,2)
-                self.options_layout.addWidget(self.spi_clockmode_select,1,2)
-                self.options_layout.addWidget(self.spi_command_select,2,2)
-                self.options_layout.addWidget(self.spi_dummyclocks_select,3,2)
-                self.options_layout.addWidget(self.spi_operating_mode_select,4,2)
-                self.options_layout.addWidget(self.spi_hardware_nss_select,5,2)
-                self.options_layout.addWidget(self.spi_frame_format_select,6,2)
-                self.options_layout.addWidget(self.spi_data_size_select,7,2)
+                self.options_layout.addWidget(self.spi_bus_select,0,1)
+                self.options_layout.addWidget(self.spi_command_select,1,1)
+                self.options_layout.addWidget(self.spi_dummyclocks_select,2,1)
+                self.options_layout.addWidget(self.spi_operating_mode_select,3,1)
+                self.options_layout.addWidget(self.spi_hardware_nss_select,4,1)
+                self.options_layout.addWidget(self.spi_frame_format_select,5,1)
+                self.options_layout.addWidget(self.spi_data_size_select,6,1)
 
                 # Layout settings
                 self.options_layout.addItem(self.spacerItem,9,0)
-                self.options_layout.setColumnMinimumWidth(1,40)
+#                self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
             print("GPIO digital optons")

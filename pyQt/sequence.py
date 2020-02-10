@@ -47,10 +47,10 @@ dict_i2c_duty_cycle = {
 }
 
 # SPI dictionaries
-dict_spi_rw = {
-    "Transmit": 0,
-    "Receive": 1
-}
+#dict_spi_rw = {
+#    "Transmit": 0,
+#    "Receive": 1
+#}
 
 dict_spi_bus = {
     "SPI1": 1,
@@ -67,7 +67,7 @@ dict_spi_mode = {
 
 dict_spi_operating_mode = {
     "Full Duplex Master": 0,
-    "Half Dupley Master": 1,
+    "Half Duplex Master": 1,
     "Transmit Only Master": 2
 }
 
@@ -97,7 +97,6 @@ dict_gpio_rw = {
     "Output": 0,
     "Input": 1
 }
-
 
 dict_gpio_state = {
     "Low": 0,
