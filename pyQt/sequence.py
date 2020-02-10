@@ -249,6 +249,20 @@ dict_usart_hw_flow = {
     "CTS and RTS": 3,
 }
 
+dict_usart_clock_polarity = {
+    "Low": 0,
+    "High": 1,
+}
+
+dict_usart_clock_phase = {
+    "One Edge": 0,
+    "Two Edge": 1,
+}
+
+dict_usart_clock_last_bit = {
+    "Disable": 0,
+    "Enable": 1,
+}
 
 
 # @brief     Classes that represent the tests

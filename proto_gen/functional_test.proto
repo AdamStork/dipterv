@@ -275,6 +275,21 @@ enum usartHardwareFlowControl{
 	USART_HW_FLOW_CTS_AND_RTS = 3;	
 }
 
+enum usartClockPolarity{
+	USART_CLOCK_POLARITY_LOW = 0;
+	USART_CLOCK_POLARITY_HIGH = 1;	
+}
+
+enum usartClockPhase{
+	USART_CLOCK_PHASE_ONE_EDGE = 0;
+	USART_CLOCK_PHASE_TWO_EDGE = 1;	
+}
+
+enum usartClockLastBit{
+	USART_CLOCK_LAST_BIT_DISABLE = 0;
+	USART_CLOCK_LAST_BIT_ENABLE = 1;	
+}
+
 message usartMessage{
  required usartBus bus = 1;
  required usartMode mode = 2;
@@ -283,6 +298,9 @@ message usartMessage{
  required usartParity parity = 5;
  required usartStopBits stopBits = 6;
  required usartDirection direction = 7;
+ optional usartClockPolarity clockPolarity = 8;
+ optional usartClockPhase clockPhase = 9;
+ optional usartClockLastBit clockLastBit = 10;
 }
 
 
