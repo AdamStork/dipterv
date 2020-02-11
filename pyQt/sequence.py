@@ -53,7 +53,7 @@ dict_spi_bus = {
     "SPI3": 3
 }
 
-dict_spi_mode = {
+dict_spi_clockmode = {
     "Mode 0": 0,
     "Mode 1": 1,
     "Mode 2": 2,
@@ -273,11 +273,10 @@ class i2c_test:
         self.dutyCycle = dutyCycle
 
 class spi_test:
-    def __init__(self, cmdType = None, bus = None, mode = None, command = None, dummyclocks = None, operatingMode = None, hardwareNSS = None, frameFormat = None,
-    dataSize = None, firstBit = None):
+    def __init__(self, cmdType = None, bus = None, command = None, dummyclocks = None, operatingMode = None, hardwareNSS = None, frameFormat = None,
+    dataSize = None, firstBit = None, clockMode = None):
         self.cmdType = cmdType
         self.bus = bus
-        self.mode = mode
         self.command = command
         self.dummyclocks = dummyclocks
         self.operatingMode = operatingMode
@@ -285,6 +284,7 @@ class spi_test:
         self.frameFormat = frameFormat
         self.dataSize = dataSize
         self.firstBit = firstBit
+        self.clockMode = clockMode
 
 class usart_test:
     def __init__(self, cmdType = None, bus = None, mode = None, baudRate = None, wordLength = None, parity = None, stopBits = None, direction = None,
@@ -377,7 +377,7 @@ def make_test_object_from_options(UI):
         selectedCommand.dataSize = UI.spi_data_size_select.currentData()
         if UI.spi_frame_format_select.currentData() == list(dict_spi_frame_format.values())[0]: # If 'Motorola' option is selected, save first bit and clock settings as well
             selectedCommand.firstBit = UI.spi_first_bit_select.currentData()
-            selectedCommand.mode = UI.spi_clockmode_select.currentData()
+            selectedCommand.clockMode = UI.spi_clockmode_select.currentData()
         return selectedCommand
 #        sequence.append(selectedCommand)
 #        add_test_object_to_test_list(selectedCommand, test_list)
@@ -402,6 +402,7 @@ def make_test_object_from_options(UI):
             selectedCommand.clockPolarity = UI.usart_clock_polarity_select.currentData()
             selectedCommand.clockPhase = UI.usart_clock_phase_select.currentData()
             selectedCommand.clockLastBit = UI.usart_clock_last_bit_select.currentData()
+        return selectedCommand
 
     elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         selectedCommand = gpio_digital()
@@ -485,25 +486,53 @@ def make_string_from_test_object(test_object):
         string += "  Addr: " + "0x{:02X}".format(test_object.address)
         string += "  Reg: " + "0x{:02X}".format(test_object.register)
         string += "  R/W: " + list(dict_i2c_rw.keys())[list(dict_i2c_rw.values()).index(test_object.direction)]
+        string += "  Mode: " + list(dict_i2c_speedmode.keys())[list(dict_i2c_speedmode.values()).index(test_object.speedMode)]
+        string += "  Speed: " + str(test_object.clockSpeed)
+        if test_object.speedMode == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, add duty cycle as well
+            string += "  Duty cycle: " + list(dict_i2c_duty_cycle.keys())[list(dict_i2c_duty_cycle.values()).index(test_object.dutyCycle)]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
         string += "SPI"
         string += "  Bus: " + list(dict_spi_bus.keys())[list(dict_spi_bus.values()).index(test_object.bus)]
-        string += "  Mode: " + list(dict_spi_mode.keys())[list(dict_spi_mode.values()).index(test_object.mode)]
         string += "  Cmd: " + "0x{:02X}".format(test_object.command)
         string += "  Dummy: " + str(test_object.dummyclocks)
-#        string += "  R/W: " + list(dict_spi_rw.keys())[list(dict_spi_rw.values()).index(test_object.direction)]
+        string += "  Op.mode: " + list(dict_spi_operating_mode.keys())[list(dict_spi_operating_mode.values()).index(test_object.operatingMode)]
+        string += "  HW NSS: " + list(dict_spi_hardware_nss.keys())[list(dict_spi_hardware_nss.values()).index(test_object.hardwareNSS)]
+        string += "  Frame format: " + list(dict_spi_frame_format.keys())[list(dict_spi_frame_format.values()).index(test_object.frameFormat)]
+        string += "  Data size: " + list(dict_spi_data_size.keys())[list(dict_spi_data_size.values()).index(test_object.dataSize)]
+        if test_object.frameFormat == list(dict_spi_frame_format.values())[0]: # If 'Motorola' option is selected
+            string += "  First bit: " + list(dict_spi_first_bit.keys())[list(dict_spi_first_bit.values()).index(test_object.firstBit)]
+            string += "  Clock mode: " + list(dict_spi_clockmode.keys())[list(dict_spi_clockmode.values()).index(test_object.clockMode)]
+
+    elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
+        string += "USART"
+        string += "  Bus: " + list(dict_usart_bus.keys())[list(dict_usart_bus.values()).index(test_object.bus)]
+        string += "  Mode: " + list(dict_usart_mode.keys())[list(dict_usart_mode.values()).index(test_object.mode)]
+        string += "  baudRate: " + str(test_object.baudRate)
+        string += "  Word Length: " + list(dict_usart_word_length.keys())[list(dict_usart_word_length.values()).index(test_object.wordLength)]
+        string += "  Parity: " + list(dict_usart_parity.keys())[list(dict_usart_parity.values()).index(test_object.parity)]
+        string += "  Stop bits: " + list(dict_usart_stop_bits.keys())[list(dict_usart_stop_bits.values()).index(test_object.stopBits)]
+        string += "  Direction: " + list(dict_usart_direction.keys())[list(dict_usart_direction.values()).index(test_object.direction)]
+        if test_object.mode == list(dict_usart_mode.values())[0]:   # If 'Asynchronous' option is selected
+            string += "  HW Flow control: " + list(dict_usart_hw_flow.keys())[list(dict_usart_hw_flow.values()).index(test_object.hwFlowControl)]
+        elif test_object.mode == list(dict_usart_mode.values())[1]:   # If 'Synchronous' option is selected
+            string += "  Clock polarity: " + list(dict_usart_clock_polarity.keys())[list(dict_usart_clock_polarity.values()).index(test_object.clockPolarity)]
+            string += "  Clock phase: " + list(dict_usart_clock_phase.keys())[list(dict_usart_clock_phase.values()).index(test_object.clockPhase)]
+            string += "  Clock last bit: " + list(dict_usart_clock_last_bit.keys())[list(dict_usart_clock_last_bit.values()).index(test_object.clockLastBit)]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         string += "GPIO"
         string += "  Pin: " +   list(dict_gpio_digital_pins.keys())[list(dict_gpio_digital_pins.values()).index(test_object.pin)]
         string += "  R/W: " +   list(dict_gpio_rw.keys())[list(dict_gpio_rw.values()).index(test_object.direction)]
         string += "  State: " + list(dict_gpio_state.keys())[list(dict_gpio_state.values()).index(test_object.state)]
+        string += "  Pull: " + list(dict_gpio_pull.keys())[list(dict_gpio_pull.values()).index(test_object.pull)]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
         string += "Analog_read"
+        string += "  Instance: " + list(dict_adc_instances.keys())[list(dict_adc_instances.values()).index(test_object.instance)]
         string += "  Pin: " + list(dict_gpio_analog_pins.keys())[list(dict_gpio_analog_pins.values()).index(test_object.pin)]
-        string += "  Res: " + list(dict_adc_res.keys())[list(dict_adc_res.values()).index(test_object.resolution)]
+        string += "  Resolution: " + list(dict_adc_res.keys())[list(dict_adc_res.values()).index(test_object.resolution)]
+        string += "  Prescaler: " + list(dict_adc_clock_prescaler.keys())[list(dict_adc_clock_prescaler.values()).index(test_object.clockPrescaler)]
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
         string += "PWM"
@@ -520,70 +549,88 @@ def make_string_from_test_object(test_object):
 # @return       test_object
 def make_test_object_from_string(string):
     words = string.split("  ")
+    option = []         # Contains "BUS", "Address" etc.
+    optionValue = []    # Contains "I2C1", "0x00" etc.
+
+    # Process string: save options and given settings to different lists
+    for i in range(len(words)):
+        if i>0:
+            newWord = words[i].split(": ")
+            option.append(newWord[0])
+            optionValue.append(newWord[1])
+
     if words[0] == list_cmd_types[0]:
         test_object = i2c_test()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.I2C_test
-        test_object.bus = list(dict_i2c_bus.values())[list(dict_i2c_bus.keys()).index(words[1][5:])]
-        test_object.address = int(words[2][6:],16)
-        test_object.register = int(words[3][5:],16)
-        test_object.direction = list(dict_i2c_rw.values())[list(dict_i2c_rw.keys()).index(words[4][5:])]
+        test_object.bus = list(dict_i2c_bus.values())[list(dict_i2c_bus.keys()).index(optionValue[0])]
+        test_object.address = int(optionValue[1],16)
+        test_object.register = int(optionValue[2],16)
+        test_object.direction = list(dict_i2c_rw.values())[list(dict_i2c_rw.keys()).index(optionValue[3])]
+        test_object.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[4])]
+        test_object.clockSpeed = int(optionValue[5])
+        if test_object.speedMode == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, add duty cycle as well
+            test_object.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[6])]
         return test_object
-#        print("Test object:")
-#        print("cmd:",test_object.cmdType)
-#        print("bus:",test_object.bus)
-#        print("address:",test_object.address)
-#        print("register:",test_object.register)
-#        print("rw:",test_object.direction)
+
     elif words[0] == list_cmd_types[1]:
         test_object = spi_test()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.SPI_test
-        test_object.bus = list(dict_spi_bus.values())[list(dict_spi_bus.keys()).index(words[1][5:])]
-        test_object.mode = list(dict_spi_mode.values())[list(dict_spi_mode.keys()).index(words[2][6:])]
-        test_object.command = int(words[3][7:],16)
-        test_object.dummyclocks = int(words[4][7:])
-        test_object.direction = list(dict_spi_rw.values())[list(dict_spi_rw.keys()).index(words[5][5:])]
+        test_object.bus = list(dict_spi_bus.values())[list(dict_spi_bus.keys()).index(optionValue[0])]
+        test_object.command = int(optionValue[1],16)
+        test_object.dummyclocks = int(optionValue[2])
+        test_object.operatingMode = list(dict_spi_operating_mode.values())[list(dict_spi_operating_mode.keys()).index(optionValue[3])]
+        test_object.hardwareNSS = list(dict_spi_hardware_nss.values())[list(dict_spi_hardware_nss.keys()).index(optionValue[4])]
+        test_object.frameFormat = list(dict_spi_frame_format.values())[list(dict_spi_frame_format.keys()).index(optionValue[5])]
+        test_object.dataSize = list(dict_spi_data_size.values())[list(dict_spi_data_size.keys()).index(optionValue[6])]
+        if test_object.frameFormat == list(dict_spi_frame_format.values())[0]: # If 'Motorola' option is selected
+            test_object.firstBit = list(dict_spi_first_bit.values())[list(dict_spi_first_bit.keys()).index(optionValue[7])]
+            test_object.clockMode = list(dict_spi_clockmode.values())[list(dict_spi_clockmode.keys()).index(optionValue[8])]
         return test_object
-#        print("Test object: ")
-#        print("cmd:",test_object.cmdType)
-#        print("bus:",test_object.bus)
-#        print("mode:",test_object.mode)
-#        print("cmd:",test_object.command)
-#        print("dum:", test_object.dummyclocks)
-#        print("rw:",test_object.direction)
+
     elif words[0] == list_cmd_types[2]:
+        test_object = usart_test()
+        test_object.cmdType = functional_test_pb2.CommandTypeEnum.USART_test
+        test_object.bus = list(dict_usart_bus.values())[list(dict_usart_bus.keys()).index(optionValue[0])]
+        test_object.mode = list(dict_usart_mode.values())[list(dict_usart_mode.keys()).index(optionValue[1])]
+        test_object.baudRate = int(optionValue[2])
+        test_object.wordLength = list(dict_usart_word_length.values())[list(dict_usart_word_length.keys()).index(optionValue[3])]
+        test_object.parity = list(dict_usart_parity.values())[list(dict_usart_parity.keys()).index(optionValue[4])]
+        test_object.stopBits = list(dict_usart_stop_bits.values())[list(dict_usart_stop_bits.keys()).index(optionValue[5])]
+        test_object.direction = list(dict_usart_direction.values())[list(dict_usart_direction.keys()).index(optionValue[6])]
+        if test_object.mode == list(dict_usart_mode.values())[0]:   # If 'Asynchronous' option is selected
+            test_object.hwFlowControl = list(dict_usart_hw_flow.values())[list(dict_usart_hw_flow.keys()).index(optionValue[7])]
+        elif test_object.mode == list(dict_usart_mode.values())[1]:   # If 'Synchronous' option is selected
+            test_object.clockPolarity = list(dict_usart_clock_polarity.values())[list(dict_usart_clock_polarity.keys()).index(optionValue[7])]
+            test_object.clockPhase = list(dict_usart_clock_phase.values())[list(dict_usart_clock_phase.keys()).index(optionValue[8])]
+            test_object.clockLastBit = list(dict_usart_clock_last_bit.values())[list(dict_usart_clock_last_bit.keys()).index(optionValue[9])]
+        return test_object
+
+    elif words[0] == list_cmd_types[3]:
         test_object = gpio_digital()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.GPIO_digital
-        test_object.pin = list(dict_gpio_digital_pins.values())[list(dict_gpio_digital_pins.keys()).index(words[1][5:])]
-        test_object.direction = list(dict_gpio_rw.values())[list(dict_gpio_rw.keys()).index(words[2][5:])]
-        test_object.state = list(dict_gpio_state.values())[list(dict_gpio_state.keys()).index(words[3][7:])]
+        test_object.pin = list(dict_gpio_digital_pins.values())[list(dict_gpio_digital_pins.keys()).index(optionValue[0])]
+        test_object.direction = list(dict_gpio_rw.values())[list(dict_gpio_rw.keys()).index(optionValue[1])]
+        test_object.state = list(dict_gpio_state.values())[list(dict_gpio_state.keys()).index(optionValue[2])]
+        test_object.pull = list(dict_gpio_pull.values())[list(dict_gpio_pull.keys()).index(optionValue[3])]
         return test_object
-#        print("Test object: ")
-#        print("cmd:",test_object.cmdType)
-#        print("pin:",test_object.pin)
-#        print("rw:",test_object.direction)
-#        print("state:", test_object.state)
-    elif words[0] == list_cmd_types[3]:
+
+    elif words[0] == list_cmd_types[4]:
         test_object = analog_read()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.Analog_read
-        test_object.pin = list(dict_gpio_analog_pins.values())[list(dict_gpio_analog_pins.keys()).index(words[1][5:])]
-        test_object.resolution = list(dict_adc_res.values())[list(dict_adc_res.keys()).index(words[2][5:])]
+        test_object.instance = list(dict_adc_instances.values())[list(dict_adc_instances.keys()).index(optionValue[0])]
+        test_object.pin = list(dict_gpio_analog_pins.values())[list(dict_gpio_analog_pins.keys()).index(optionValue[1])]
+        test_object.resolution = list(dict_adc_res.values())[list(dict_adc_res.keys()).index(optionValue[2])]
+        test_object.clockPrescaler = list(dict_adc_clock_prescaler.values())[list(dict_adc_clock_prescaler.keys()).index(optionValue[3])]
         return test_object
-#        print("Test object:")
-#        print("cmd:",test_object.cmdType)
-#        print("pin:",test_object.pin)
-#        print("Res:",test_object.resolution)
-    elif words[0] == list_cmd_types[4]:
+
+    elif words[0] == list_cmd_types[5]:
         test_object = analog_write()
         test_object.cmdType = functional_test_pb2.CommandTypeEnum.Analog_write
-        test_object.pin = list(dict_gpio_digital_pins.values())[list(dict_gpio_digital_pins.keys()).index(words[1][5:])]
-        test_object.frequency = int(words[2][6:])
-        test_object.dutyCycle = int(words[3][6:])
+        test_object.pin = list(dict_gpio_digital_pins.values())[list(dict_gpio_digital_pins.keys()).index(optionValue[0])]
+        test_object.frequency = int(optionValue[1])
+        test_object.dutyCycle = int(optionValue[2])
         return test_object
-#        print("Test object:")
-#        print("cmd:",test_object.cmdType)
-#        print("pin:",test_object.pin)
-#        print("Res:",test_object.frequency)
-#        print("Freq:",test_object.dutyCycle)
+
 
 
 # @brief        Make protobuf command from test object
@@ -605,7 +652,6 @@ def make_protobuf_command_from_test_object(test_object):
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
         cmd.spi.bus = test_object.bus
-        cmd.spi.mode = test_object.mode
         cmd.spi.command = test_object.command
         cmd.spi.dummyclocks = test_object.dummyclocks
         cmd.spi.operatingMode = test_object.operatingMode
@@ -614,7 +660,7 @@ def make_protobuf_command_from_test_object(test_object):
         cmd.spi.dataSize = test_object.dataSize
         if test_object.frameFormat == list(dict_spi_frame_format.values())[0]:
             cmd.spi.firstBit = test_object.firstBit
-            cmd.spi.mode = test_object.mode
+            cmd.spi.clockMode = test_object.clockMode
 
     elif test_object.cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
         cmd.usart.bus = test_object.bus

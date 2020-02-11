@@ -94,14 +94,14 @@ enum spiFirstBit{
 
 message spiMessage{
  required spiBus bus = 1;
- required clockMode mode = 2;	//ide esetleg hintet megjeleniteni
- required uint32 command = 3;
- required uint32 dummyclocks = 4;
- required spiOperatingMode operatingMode = 5;
- required spiHardwareNSS hardwareNSS = 6;
- required spiFrameFormat frameFormat = 7;
- required spiDataSize dataSize = 8;
- optional spiFirstBit firstBit = 9;
+ required uint32 command = 2;
+ required uint32 dummyclocks = 3;
+ required spiOperatingMode operatingMode = 4;
+ required spiHardwareNSS hardwareNSS = 5;
+ required spiFrameFormat frameFormat = 6;
+ required spiDataSize dataSize = 7;
+ optional spiFirstBit firstBit = 8;
+ optional clockMode clockMode = 9;	//ide esetleg hintet megjeleniteni
 }
 
 

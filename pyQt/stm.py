@@ -467,8 +467,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.spi_bus_select.addItem(list(sequence.dict_spi_bus.keys())[i],list(sequence.dict_spi_bus.values())[i] )
 
                 # Fill SPI clock mode combobox
-                for i in range(len(sequence.dict_spi_mode)):
-                    self.spi_clockmode_select.addItem(list(sequence.dict_spi_mode.keys())[i],list(sequence.dict_spi_mode.values())[i] )
+                for i in range(len(sequence.dict_spi_clockmode)):
+                    self.spi_clockmode_select.addItem(list(sequence.dict_spi_clockmode.keys())[i],list(sequence.dict_spi_clockmode.values())[i] )
 
                 # Set placeholders and validators for input field
                 self.spi_command_select.setValidator(self.byteValidator)
