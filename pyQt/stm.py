@@ -37,7 +37,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clear_button.clicked.connect(self.clear_response)
         self.cfg_browse_button.clicked.connect(self.browse_cfg)
         self.cfg_load_button.clicked.connect(self.load_cfg)
-        self.cfg_checkbox.stateChanged.connect(self.checkbox_state_changed)
+        self.cfg_checkbox.stateChanged.connect(self.cfg_checkbox_state_changed)
         self.fill_cmd_box()
         # flags: avoid command reselection
         self.I2C_active = False
@@ -50,10 +50,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.LL = link_layer()
         self.ser = serial.Serial()
         self.close_button.setEnabled(False)
-        self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]")) # Byte validator for input fields (0xhh format)
-        self.decValidator  = QRegExpValidator(QRegExp("[0-9][0-9]")) # 2-digit decimal validator for input fields
-        self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]")) # Max. 3 digit validator for duty cycle [0-100], limits checked
-        self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]")) # Max. 4 digit validator for freqency [0-1000], limits checked
+        # Validators
+        self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]"))          # Byte validator for input fields (0xhh format)
+        self.decValidator  = QRegExpValidator(QRegExp("[0-9][0-9]"))                        # 2-digit decimal validator for input fields
+        self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9]"))      # 5-digit decimal validator for input fields
+        self.baudValidator  = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9][0-9]"))   # 6-digit decimal validator for input fields
+        self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]"))                   # Max. 3 digit validator for duty cycle [0-100], limits checked
+        self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]"))              # Max. 4 digit validator for freqency [0-1000], limits checked
         self.test_list = []     # List filled with test objects
         self.helpLabel_list = []
         self.scroll_layout.addStretch()                            # Add stretch for scroll area
@@ -185,6 +188,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Send sequence via serial port
     def send_seq(self):
+        if not self.test_list:
+            return
         separationLabelStart = QLabel("------------------------------------------------------")
         sequenceStartedLabel = QLabel("Sequence started.")
         sequenceStartedLabel.setFont(self.italicFont)
@@ -260,7 +265,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             errorLabel = QLabel("No such file or directory")
             self.scroll_layout.addWidget(errorLabel)
 
-    def checkbox_state_changed(self):
+    # Check config checkbox state
+    def cfg_checkbox_state_changed(self):
         if self.cfg_checkbox.isChecked():
             self.cfg_browse_button.setEnabled(True)
             self.cfg_load_button.setEnabled(True)
@@ -273,6 +279,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.on_changed_cmd_box()
             deviceInfoLabel = QLabel("Config removed.")
             self.scroll_layout.addWidget(deviceInfoLabel)
+
+    # Check pwm time checkbox state
+    def pwm_time_checkbox_state_changed(self):
+        if self.pwm_time_checkbox.isChecked():
+            self.pwm_time_select.setEnabled(True)
+        else:
+            self.pwm_time_select.setEnabled(False)
+
 
     # Fill combobox with commands
     def fill_cmd_box(self):
@@ -666,10 +680,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.gpio_pin_label = QLabel("GPIO pin", self)
                 self.pwm_freq_label= QLabel("Frequency", self)
                 self.pwm_duty_label = QLabel("Duty cycle", self)
+                self.pwm_time_checkbox = QCheckBox("Active for given time (ms) only")
+                self.pwm_time_label = QLabel("Time",self)
 
                 self.gpio_pin_select = QComboBox(self)
                 self.pwm_freq_select = QLineEdit(self)
                 self.pwm_duty_select = QLineEdit(self)
+                self.pwm_time_select = QLineEdit(self)
 
                 # Fill GPIO pins combobox
                 if self.use_config_file == True:
@@ -686,6 +703,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.pwm_duty_select.setValidator(self.dutyValidator)
                 self.pwm_duty_select.setPlaceholderText("0..100")
 
+                self.pwm_time_select.setValidator(self.pwmTimeValidator)
+                self.pwm_time_select.setPlaceholderText("1000")
+
+                # Connect signal and call function explicitly
+                self.pwm_time_checkbox.stateChanged.connect(self.pwm_time_checkbox_state_changed)
+                self.pwm_time_checkbox_state_changed()
+
                 # Add widgets to layout
                 self.options_layout.addWidget(self.gpio_pin_label,0,0)
                 self.options_layout.addWidget(self.pwm_freq_label,1,0)
@@ -695,8 +719,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.pwm_freq_select,1,2)
                 self.options_layout.addWidget(self.pwm_duty_select,2,2)
 
+                self.options_layout.addWidget(self.pwm_time_checkbox,3,0,1,3)
+                self.options_layout.addWidget(self.pwm_time_label,4,0)
+                self.options_layout.addWidget(self.pwm_time_select,4,2)
+
                 # Layout settings
-                self.options_layout.addItem(self.spacerItem,4,0)
+                self.options_layout.addItem(self.spacerItem,5,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
@@ -774,6 +802,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.usart_hw_flow_control_select.addItem(list(sequence.dict_usart_hw_flow.keys())[i],list(sequence.dict_usart_hw_flow.values())[i] )
 
                 # Set placeholders and validator for input fields
+                self.usart_baudrate_select.setValidator(self.baudValidator)
                 self.usart_baudrate_select.setPlaceholderText("115200")
                 self.usart_command_select.setValidator(self.byteValidator)
                 self.usart_command_select.setPlaceholderText("0xFF")

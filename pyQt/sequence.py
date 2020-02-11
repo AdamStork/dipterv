@@ -259,6 +259,12 @@ dict_usart_clock_last_bit = {
     "Enable": 1,
 }
 
+# PWM dictionaries
+dict_pwm_time_dependency = {
+    "Disabled": 0,
+    "Enabled": 1,
+}
+
 
 # @brief        Make test objects from the selected options and add it to test_list.
 # @param[in]    UI: user interface (e.g. MyWindow class)
@@ -359,6 +365,15 @@ def make_test_object_from_options(UI):
             UI.pwm_duty_select.setText("0")
         else:
             cmd.analog_out.dutyCycle = int(UI.pwm_duty_select.text())
+        if UI.pwm_time_checkbox.isChecked():
+            cmd.analog_out.dependency = list(dict_pwm_time_dependency.values())[1]
+            if is_empty(UI.pwm_time_select.text()):
+                cmd.analog_out.time = 0
+                UI.pwm_time_select.setText("0")
+            else:
+                cmd.analog_out.time = int(UI.pwm_time_select.text())
+        else:
+            cmd.analog_out.dependency = list(dict_pwm_time_dependency.values())[0]
         return cmd
 
     else:
@@ -458,6 +473,9 @@ def make_string_from_test_object(test_object):
         string += "  Pin: " + list(dict_gpio_digital_pins.keys())[list(dict_gpio_digital_pins.values()).index(test_object.analog_out.pin)]
         string += "  Freq: " + str(test_object.analog_out.frequency)
         string += "  Duty: " + str(test_object.analog_out.dutyCycle)
+        string += "  Time dependency: " + list(dict_pwm_time_dependency.keys())[list(dict_pwm_time_dependency.values()).index(test_object.analog_out.dependency)]
+        if test_object.analog_out.dependency == list(dict_pwm_time_dependency.values())[1]: # If time dependency is set to 'Enabled'
+            string += "  Time: " + str(test_object.analog_out.time)
 
     return string
 
@@ -545,6 +563,9 @@ def make_test_object_from_string(string):
         test_object.analog_out.pin = list(dict_gpio_digital_pins.values())[list(dict_gpio_digital_pins.keys()).index(optionValue[0])]
         test_object.analog_out.frequency = int(optionValue[1])
         test_object.analog_out.dutyCycle = int(optionValue[2])
+        test_object.analog_out.dependency = list(dict_pwm_time_dependency.values())[list(dict_pwm_time_dependency.keys()).index(optionValue[3])]
+        if test_object.analog_out.dependency == list(dict_pwm_time_dependency.values())[1]: # If time dependency is set to 'Enabled'
+            test_object.analog_out.time = int(optionValue[4])
         return test_object
 
 

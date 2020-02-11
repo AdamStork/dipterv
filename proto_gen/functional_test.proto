@@ -9,6 +9,7 @@ enum CommandTypeEnum{
   GPIO_digital = 4;
   Analog_read = 5;		// Analog in, ADC config
   Analog_write = 6;		// Analog out, PWM
+  Timer_single = 7;
 }
 
 
@@ -216,13 +217,18 @@ message analogIN{
  required adcClockPrescaler clockPrescaler = 4;
 }
 
-
+enum pwmTimeDependency{		
+	PWM_TIME_DEPENDENCY_DISABLED = 0;
+	PWM_TIME_DEPENDENCY_ENABLED = 1;
+}
 
 // Analog OUT message
 message analogOUT{
  required gpioPins pin = 1;
  required uint32 frequency = 2;
  required uint32 dutyCycle = 3;
+ required pwmTimeDependency dependency = 4;
+ optional uint32 time = 5;
 }
 
 
