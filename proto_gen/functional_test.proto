@@ -9,7 +9,6 @@ enum CommandTypeEnum{
   GPIO_digital = 4;
   Analog_read = 5;		// Analog in, ADC config
   Analog_write = 6;		// Analog out, PWM
-  Timer_single = 7;
 }
 
 
