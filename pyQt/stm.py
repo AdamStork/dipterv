@@ -76,6 +76,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             currentItem = self.sequence_list.takeItem(currentRow)
             self.sequence_list.insertItem(currentRow - 1, currentItem)
             self.sequence_list.setCurrentRow(currentRow - 1)
+            testMovedUpLabel = QLabel("Test moved upward.")
+            testMovedUpLabel.setFont(self.italicFont)
+            self.scroll_layout.addWidget(testMovedUpLabel)
 #            print(self.test_list[0].cmdType)
 
 
@@ -89,6 +92,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             currentItem = self.sequence_list.takeItem(currentRow)
             self.sequence_list.insertItem(currentRow + 1, currentItem)
             self.sequence_list.setCurrentRow(currentRow + 1)
+            testMovedDownLabel = QLabel("Test moved downward.")
+            testMovedDownLabel.setFont(self.italicFont)
+            self.scroll_layout.addWidget(testMovedDownLabel)
 #            print(self.test_list[0].cmdType)
 
 
@@ -128,6 +134,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def delete_seq(self):
         self.sequence_list.clear()                  # Delete sequence list
         sequence.delete_test_list(self.test_list)        # Delete test list
+        sequenceDeletedLabel = QLabel("Sequence deleted.")
+        sequenceDeletedLabel.setFont(self.italicFont)
+        self.scroll_layout.addWidget(sequenceDeletedLabel)
 #        print("len seq:", len(self.sequence_list))
 #        print("len test:", len(self.test_list))
 
@@ -147,6 +156,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
            file.write(data_line[i])
            file.write("\n")
         file.close()
+        sequenceSavedLabel = QLabel("Sequence saved.")
+        sequenceSavedLabel.setFont(self.italicFont)
+        self.scroll_layout.addWidget(sequenceSavedLabel)
 
     # Load sequence: open text file, and read line-by-line
     def load_seq(self):
@@ -166,9 +178,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     test_object = sequence.make_test_object_from_string(data_line[i])           # Make object from string line
                     sequence.add_test_object_to_test_list(test_object, self.test_list)          # Add object to test list
                 file.close()
+                sequenceLoadedLabel = QLabel("Sequence loaded.")
+                sequenceLoadedLabel.setFont(self.italicFont)
+                self.scroll_layout.addWidget(sequenceLoadedLabel)
+
 
     # Send sequence via serial port
     def send_seq(self):
+        separationLabelStart = QLabel("------------------------------------------------------")
+        sequenceStartedLabel = QLabel("Sequence started.")
+        sequenceStartedLabel.setFont(self.italicFont)
+        self.scroll_layout.addWidget(separationLabelStart)
+        self.scroll_layout.addWidget(sequenceStartedLabel)
         for i in range(len(self.test_list)):
             pb = sequence.make_protobuf_command_from_test_object(self.test_list[i])    # Make protobuf command
             self.LL.link_frame_data(pb)            # Frame protobuf data
@@ -202,6 +223,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.scroll_layout.addWidget(responseLabel)
             last_widget = self.scroll_layout.itemAt(self.scroll_layout.count()-1).widget()
             QtCore.QTimer.singleShot(0, partial(self.scrollArea.ensureWidgetVisible, last_widget))
+
+        separationLabelFinish = QLabel("------------------------------------------------------")
+        sequenceFinishedLabel = QLabel("Sequence finished.")
+        sequenceFinishedLabel.setFont(self.italicFont)
+        self.scroll_layout.addWidget(sequenceFinishedLabel)
+        self.scroll_layout.addWidget(separationLabelFinish)
 
     # Clear response (scrollArea)
     def clear_response(self):
