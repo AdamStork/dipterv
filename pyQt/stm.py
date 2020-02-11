@@ -335,20 +335,20 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_clock_phase_select.setParent(None)
                 self.usart_clock_last_bit_select.setParent(None)
 
-            self.options_layout.addWidget(self.usart_hw_flow_control_label,7,0)
-            self.options_layout.addWidget(self.usart_hw_flow_control_select,7,2)
+            self.options_layout.addWidget(self.usart_hw_flow_control_label,8,0)
+            self.options_layout.addWidget(self.usart_hw_flow_control_select,8,2)
         # If 'Synchronous' mode is selected: remove HW flow control settings if necessary, add clock settings
         else:
             self.options_layout.removeWidget(self.usart_hw_flow_control_label)
             self.options_layout.removeWidget(self.usart_hw_flow_control_select)
             self.usart_hw_flow_control_label.setParent(None)
             self.usart_hw_flow_control_select.setParent(None)
-            self.options_layout.addWidget(self.usart_clock_polarity_label,7,0)
-            self.options_layout.addWidget(self.usart_clock_phase_label,8,0)
-            self.options_layout.addWidget(self.usart_clock_last_bit_label,9,0)
-            self.options_layout.addWidget(self.usart_clock_polarity_select,7,2)
-            self.options_layout.addWidget(self.usart_clock_phase_select,8,2)
-            self.options_layout.addWidget(self.usart_clock_last_bit_select,9,2)
+            self.options_layout.addWidget(self.usart_clock_polarity_label,8,0)
+            self.options_layout.addWidget(self.usart_clock_phase_label,9,0)
+            self.options_layout.addWidget(self.usart_clock_last_bit_label,10,0)
+            self.options_layout.addWidget(self.usart_clock_polarity_select,8,2)
+            self.options_layout.addWidget(self.usart_clock_phase_select,9,2)
+            self.options_layout.addWidget(self.usart_clock_last_bit_select,10,2)
 
 
 
@@ -683,6 +683,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_parity_label = QLabel("Parity", self)
                 self.usart_stop_bits_label = QLabel("Stop Bits", self)
                 self.usart_direction_label = QLabel("Direction", self)
+                self.usart_command_label = QLabel("Command", self)
                 self.usart_clock_polarity_label = QLabel("Clock Polarity", self)
                 self.usart_clock_phase_label = QLabel("Clock Phase", self)
                 self.usart_clock_last_bit_label = QLabel("Clock Last Bit", self)
@@ -695,6 +696,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_parity_select = QComboBox(self)
                 self.usart_stop_bits_select = QComboBox(self)
                 self.usart_direction_select = QComboBox(self)
+                self.usart_command_select = QLineEdit(self)
                 self.usart_clock_polarity_select = QComboBox(self)
                 self.usart_clock_phase_select = QComboBox(self)
                 self.usart_clock_last_bit_select = QComboBox(self)
@@ -744,8 +746,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for i in range(len(sequence.dict_usart_hw_flow)):
                     self.usart_hw_flow_control_select.addItem(list(sequence.dict_usart_hw_flow.keys())[i],list(sequence.dict_usart_hw_flow.values())[i] )
 
-                # Set placeholder for input field
+                # Set placeholders and validator for input fields
                 self.usart_baudrate_select.setPlaceholderText("115200")
+                self.usart_command_select.setValidator(self.byteValidator)
+                self.usart_command_select.setPlaceholderText("0xFF")
 
                 # Connect signal and call function explicitly
                 self.usart_mode_select.activated[str].connect(self.on_changed_usart_mode)
@@ -759,6 +763,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.usart_parity_label,4,0)
                 self.options_layout.addWidget(self.usart_stop_bits_label,5,0)
                 self.options_layout.addWidget(self.usart_direction_label,6,0)
+                self.options_layout.addWidget(self.usart_command_label,7,0)
 
                 self.options_layout.addWidget(self.usart_bus_select,0,2)
                 self.options_layout.addWidget(self.usart_mode_select,1,2)
@@ -767,9 +772,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.usart_parity_select,4,2)
                 self.options_layout.addWidget(self.usart_stop_bits_select,5,2)
                 self.options_layout.addWidget(self.usart_direction_select,6,2)
+                self.options_layout.addWidget(self.usart_command_select,7,2)
 
                 # Layout settings
-                self.options_layout.addItem(self.spacerItem,10,0)
+                self.options_layout.addItem(self.spacerItem,11,0)
                 self.options_layout.setColumnMinimumWidth(1,10)
 
 

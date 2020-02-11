@@ -293,10 +293,11 @@ message usartMessage{
  required usartParity parity = 5;
  required usartStopBits stopBits = 6;
  required usartDirection direction = 7;
- optional usartClockPolarity clockPolarity = 8;
- optional usartClockPhase clockPhase = 9;
- optional usartClockLastBit clockLastBit = 10;
- optional usartHardwareFlowControl hwFlowControl = 11;
+ required uint32 command = 8;			// byte
+ optional usartClockPolarity clockPolarity = 9;
+ optional usartClockPhase clockPhase = 10;
+ optional usartClockLastBit clockLastBit = 11;
+ optional usartHardwareFlowControl hwFlowControl = 12;
 }
 
 

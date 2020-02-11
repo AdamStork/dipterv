@@ -288,7 +288,7 @@ class spi_test:
 
 class usart_test:
     def __init__(self, cmdType = None, bus = None, mode = None, baudRate = None, wordLength = None, parity = None, stopBits = None, direction = None,
-    clockPolarity = None, clockPhase = None, clockLastBit = None, hwFlowControl = None):
+    command = None, clockPolarity = None, clockPhase = None, clockLastBit = None, hwFlowControl = None):
         self.cmdType = cmdType
         self.bus = bus
         self.mode = mode
@@ -297,6 +297,7 @@ class usart_test:
         self.parity = parity
         self.stopBits = stopBits
         self.direction = direction
+        self.command = command
         self.clockPolarity = clockPolarity
         self.clockPhase = clockPhase
         self.clockLastBit = clockLastBit
@@ -396,6 +397,11 @@ def make_test_object_from_options(UI):
         selectedCommand.parity = UI.usart_parity_select.currentData()
         selectedCommand.stopBits = UI.usart_stop_bits_select.currentData()
         selectedCommand.direction = UI.usart_direction_select.currentData()
+        if is_empty(UI.usart_command_select.text()):
+            selectedCommand.command = 0
+            UI.usart_command_select.setText("0x00")
+        else:
+            selectedCommand.command = int(UI.usart_command_select.text(),16)
         if UI.usart_mode_select.currentData() == list(dict_usart_mode.values())[0]:     # If 'Asynchronous' mode is selected, save HW flow control settings
             selectedCommand.hwFlowControl = UI.usart_hw_flow_control_select.currentData()
         elif UI.usart_mode_select.currentData() == list(dict_usart_mode.values())[1]:   # If 'Synchronous' mode is selected, save clock settings
@@ -513,6 +519,7 @@ def make_string_from_test_object(test_object):
         string += "  Parity: " + list(dict_usart_parity.keys())[list(dict_usart_parity.values()).index(test_object.parity)]
         string += "  Stop bits: " + list(dict_usart_stop_bits.keys())[list(dict_usart_stop_bits.values()).index(test_object.stopBits)]
         string += "  Direction: " + list(dict_usart_direction.keys())[list(dict_usart_direction.values()).index(test_object.direction)]
+        string += "  Cmd: " + "0x{:02X}".format(test_object.command)
         if test_object.mode == list(dict_usart_mode.values())[0]:   # If 'Asynchronous' option is selected
             string += "  HW Flow control: " + list(dict_usart_hw_flow.keys())[list(dict_usart_hw_flow.values()).index(test_object.hwFlowControl)]
         elif test_object.mode == list(dict_usart_mode.values())[1]:   # If 'Synchronous' option is selected
@@ -597,12 +604,13 @@ def make_test_object_from_string(string):
         test_object.parity = list(dict_usart_parity.values())[list(dict_usart_parity.keys()).index(optionValue[4])]
         test_object.stopBits = list(dict_usart_stop_bits.values())[list(dict_usart_stop_bits.keys()).index(optionValue[5])]
         test_object.direction = list(dict_usart_direction.values())[list(dict_usart_direction.keys()).index(optionValue[6])]
+        test_object.command = int(optionValue[7],16)
         if test_object.mode == list(dict_usart_mode.values())[0]:   # If 'Asynchronous' option is selected
-            test_object.hwFlowControl = list(dict_usart_hw_flow.values())[list(dict_usart_hw_flow.keys()).index(optionValue[7])]
+            test_object.hwFlowControl = list(dict_usart_hw_flow.values())[list(dict_usart_hw_flow.keys()).index(optionValue[8])]
         elif test_object.mode == list(dict_usart_mode.values())[1]:   # If 'Synchronous' option is selected
-            test_object.clockPolarity = list(dict_usart_clock_polarity.values())[list(dict_usart_clock_polarity.keys()).index(optionValue[7])]
-            test_object.clockPhase = list(dict_usart_clock_phase.values())[list(dict_usart_clock_phase.keys()).index(optionValue[8])]
-            test_object.clockLastBit = list(dict_usart_clock_last_bit.values())[list(dict_usart_clock_last_bit.keys()).index(optionValue[9])]
+            test_object.clockPolarity = list(dict_usart_clock_polarity.values())[list(dict_usart_clock_polarity.keys()).index(optionValue[8])]
+            test_object.clockPhase = list(dict_usart_clock_phase.values())[list(dict_usart_clock_phase.keys()).index(optionValue[9])]
+            test_object.clockLastBit = list(dict_usart_clock_last_bit.values())[list(dict_usart_clock_last_bit.keys()).index(optionValue[10])]
         return test_object
 
     elif words[0] == list_cmd_types[3]:
@@ -670,6 +678,7 @@ def make_protobuf_command_from_test_object(test_object):
         cmd.usart.parity = test_object.parity
         cmd.usart.stopBits = test_object.stopBits
         cmd.usart.direction = test_object.direction
+        cmd.usart.command = test_object.command
         if test_object.mode == list(dict_usart_mode.values())[0]:
             cmd.usart.hwFlowControl = test_object.hwFlowControl
         elif test_object.mode == list(dict_usart_mode.values())[1]:
