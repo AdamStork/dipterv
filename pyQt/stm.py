@@ -202,7 +202,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             try:
                 self.ser.write(self.LL.tx_buffer)
                 command_send_success = 'Command sent'
-                self.read_data_depending_on_cmd_type(self.test_list[i].cmdType)
+                self.read_data_depending_on_cmd_type(self.test_list[i].commandType)
             except serial.serialutil.SerialException:
                 if self.ser.is_open:
                     command_send_success = 'Error while sending command'
@@ -865,6 +865,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
                                     # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
+        elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
+            response_num = 5        # todo
         elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
             response_num = 4        # Frame:2, CmdType: 1+1
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
