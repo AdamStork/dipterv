@@ -10,8 +10,15 @@
 //#include <stdbool.h>
 #include "functional_test.pb.h"
 
-bool encode_message(uint8_t* pBuffer,Command* message_out);
-bool decode_message(uint8_t* pBuffer, Command* msg);
+typedef enum{
+	STATE_WAIT,
+	STATE_PROCESS,
+	STATE_DECODE,
+	STATE_TEST
+} StateType;
+
+bool encode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_out);
+bool decode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* msg);
 
 void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize);
 void buffer_send(uint8_t* pBuffer, uint8_t pSize);
