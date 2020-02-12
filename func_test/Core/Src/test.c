@@ -16,7 +16,7 @@
 bool frameReady = false;
 uint8_t receiveByte;
 uint8_t transmitByte;
-uint8_t receiveBuffer[128];
+uint8_t receiveBuffer[90];
 uint8_t transmitBuffer[128];
 uint8_t receiveBufferLen;
 link_layer_t linkLayer;
@@ -27,10 +27,10 @@ link_layer_t linkLayer;
  * @param[in]	message_out: pointer to message to encode
  * @return	status: true, if encoding was successful
  */
-bool encode_message(uint8_t* pBuffer,Command* message_out)
+bool encode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_out)
 {
 	bool status;
-	pb_ostream_t stream_out = pb_ostream_from_buffer(pBuffer,sizeof(pBuffer));
+	pb_ostream_t stream_out = pb_ostream_from_buffer(pBuffer, pBufferLen);
 	status = pb_encode(&stream_out,Command_fields,message_out);
 	return status;
 }
@@ -41,10 +41,10 @@ bool encode_message(uint8_t* pBuffer,Command* message_out)
  * @param[out]	message_in: decoded message
  * @return	status: true, if encoding was successful
  */
-bool decode_message(uint8_t* pBuffer, Command* message_in)
+bool decode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_in)
 {
 	bool status;
-	pb_istream_t stream_in = pb_istream_from_buffer(pBuffer, sizeof(pBuffer));
+	pb_istream_t stream_in = pb_istream_from_buffer(pBuffer, pBufferLen);
 	status = pb_decode(&stream_in, Command_fields,message_in);
 	return status;
 }
@@ -85,17 +85,12 @@ void enter_processing_state(void)
 	  HAL_UART_Receive_DMA(&huart2,(uint8_t*)&receiveByte, 1);
 	  if(frameReady){
 		  frameReady = false;
-		  messageDecodeSuccessful = decode_message(receiveBuffer, &message_in);
+		  messageDecodeSuccessful = decode_message(receiveBuffer, sizeof(receiveBuffer), &message_in);
+		  buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
 		  if(messageDecodeSuccessful){
 			  switch(message_in.commandType){
+
 			  case CommandTypeEnum_I2C_test:
-				  // perif_init()
-				  // perif_test()
-				  // perif_uninit()
-				  break;
-			  case CommandTypeEnum_SPI_test:
-				  break;
-			  case CommandTypeEnum_LED_test:
 				  HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
 				  if(testToggle){
 					  message_out.commandType = CommandTypeEnum_LED_test;
@@ -105,9 +100,10 @@ void enter_processing_state(void)
 					  message_out.commandType = CommandTypeEnum_GPIO_digital;
 					  testToggle = true;
 				  }
-				  encode_message(transmitBuffer,&message_out);
+				  encode_message(transmitBuffer,sizeof(transmitBuffer), &message_out);
 				  link_set_phy_write_fn(&linkLayer,&buffer_send);
 				  link_write(&linkLayer,transmitBuffer,strlen((char*)transmitBuffer));
+				  buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
 				  break;
 
 			  default:
