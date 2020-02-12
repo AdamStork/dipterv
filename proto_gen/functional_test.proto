@@ -40,7 +40,7 @@ enum i2cFastModeDutyCycle{
 message i2cMessage{
  required i2cBus bus = 1;
  required uint32 address = 2;
- required uint32 register = 3;
+ required uint32 reg = 3;
  required i2cDirection direction = 4; 	// 1: read, 0: write
  required i2cSpeedMode speedMode = 5;
  required uint32 clockSpeed = 6;

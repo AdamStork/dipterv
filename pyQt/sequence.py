@@ -281,10 +281,10 @@ def make_test_object_from_options(UI):
         else:
             cmd.i2c.address = int(UI.i2c_addr_select.text(),16)      # Convert to int
         if is_empty(UI.i2c_reg_select.text()):
-            cmd.i2c.register = 0
+            cmd.i2c.reg = 0
             UI.i2c_reg_select.setText("0x00")
         else:
-            cmd.i2c.register = int(UI.i2c_reg_select.text(),16)           # Convert to int
+            cmd.i2c.reg = int(UI.i2c_reg_select.text(),16)           # Convert to int
         cmd.i2c.direction = UI.i2c_rw_select.currentData()
         cmd.i2c.speedMode = UI.i2c_speed_mode_select.currentData()
         cmd.i2c.clockSpeed = int(UI.i2c_clock_speed_select.text())
@@ -417,7 +417,7 @@ def make_string_from_test_object(test_object):
         string += "I2C"
         string += "  Bus: " + list(dict_i2c_bus.keys())[list(dict_i2c_bus.values()).index(test_object.i2c.bus)]
         string += "  Addr: " + "0x{:02X}".format(test_object.i2c.address)
-        string += "  Reg: " + "0x{:02X}".format(test_object.i2c.register)
+        string += "  Reg: " + "0x{:02X}".format(test_object.i2c.reg)
         string += "  R/W: " + list(dict_i2c_rw.keys())[list(dict_i2c_rw.values()).index(test_object.i2c.direction)]
         string += "  Mode: " + list(dict_i2c_speedmode.keys())[list(dict_i2c_speedmode.values()).index(test_object.i2c.speedMode)]
         string += "  Speed: " + str(test_object.i2c.clockSpeed)
@@ -502,7 +502,7 @@ def make_test_object_from_string(string):
         test_object.commandType = functional_test_pb2.CommandTypeEnum.I2C_test
         test_object.i2c.bus = list(dict_i2c_bus.values())[list(dict_i2c_bus.keys()).index(optionValue[0])]
         test_object.i2c.address = int(optionValue[1],16)
-        test_object.i2c.register = int(optionValue[2],16)
+        test_object.i2c.reg = int(optionValue[2],16)
         test_object.i2c.direction = list(dict_i2c_rw.values())[list(dict_i2c_rw.keys()).index(optionValue[3])]
         test_object.i2c.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[4])]
         test_object.i2c.clockSpeed = int(optionValue[5])
