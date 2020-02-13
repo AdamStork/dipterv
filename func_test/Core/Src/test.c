@@ -20,6 +20,7 @@ uint8_t receiveBuffer[90];
 uint8_t transmitBuffer[128];
 uint8_t receiveBufferLen;
 link_layer_t linkLayer;
+StateType deviceState;
 
 
 /** @brief 	Encode message
@@ -79,41 +80,77 @@ void enter_processing_state(void)
 	Command message_out = Command_init_zero;
 	buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
 	bool messageDecodeSuccessful = false;
-	bool testToggle = false;
+	deviceState = STATE_WAIT;
 
 	while (1){
-	  HAL_UART_Receive_DMA(&huart2,(uint8_t*)&receiveByte, 1);
-	  if(frameReady){
-		  frameReady = false;
-		  messageDecodeSuccessful = decode_message(receiveBuffer, sizeof(receiveBuffer), &message_in);
-		  buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
-		  if(messageDecodeSuccessful){
-			  switch(message_in.commandType){
+		switch(deviceState){
+		case STATE_WAIT:
+//			HAL_UART_Receive_DMA(&huart2,(uint8_t*)&receiveByte, 1);
+			HAL_UART_Receive(&huart2,(uint8_t*)&receiveByte, 1,HAL_MAX_DELAY);
+			deviceState = STATE_PROCESS;
+			break;
+		case STATE_PROCESS:
+			link_parse_byte(&linkLayer, receiveByte);
+			if(link_get_valid_frame(&linkLayer,receiveBuffer, &receiveBufferLen)){
+				deviceState = STATE_DECODE;
+			}
+			else{
+				deviceState = STATE_WAIT;
+			}
+			break;
+		case STATE_DECODE:
+			messageDecodeSuccessful = decode_message(receiveBuffer, sizeof(receiveBuffer), &message_in);
+			buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+			if(messageDecodeSuccessful){
+				deviceState = STATE_TEST;
+			}
+			else{
+				deviceState = STATE_WAIT;
+			}
+			break;
+		case STATE_TEST:
+			switch(message_in.commandType){
 
-			  case CommandTypeEnum_I2C_test:
-				  HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-				  if(testToggle){
-					  message_out.commandType = CommandTypeEnum_LED_test;
-					  testToggle = false;
-				  }
-				  else{
-					  message_out.commandType = CommandTypeEnum_GPIO_digital;
-					  testToggle = true;
-				  }
-				  encode_message(transmitBuffer,sizeof(transmitBuffer), &message_out);
-				  link_set_phy_write_fn(&linkLayer,&buffer_send);
-				  link_write(&linkLayer,transmitBuffer,strlen((char*)transmitBuffer));
-				  buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
-				  break;
+			case CommandTypeEnum_I2C_test:
+				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+				message_out.commandType = CommandTypeEnum_I2C_test;
+				break;
 
-			  default:
-				  break;
-			  }
-		  }
-	  }
-	}
+			case CommandTypeEnum_SPI_test:
+				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+				message_out.commandType = CommandTypeEnum_SPI_test;
+				break;
 
+			case CommandTypeEnum_USART_test:
+				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+				message_out.commandType = CommandTypeEnum_USART_test;
+				break;
+
+			case CommandTypeEnum_GPIO_digital:
+				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+				message_out.commandType = CommandTypeEnum_GPIO_digital;
+				break;
+
+			case CommandTypeEnum_Analog_read:
+				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+				message_out.commandType = CommandTypeEnum_Analog_read;
+				break;
+
+			case CommandTypeEnum_Analog_write:
+				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+				message_out.commandType = CommandTypeEnum_Analog_write;
+				break;
+
+			default:
+				break;
+			} /* switch(message_in.commandType) */
+			encode_message(transmitBuffer,sizeof(transmitBuffer), &message_out);
+			link_set_phy_write_fn(&linkLayer,&buffer_send);
+			link_write(&linkLayer,transmitBuffer,strlen((char*)transmitBuffer));
+			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
+			deviceState = STATE_WAIT;
+			break;
+		}  /* switch(deviceState) */
+	} /* while(1) */
 }
 
-
-/** TODO: I2C test: perif init, test: write,  perif uninit **/
