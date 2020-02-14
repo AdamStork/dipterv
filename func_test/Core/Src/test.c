@@ -127,7 +127,7 @@ void enter_processing_state(void)
 				break;
 
 			case CommandTypeEnum_GPIO_digital:
-				gpio_test(&message_in);
+				gpio_test(&message_in, &message_out);
 				break;
 
 			case CommandTypeEnum_Analog_read:
@@ -146,7 +146,12 @@ void enter_processing_state(void)
 			encode_message(transmitBuffer,sizeof(transmitBuffer), &message_out);
 			link_set_phy_write_fn(&linkLayer,&buffer_send);
 			link_write(&linkLayer,transmitBuffer,strlen((char*)transmitBuffer));
+
+			// reset buffers and messages
 			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
+			Command message_in = Command_init_zero;
+			Command message_out = Command_init_zero;
+			// progress state machine
 			deviceState = STATE_WAIT;
 			break;
 		}  /* switch(deviceState) */
@@ -156,11 +161,11 @@ void enter_processing_state(void)
 
 
 /** @brief	GPIO digital test **/
-void gpio_test(Command* message_in)
+void gpio_test(Command* message_in, Command* message_out)
 {
 	GPIO_TypeDef *gpioPort;
-	uint32_t gpioPin;
-	uint8_t gpioReadState = 0;
+	uint16_t gpioPin;
+	uint32_t gpioReadState = 0;		//message: responseRead is stored in uint32_t
 
 	// choose GPIO port and pin
 	gpioPort = gpio_port_pin(message_in, &gpioPin);
@@ -172,37 +177,32 @@ void gpio_test(Command* message_in)
 		}
 	}
 
+	// Set response commandType
+	message_out->commandType = CommandTypeEnum_GPIO_digital;
+
 	// Read or write the pin depending on message
 	if(message_in->gpio.direction == gpioDirection_GPIO_OUTPUT){
 		if(message_in->gpio.state == gpioPinState_GPIO_HIGH){
 			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_SET);
+			message_out->responseWrite = successfulWrite_GPIO_SET;
 		}
 		else if(message_in->gpio.state == gpioPinState_GPIO_LOW){
 			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_RESET);
+			message_out->responseWrite = successfulWrite_GPIO_RESET;
 		}
 	}
 	else if(message_in->gpio.direction == gpioDirection_GPIO_INPUT){
 		gpioReadState = HAL_GPIO_ReadPin(gpioPort, gpioPin);
+		message_out->responseRead = gpioReadState;
 	}
 	else{
 		//empty
 	}
 
-
-
-//	message_out.commandType = CommandTypeEnum_GPIO_digital;
-
-	// If direction == write: set output,
-		// return: message_out response: pin set, pin reset (set Low), set Fail?
-	//if read : read pin: result: L/H.
-
-	// Transmit result
-
-
 	// Deinitialize GPIO if CubeMX config file is not available
 //	if(message_in->has_autoConfig == false){
 //		if(message_in->autoConfig == false){
-//			gpio_deinit(message_in);
+//			gpio_deinit(gpioPort, gpioPin);
 //		}
 //	}
 }
@@ -258,18 +258,18 @@ void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 
 
 /** @brief	GPIO digital deinit **/
-void gpio_deinit(Command* message_in)
+void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 {
-//	HAL_GPIO_DeInit(GPIO_TypeDef  *GPIOx, uint32_t GPIO_Pin)
-
+	HAL_GPIO_DeInit(gpioPort, gpioPin);
 
 	/* GPIO Ports Clock Disable */
-//	__HAL_RCC_GPIOC_CLK_DISABLE();
-//	__HAL_RCC_GPIOH_CLK_DISABLE();
-//	__HAL_RCC_GPIOA_CLK_DISABLE();
-//	__HAL_RCC_GPIOB_CLK_DISABLE();
+	__HAL_RCC_GPIOC_CLK_DISABLE();
+	__HAL_RCC_GPIOH_CLK_DISABLE();
+	__HAL_RCC_GPIOA_CLK_DISABLE();
+	__HAL_RCC_GPIOB_CLK_DISABLE();
 
 }
+
 
 /** @brief			Choose port & pin according to message
  * 	@param[in]		message_in: message received

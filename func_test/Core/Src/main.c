@@ -15,7 +15,7 @@ int main(void)
 {
   SystemClock_Config();
 
-  MX_GPIO_Init();
+//  MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();

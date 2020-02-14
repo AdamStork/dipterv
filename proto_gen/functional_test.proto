@@ -312,8 +312,8 @@ enum successfulWrite{
  I2C_WRITE_FAIL = 2;
  SPI_WRITE_OK = 3;
  SPI_WRITE_FAIL = 4;
- GPIO_SET = 5;
- GPIO_RESET = 6;
+ GPIO_SET_HIGH = 5;
+ GPIO_SET_LOW = 6;
  GPIO_WRITE_FAIL = 7;
  PWM_SET = 8;
  PWM_RESET = 9;

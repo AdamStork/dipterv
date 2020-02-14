@@ -38,8 +38,8 @@ void spi_test(void);
 void spi_deinit(void);
 
 void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin);
-void gpio_test(Command* message_in);
-void gpio_deinit(Command* message_in);
+void gpio_test(Command* message_in, Command* message_out);
+void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin);
 GPIO_TypeDef* gpio_port_pin(Command* message_in, uint16_t* pin);
 
 void led_init(void);
