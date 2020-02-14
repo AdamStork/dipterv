@@ -158,22 +158,48 @@ void enter_processing_state(void)
 /** @brief	GPIO digital test **/
 void gpio_test(Command* message_in)
 {
+	GPIO_TypeDef *gpioPort;
+	uint32_t gpioPin;
+	uint8_t gpioReadState = 0;
+
+	// choose GPIO port and pin
+	gpioPort = gpio_port_pin(message_in, &gpioPin);
+
+	// Initialize GPIO if CubeMX config file is not available
 	if(message_in->has_autoConfig == false){
 		if(message_in->autoConfig == false){
-			gpio_init(message_in);
+			gpio_init(message_in, gpioPort, gpioPin);
 		}
 	}
 
+	// Read or write the pin depending on message
+	if(message_in->gpio.direction == gpioDirection_GPIO_OUTPUT){
+		if(message_in->gpio.state == gpioPinState_GPIO_HIGH){
+			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_SET);
+		}
+		else if(message_in->gpio.state == gpioPinState_GPIO_LOW){
+			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_RESET);
+		}
+	}
+	else if(message_in->gpio.direction == gpioDirection_GPIO_INPUT){
+		gpioReadState = HAL_GPIO_ReadPin(gpioPort, gpioPin);
+	}
+	else{
+		//empty
+	}
+
+
+
 //	message_out.commandType = CommandTypeEnum_GPIO_digital;
-	// Initialize GPIO pin, direction, pull
-//	gpio_init(message_in);
+
 	// If direction == write: set output,
-		// response: pin set, pin reset (set Low), set Fail?
+		// return: message_out response: pin set, pin reset (set Low), set Fail?
 	//if read : read pin: result: L/H.
 
 	// Transmit result
 
 
+	// Deinitialize GPIO if CubeMX config file is not available
 //	if(message_in->has_autoConfig == false){
 //		if(message_in->autoConfig == false){
 //			gpio_deinit(message_in);
@@ -183,54 +209,51 @@ void gpio_test(Command* message_in)
 
 
 /** @brief	GPIO digital init **/
-void gpio_init(Command* message_in)
+void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 {
-	GPIO_TypeDef *gpioPort;
-	uint32_t gpioPin;
+	/* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	__HAL_RCC_GPIOH_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
 
-	// choose GPIO port and pin
-	gpioPort = gpio_port_pin(message_in, &gpioPin);
+	// Define GPIO_InitStruct
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-	  GPIO_InitTypeDef GPIO_InitStruct = {0};
+	// Configure GPIO pin number
+	GPIO_InitStruct.Pin = gpioPin;
 
-	  /* GPIO Ports Clock Enable */
-	  __HAL_RCC_GPIOC_CLK_ENABLE();
-	  __HAL_RCC_GPIOH_CLK_ENABLE();
-	  __HAL_RCC_GPIOA_CLK_ENABLE();
-	  __HAL_RCC_GPIOB_CLK_ENABLE();
-//
-//	  /*Configure GPIO pin Output Level */
-//	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-//
-//	  /*Configure GPIO pin Output Level */
-//	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
-//
-//	  /*Configure GPIO pin : PtPin */
-//	  GPIO_InitStruct.Pin = B1_Pin;
-//	  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-//	  GPIO_InitStruct.Pull = GPIO_NOPULL;
-//	  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
-//
-	  /*Configure GPIO pin : PtPin */
-//	  GPIO_InitStruct.Pin = LD2_Pin;
-//	  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-//	  GPIO_InitStruct.Pull = GPIO_NOPULL;
-//	  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-//	  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
-//
-//	  /*Configure GPIO pin : PB1 */
-//	  GPIO_InitStruct.Pin = GPIO_PIN_1;
-//	  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-//	  GPIO_InitStruct.Pull = GPIO_NOPULL;
-//	  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-//
-//	  /*Configure GPIO pin : PB2 */
-//	  GPIO_InitStruct.Pin = GPIO_PIN_2;
-//	  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-//	  GPIO_InitStruct.Pull = GPIO_NOPULL;
-//	  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-//	  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	// Configure GPIO pin direction
+	if(message_in->gpio.direction == gpioDirection_GPIO_OUTPUT){
+		GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	}
+	else if(message_in->gpio.direction == gpioDirection_GPIO_INPUT){
+		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+//		GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+	}
+	else{
+		// empty
+	}
 
+	// Configure GPIO pin Pull
+	if(message_in->gpio.pull == gpioPull_GPIO_NO_PULL){
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+	}
+	else if(message_in->gpio.pull == gpioPull_GPIO_PULL_UP){
+		GPIO_InitStruct.Mode = GPIO_PULLUP;
+	}
+	else if(message_in->gpio.pull == gpioPull_GPIO_PULL_DOWN){
+		GPIO_InitStruct.Mode = GPIO_PULLDOWN;
+	}
+	else{
+		// empty
+	}
+
+	// GPIO speed set to default low frequency
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+
+	// Initialize GPIO
+	HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);
 }
 
 
@@ -390,7 +413,7 @@ GPIO_TypeDef* gpio_port_pin(Command* message_in, uint16_t* gpioPin)
 		break;
 
 
-	case gpioPins_PC1:
+	case gpioPins_PC0:
 		gpioPort = GPIOC;
 		*gpioPin = GPIO_PIN_1;
 		break;
