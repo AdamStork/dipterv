@@ -127,8 +127,7 @@ void enter_processing_state(void)
 				break;
 
 			case CommandTypeEnum_GPIO_digital:
-				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-				message_out.commandType = CommandTypeEnum_GPIO_digital;
+				gpio_test(&message_in);
 				break;
 
 			case CommandTypeEnum_Analog_read:
@@ -154,3 +153,311 @@ void enter_processing_state(void)
 	} /* while(1) */
 }
 
+
+
+/** @brief	GPIO digital test **/
+void gpio_test(Command* message_in)
+{
+	if(message_in->has_autoConfig == false){
+		if(message_in->autoConfig == false){
+			gpio_init(message_in);
+		}
+	}
+
+//	message_out.commandType = CommandTypeEnum_GPIO_digital;
+	// Initialize GPIO pin, direction, pull
+//	gpio_init(message_in);
+	// If direction == write: set output,
+		// response: pin set, pin reset (set Low), set Fail?
+	//if read : read pin: result: L/H.
+
+	// Transmit result
+
+
+//	if(message_in->has_autoConfig == false){
+//		if(message_in->autoConfig == false){
+//			gpio_deinit(message_in);
+//		}
+//	}
+}
+
+
+/** @brief	GPIO digital init **/
+void gpio_init(Command* message_in)
+{
+	GPIO_TypeDef *gpioPort;
+	uint32_t gpioPin;
+
+	// choose GPIO port and pin
+	gpioPort = gpio_port_pin(message_in, &gpioPin);
+
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	  /* GPIO Ports Clock Enable */
+	  __HAL_RCC_GPIOC_CLK_ENABLE();
+	  __HAL_RCC_GPIOH_CLK_ENABLE();
+	  __HAL_RCC_GPIOA_CLK_ENABLE();
+	  __HAL_RCC_GPIOB_CLK_ENABLE();
+//
+//	  /*Configure GPIO pin Output Level */
+//	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+//
+//	  /*Configure GPIO pin Output Level */
+//	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
+//
+//	  /*Configure GPIO pin : PtPin */
+//	  GPIO_InitStruct.Pin = B1_Pin;
+//	  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+//	  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//	  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+//
+	  /*Configure GPIO pin : PtPin */
+//	  GPIO_InitStruct.Pin = LD2_Pin;
+//	  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+//	  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//	  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+//	  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+//
+//	  /*Configure GPIO pin : PB1 */
+//	  GPIO_InitStruct.Pin = GPIO_PIN_1;
+//	  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+//	  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//	  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+//
+//	  /*Configure GPIO pin : PB2 */
+//	  GPIO_InitStruct.Pin = GPIO_PIN_2;
+//	  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+//	  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//	  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+//	  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+}
+
+
+/** @brief	GPIO digital deinit **/
+void gpio_deinit(Command* message_in)
+{
+//	HAL_GPIO_DeInit(GPIO_TypeDef  *GPIOx, uint32_t GPIO_Pin)
+
+
+	/* GPIO Ports Clock Disable */
+//	__HAL_RCC_GPIOC_CLK_DISABLE();
+//	__HAL_RCC_GPIOH_CLK_DISABLE();
+//	__HAL_RCC_GPIOA_CLK_DISABLE();
+//	__HAL_RCC_GPIOB_CLK_DISABLE();
+
+}
+
+/** @brief			Choose port & pin according to message
+ * 	@param[in]		message_in: message received
+ * 	@param[in/out]	gpioPin: pin [0-15]
+ * 	@return			pointer to GPIO port [GPIOA, GPIOB...]	**/
+GPIO_TypeDef* gpio_port_pin(Command* message_in, uint16_t* gpioPin)
+{
+	GPIO_TypeDef* gpioPort;
+
+	switch(message_in->gpio.pin){
+
+	case gpioPins_PA0:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_0;
+		break;
+	case gpioPins_PA1:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_1;
+		break;
+	case gpioPins_PA2:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_2;
+		break;
+	case gpioPins_PA3:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_3;
+		break;
+	case gpioPins_PA4:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_4;
+		break;
+	case gpioPins_PA5:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_5;
+		break;
+	case gpioPins_PA6:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_6;
+		break;
+	case gpioPins_PA7:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_7;
+		break;
+	case gpioPins_PA8:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_8;
+		break;
+	case gpioPins_PA9:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_9;
+		break;
+	case gpioPins_PA10:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_10;
+		break;
+	case gpioPins_PA11:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_11;
+		break;
+	case gpioPins_PA12:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_12;
+		break;
+	case gpioPins_PA13:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_13;
+		break;
+	case gpioPins_PA14:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_14;
+		break;
+	case gpioPins_PA15:
+		gpioPort = GPIOA;
+		*gpioPin = GPIO_PIN_15;
+		break;
+
+
+	case gpioPins_PB0:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_0;
+		break;
+	case gpioPins_PB1:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_1;
+		break;
+	case gpioPins_PB2:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_2;
+		break;
+	case gpioPins_PB3:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_3;
+		break;
+	case gpioPins_PB4:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_4;
+		break;
+	case gpioPins_PB5:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_5;
+		break;
+	case gpioPins_PB6:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_6;
+		break;
+	case gpioPins_PB7:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_7;
+		break;
+	case gpioPins_PB8:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_8;
+		break;
+	case gpioPins_PB9:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_9;
+		break;
+	case gpioPins_PB10:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_10;
+		break;
+	case gpioPins_PB11:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_11;
+		break;
+	case gpioPins_PB12:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_12;
+		break;
+	case gpioPins_PB13:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_13;
+		break;
+	case gpioPins_PB14:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_14;
+		break;
+	case gpioPins_PB15:
+		gpioPort = GPIOB;
+		*gpioPin = GPIO_PIN_15;
+		break;
+
+
+	case gpioPins_PC1:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_1;
+		break;
+	case gpioPins_PC1:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_1;
+		break;
+	case gpioPins_PC2:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_2;
+		break;
+	case gpioPins_PC3:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_3;
+		break;
+	case gpioPins_PC4:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_4;
+		break;
+	case gpioPins_PC5:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_5;
+		break;
+	case gpioPins_PC6:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_6;
+		break;
+	case gpioPins_PC7:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_7;
+		break;
+	case gpioPins_PC8:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_8;
+		break;
+	case gpioPins_PC9:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_9;
+		break;
+	case gpioPins_PC10:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_10;
+		break;
+	case gpioPins_PC11:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_11;
+		break;
+	case gpioPins_PC12:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_12;
+		break;
+	case gpioPins_PC13:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_13;
+		break;
+	case gpioPins_PC14:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_14;
+		break;
+	case gpioPins_PC15:
+		gpioPort = GPIOC;
+		*gpioPin = GPIO_PIN_15;
+		break;
+
+	default:
+		break;
+	}
+
+	return gpioPort;
+}
