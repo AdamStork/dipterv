@@ -291,8 +291,6 @@ def make_test_object_from_options(UI):
         if UI.i2c_speed_mode_select.currentData() == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, save duty cycle option as well
             cmd.i2c.dutyCycle = UI.i2c_duty_cycle_select.currentData()
 
-        return cmd
-
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.SPI_test:
         cmd.spi.bus = UI.spi_bus_select.currentData()
         if is_empty(UI.spi_command_select.text()):
@@ -312,7 +310,6 @@ def make_test_object_from_options(UI):
         if UI.spi_frame_format_select.currentData() == list(dict_spi_frame_format.values())[0]: # If 'Motorola' option is selected, save first bit and clock settings as well
             cmd.spi.firstBit = UI.spi_first_bit_select.currentData()
             cmd.spi.clockMode = UI.spi_clockmode_select.currentData()
-        return cmd
 
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.USART_test:
         cmd.usart.bus = UI.usart_bus_select.currentData()
@@ -337,21 +334,18 @@ def make_test_object_from_options(UI):
             cmd.usart.clockPolarity = UI.usart_clock_polarity_select.currentData()
             cmd.usart.clockPhase = UI.usart_clock_phase_select.currentData()
             cmd.usart.clockLastBit = UI.usart_clock_last_bit_select.currentData()
-        return cmd
 
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.GPIO_digital:
         cmd.gpio.pin = UI.gpio_pin_select.currentData()
         cmd.gpio.direction = UI.gpio_direction_select.currentData()
         cmd.gpio.state = UI.gpio_state_select.currentData()
         cmd.gpio.pull = UI.gpio_pull_select.currentData()
-        return cmd
 
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.Analog_read:
         cmd.analog_in.instance = UI.adc_instance_select.currentData()
         cmd.analog_in.pin = UI.gpio_pin_select.currentData()
         cmd.analog_in.resolution = UI.adc_resolution_select.currentData()
         cmd.analog_in.clockPrescaler = UI.adc_clock_prescaler_select.currentData()
-        return cmd
 
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.Analog_write:
         cmd.analog_out.pin = UI.gpio_pin_select.currentData()
@@ -374,10 +368,13 @@ def make_test_object_from_options(UI):
                 cmd.analog_out.time = int(UI.pwm_time_select.text())
         else:
             cmd.analog_out.dependency = list(dict_pwm_time_dependency.values())[0]
-        return cmd
 
     else:
         return None
+
+    if UI.use_config_file:
+        cmd.autoConfig = True
+    return cmd
 
 
 # @brief            Delete test object from test_list on given index

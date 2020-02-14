@@ -333,4 +333,5 @@ message Command{
  optional analogOUT	analog_out = 7;
  optional uint32 responseRead = 10;					// Register value
  optional successfulWrite responseWrite = 11;		// Write success
+ optional bool autoConfig = 12; //not available at sequence -- false
 }
