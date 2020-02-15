@@ -320,6 +320,10 @@ enum successfulWrite{
  PWM_WRITE_FAIL = 10;
 }
 
+message responseMessage{
+ optional uint32 responseRead = 1;
+ optional successfulWrite responseWrite = 2;
+}
 
 
 // Main message
@@ -331,7 +335,6 @@ message Command{
  optional	digitalGPIO	gpio = 5;
  optional analogIN analog_in = 6;
  optional analogOUT	analog_out = 7;
- optional uint32 responseRead = 10;					// Register value
- optional successfulWrite responseWrite = 11;		// Write success
- optional bool autoConfig = 12; //not available at sequence -- false
+ optional responseMessage response = 10;		
+ optional bool autoConfig = 11; //not available at sequence -- false
 }

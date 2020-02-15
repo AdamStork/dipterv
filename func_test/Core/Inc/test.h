@@ -19,8 +19,8 @@ typedef enum{
 
 
 
-bool encode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_out);
-bool decode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* msg);
+bool encode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_out, uint8_t* bytesWritten);
+bool decode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_in);
 
 void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize);
 void command_reset(Command* message);

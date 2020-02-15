@@ -27,20 +27,23 @@ StateType deviceState;
 
 /** @brief 	Encode message
  * @param[out]	pBuffer: pointer to encoded buffer
+ * @param[in]	pBufferLen: length of buffer (max length of stream)
  * @param[in]	message_out: pointer to message to encode
  * @return	status: true, if encoding was successful
  */
-bool encode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_out)
+bool encode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_out, uint8_t* bytesWritten)
 {
 	bool status;
 	pb_ostream_t stream_out = pb_ostream_from_buffer(pBuffer, pBufferLen);
 	status = pb_encode(&stream_out,Command_fields,message_out);
+	*bytesWritten = (uint8_t)stream_out.bytes_written;
 	return status;
 }
 
 
 /** @brief 	Decode message
  * @param[in]	pBuffer: pointer to buffer to decode
+ * @param[in]	pBufferLen: length of buffer (max length of stream)
  * @param[out]	message_in: decoded message
  * @return	status: true, if encoding was successful
  */
@@ -147,13 +150,12 @@ void command_reset(Command* message)
 	message->analog_out.has_time = false;
 	message->analog_out.time = 0;
 
-	// Reset responseRead
-	message->has_responseRead = false;
-	message->responseRead = 0;
-
-	// Reset responseWrite
-	message->has_responseWrite = false;
-	message->responseWrite = _successfulWrite_MIN;
+	// Reset response
+	message->has_response = false;
+	message->response.has_responseRead = false;
+	message->response.has_responseWrite = false;
+	message->response.responseRead = 0;
+	message->response.responseWrite = _successfulWrite_MIN;
 
 	// Reset autoConfig
 	message->has_autoConfig = false;
@@ -167,7 +169,7 @@ void enter_processing_state(void)
 {
 	Command message_in = Command_init_zero;
 	Command message_out = Command_init_zero;
-//	Command *message_out2 = Command_init_zero;
+	uint8_t bytesWritten = 0;
 	buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
 	bool messageDecodeSuccessful = false;
 	deviceState = STATE_WAIT;
@@ -233,9 +235,9 @@ void enter_processing_state(void)
 			default:
 				break;
 			} /* switch(message_in.commandType) */
-			encode_message(transmitBuffer,sizeof(transmitBuffer), &message_out);
+			encode_message(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
 			link_set_phy_write_fn(&linkLayer,&buffer_send);
-			link_write(&linkLayer,transmitBuffer,strlen((char*)transmitBuffer));
+			link_write(&linkLayer,transmitBuffer,bytesWritten);
 
 			// reset buffers and messages
 			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
@@ -273,19 +275,22 @@ void gpio_test(Command* message_in, Command* message_out)
 	if(message_in->gpio.direction == gpioDirection_GPIO_OUTPUT){
 		if(message_in->gpio.state == gpioPinState_GPIO_HIGH){
 			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_SET);
-			message_out->has_responseWrite = true;
-			message_out->responseWrite = successfulWrite_GPIO_SET_HIGH;
+			message_out->has_response = true;
+			message_out->response.has_responseWrite = true;
+			message_out->response.responseWrite = successfulWrite_GPIO_SET_HIGH;
 		}
 		else if(message_in->gpio.state == gpioPinState_GPIO_LOW){
 			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_RESET);
-			message_out->has_responseWrite = true;
-			message_out->responseWrite = successfulWrite_GPIO_SET_LOW;
+			message_out->has_response = true;
+			message_out->response.has_responseWrite = true;
+			message_out->response.responseWrite = successfulWrite_GPIO_SET_LOW;
 		}
 	}
 	else if(message_in->gpio.direction == gpioDirection_GPIO_INPUT){
 		gpioReadState = HAL_GPIO_ReadPin(gpioPort, gpioPin);
-		message_out->has_responseRead = true;
-		message_out->responseRead = gpioReadState;
+		message_out->has_response = true;
+		message_out->response.has_responseRead = true;
+		message_out->response.responseRead = gpioReadState;
 	}
 	else{
 		//empty
