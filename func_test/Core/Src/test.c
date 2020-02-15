@@ -11,16 +11,18 @@
 #include "usart.h"
 #include "test.h"
 #include "link_layer.h"
+#include "functional_test.pb.h"
 
 
 bool frameReady = false;
 uint8_t receiveByte;
 uint8_t transmitByte;
-uint8_t receiveBuffer[90];
-uint8_t transmitBuffer[128];
+uint8_t receiveBuffer[50];
+uint8_t transmitBuffer[50];
 uint8_t receiveBufferLen;
 link_layer_t linkLayer;
 StateType deviceState;
+
 
 
 /** @brief 	Encode message
@@ -72,12 +74,100 @@ void buffer_send(uint8_t* pBuffer, uint8_t pSize)
 	HAL_UART_Transmit(&huart2,pBuffer, pSize, HAL_MAX_DELAY);
 }
 
+/** @brief  Resets command message to default
+ *  @param	message: pointer to command message **/
+void command_reset(Command* message)
+{
+	message->commandType = _CommandTypeEnum_MIN;
+
+	// Reset I2C
+	message->has_i2c = false;
+	message->i2c.bus = _i2cBus_MIN;
+	message->i2c.address = 0;
+	message->i2c.reg = 0;
+	message->i2c.direction = _i2cDirection_MIN;
+	message->i2c.speedMode = _i2cSpeedMode_MIN;
+	message->i2c.clockSpeed = 0;
+	message->i2c.has_dutyCycle = false;
+	message->i2c.dutyCycle = _i2cFastModeDutyCycle_MIN;
+
+	// Reset SPI
+	message->has_spi = false;
+	message->spi.bus = _spiBus_MIN;
+	message->spi.command = 0;
+	message->spi.dummyclocks = 0;
+	message->spi.operatingMode = _spiOperatingMode_MIN;
+	message->spi.hardwareNSS = _spiHardwareNSS_MIN;
+	message->spi.frameFormat = _spiFrameFormat_MIN;
+	message->spi.dataSize = _spiDataSize_MIN;
+	message->spi.has_firstBit = false;
+	message->spi.firstBit = _spiFirstBit_MIN;
+	message->spi.has_clockMode = false;
+	message->spi.clockMode = _clockMode_MIN;
+
+	// Reset USART
+	message->has_usart = false;
+	message->usart.bus = _usartBus_MIN;
+	message->usart.mode = _usartMode_MIN;
+	message->usart.baudRate = 0;
+	message->usart.wordLength = _usartWordLength_MIN;
+	message->usart.parity = _usartParity_MIN;
+	message->usart.stopBits = _usartStopBits_MIN;
+	message->usart.direction = _usartDirection_MIN;
+	message->usart.command = 0;
+	message->usart.has_clockPolarity = false;
+	message->usart.clockPolarity = _usartClockPolarity_MIN;
+	message->usart.has_clockPhase = false;
+	message->usart.clockPhase = _usartClockPhase_MIN;
+	message->usart.has_clockLastBit = false;
+	message->usart.clockLastBit = _usartClockLastBit_MIN;
+	message->usart.has_hwFlowControl = false;
+	message->usart.hwFlowControl = _usartHardwareFlowControl_MIN;
+
+	// Reset GPIO
+	message->has_gpio = false;
+	message->gpio.pin = _gpioPins_MIN;
+	message->gpio.direction = _gpioDirection_MIN;
+	message->gpio.state = _gpioPinState_MIN;
+	message->gpio.pull = _gpioPull_MIN;
+
+	// Reset analog_in
+	message->has_analog_in = false;
+	message->analog_in.instance = _adcInstance_MIN;
+	message->analog_in.pin = _gpioPins_MIN;
+	message->analog_in.resolution = _adcResolution_MIN;
+	message->analog_in.clockPrescaler = _adcClockPrescaler_MIN;
+
+	// Reset analog_out
+	message->has_analog_out = false;
+	message->analog_out.pin = _gpioPins_MIN;
+	message->analog_out.frequency = 0;
+	message->analog_out.dutyCycle = 0;
+	message->analog_out.dependency = _pwmTimeDependency_MIN;
+	message->analog_out.has_time = false;
+	message->analog_out.time = 0;
+
+	// Reset responseRead
+	message->has_responseRead = false;
+	message->responseRead = 0;
+
+	// Reset responseWrite
+	message->has_responseWrite = false;
+	message->responseWrite = _successfulWrite_MIN;
+
+	// Reset autoConfig
+	message->has_autoConfig = false;
+	message->autoConfig = false;
+
+
+}
 
 /** @brief Receive command via UART, and perform chosen test **/
 void enter_processing_state(void)
 {
 	Command message_in = Command_init_zero;
 	Command message_out = Command_init_zero;
+//	Command *message_out2 = Command_init_zero;
 	buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
 	bool messageDecodeSuccessful = false;
 	deviceState = STATE_WAIT;
@@ -112,18 +202,18 @@ void enter_processing_state(void)
 			switch(message_in.commandType){
 
 			case CommandTypeEnum_I2C_test:
-				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-				message_out.commandType = CommandTypeEnum_I2C_test;
+//				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+//				message_out.commandType = CommandTypeEnum_I2C_test;
 				break;
 
 			case CommandTypeEnum_SPI_test:
-				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-				message_out.commandType = CommandTypeEnum_SPI_test;
+//				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+//				message_out.commandType = CommandTypeEnum_SPI_test;
 				break;
 
 			case CommandTypeEnum_USART_test:
-				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-				message_out.commandType = CommandTypeEnum_USART_test;
+//				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+//				message_out.commandType = CommandTypeEnum_USART_test;
 				break;
 
 			case CommandTypeEnum_GPIO_digital:
@@ -131,13 +221,13 @@ void enter_processing_state(void)
 				break;
 
 			case CommandTypeEnum_Analog_read:
-				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-				message_out.commandType = CommandTypeEnum_Analog_read;
+//				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+//				message_out.commandType = CommandTypeEnum_Analog_read;
 				break;
 
 			case CommandTypeEnum_Analog_write:
-				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-				message_out.commandType = CommandTypeEnum_Analog_write;
+//				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+//				message_out.commandType = CommandTypeEnum_Analog_write;
 				break;
 
 			default:
@@ -149,8 +239,7 @@ void enter_processing_state(void)
 
 			// reset buffers and messages
 			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
-			Command message_in = Command_init_zero;
-			Command message_out = Command_init_zero;
+			command_reset(&message_out);
 			// progress state machine
 			deviceState = STATE_WAIT;
 			break;
@@ -184,15 +273,18 @@ void gpio_test(Command* message_in, Command* message_out)
 	if(message_in->gpio.direction == gpioDirection_GPIO_OUTPUT){
 		if(message_in->gpio.state == gpioPinState_GPIO_HIGH){
 			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_SET);
-			message_out->responseWrite = successfulWrite_GPIO_SET;
+			message_out->has_responseWrite = true;
+			message_out->responseWrite = successfulWrite_GPIO_SET_HIGH;
 		}
 		else if(message_in->gpio.state == gpioPinState_GPIO_LOW){
 			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_RESET);
-			message_out->responseWrite = successfulWrite_GPIO_RESET;
+			message_out->has_responseWrite = true;
+			message_out->responseWrite = successfulWrite_GPIO_SET_LOW;
 		}
 	}
 	else if(message_in->gpio.direction == gpioDirection_GPIO_INPUT){
 		gpioReadState = HAL_GPIO_ReadPin(gpioPort, gpioPin);
+		message_out->has_responseRead = true;
 		message_out->responseRead = gpioReadState;
 	}
 	else{
@@ -250,7 +342,7 @@ void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 	}
 
 	// GPIO speed set to default low frequency
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+//	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 
 	// Initialize GPIO
 	HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);

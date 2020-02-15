@@ -17,10 +17,13 @@ typedef enum{
 	STATE_TEST
 } StateType;
 
+
+
 bool encode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_out);
 bool decode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* msg);
 
 void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize);
+void command_reset(Command* message);
 void buffer_send(uint8_t* pBuffer, uint8_t pSize);
 
 void enter_processing_state(void);
