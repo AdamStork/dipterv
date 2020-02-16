@@ -167,9 +167,7 @@ enum gpioPins{
 	PC13 = 53;
 	PC14 = 54;
 	PC15 = 55;
-	Temp = 60;
-	Vrefint = 61;
-	Vbat = 62;
+	P_INVALID = 60;
 }
 
 
@@ -209,17 +207,41 @@ enum adcClockPrescaler{
 	ADC_PCLK2_DIVIDED_BY_8 = 2;
 }
 
+enum adcChannel{		
+	ADC_CHANNEL_IN0 = 0;
+	ADC_CHANNEL_IN1 = 1;
+	ADC_CHANNEL_IN2 = 2;
+	ADC_CHANNEL_IN3 = 3;
+	ADC_CHANNEL_IN4 = 4;
+	ADC_CHANNEL_IN5 = 5;
+	ADC_CHANNEL_IN6 = 6;
+	ADC_CHANNEL_IN7 = 7;
+	ADC_CHANNEL_IN8 = 8;
+	ADC_CHANNEL_IN9 = 9;
+	ADC_CHANNEL_IN10 = 10;
+	ADC_CHANNEL_IN11 = 11;
+	ADC_CHANNEL_IN12 = 12;
+	ADC_CHANNEL_IN13 = 13;	
+	ADC_CHANNEL_IN14 = 14;		
+	ADC_CHANNEL_IN15 = 15;	
+	ADC_CHANNEL_TEMP = 20;
+	ADC_CHANNEL_VREFINT = 21;
+	ADC_CHANNEL_VBAT = 22;	
+}
+
 message analogIN{		
  required adcInstance instance = 1;
- required gpioPins pin = 2;
- required adcResolution resolution = 3;
- required adcClockPrescaler clockPrescaler = 4;
+ required adcChannel channel = 2;
+ required gpioPins pin = 3;
+ required adcResolution resolution = 4;
+ required adcClockPrescaler clockPrescaler = 5;
 }
 
 enum pwmTimeDependency{		
 	PWM_TIME_DEPENDENCY_DISABLED = 0;
 	PWM_TIME_DEPENDENCY_ENABLED = 1;
 }
+
 
 // Analog OUT message
 message analogOUT{

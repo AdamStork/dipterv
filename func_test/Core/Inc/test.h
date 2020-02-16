@@ -32,9 +32,7 @@ void i2c_init(void);
 void i2c_test(void);
 void i2c_deinit(void);
 
-void adc_init(void);
-void adc_test(void);
-void adc_deinit(void);
+
 
 void spi_init(void);
 void spi_test(void);
@@ -45,9 +43,12 @@ void gpio_test(Command* message_in, Command* message_out);
 void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin);
 GPIO_TypeDef* gpio_port_pin(Command* message_in, uint16_t* pin);
 
-void led_init(void);
-void led_test(void);
-void led_deinit(void);
+
+void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_TypeDef* gpioPort, uint16_t gpioPin);
+void analog_read_test(Command* message_in, Command* message_out);
+void analog_read_deinit(ADC_HandleTypeDef* adcHandler, GPIO_TypeDef* gpioPort, uint16_t gpioPin);
+uint32_t analog_read_choose_channel(Command* message_in);
+
 
 void pwm_init(void);
 void pwm_test(void);

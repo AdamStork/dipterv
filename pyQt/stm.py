@@ -9,6 +9,8 @@ from functools import partial
 import functional_test_pb2
 import sequence
 import config
+import array
+from importlib import import_module
 from link_layer import link_layer
 
 ui_path = os.path.dirname(os.path.abspath(__file__))
@@ -202,7 +204,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             try:
                 self.ser.write(self.LL.tx_buffer)
                 command_send_success = 'Command sent'
-                self.read_data_depending_on_cmd_type(self.test_list[i].commandType)
+                self.read_data_depending_on_cmd_type(self.test_list[i])
             except serial.serialutil.SerialException:
                 if self.ser.is_open:
                     command_send_success = 'Error while sending command'
@@ -856,40 +858,62 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.AnalogRead_active = False
         self.AnalogWrite_active = False
 
-    # Get number of response bytes depending on command type
-    def read_data_depending_on_cmd_type(self, cmdType):
-        print("Read data depending on cmd type:",cmdType)
-        if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
-            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
-                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
-        elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
-            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
-                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
-        elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
-            response_num = 5        # todo
-        elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
-            response_num = 4        # Frame:2, CmdType: 1+1
-        elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
-            response_num = 5    # Frame:2, CmdType: 1+1, Result: 1 (pin state) ---- ide is inkabb pin config set kene
-                                # Frame:2, CmdType:1+1, Result: 1 (pin set/reset)
-        elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
-            response_num = 6    # Frame:2, CmdType: 1+1, Result: 2 (16bit value)
-        elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
-            response_num = 6    # Frame:2, CmdType: 1+1, Result: 1 (Write_successful/failed)
-        else:
-            response_num = 0
-
-
+    # Get a maximum number of response bytes depending on command type
+    def read_data_depending_on_cmd_type(self, test_object):
+        cmdType = test_object.commandType
+        response_num = 20 # Should depend on buad rate..
         print("response_num:", response_num)
-        if response_num > 0:
-            response_data = self.ser.read(response_num)
-            self.LL.link_unframe_data(response_data)
-            response_list = []
-            for i in self.LL.rx_buffer:
-                i = format(i,'02X')
-                response_list.append(i)
-            response = ' '.join(str(e) for e in response_list)
-            return response
+
+        # Get response
+        response_data = self.ser.read(response_num)             # Read response data
+        self.LL.link_unframe_data(response_data)                # Unframe response data
+        pb = array.array('b',self.LL.rx_buffer).tobytes()      # Make string from response data
+        message_data = functional_test_pb2.Command()
+        message_data.ParseFromString(pb)                        # Deserialize response data into data structure
+#        print(message_data)
+
+        if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:
+            print("read response: ", message_data.response.responseRead)
+        elif test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_OUTPUT:
+            print("write response: ", message_data.response.responseWrite)
+
+#        if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
+#            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
+#                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
+
+#        elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
+#            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
+#                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
+
+#        elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
+#            response_num = 5        # todo
+
+#        elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
+#            response_num = 4        # Frame:2, CmdType: 1+1
+
+#        elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
+#            response_num = 10    # Frame:2, CmdType: 1+1, Result+type: 1+1
+#            if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_OUTPUT:
+#                response_str = ""
+#            elif test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:
+#                response_str = ""
+
+#        elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
+#            response_num = 6    # Frame:2, CmdType: 1+1, Result: 2 (16bit value)
+
+#        elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
+#            response_num = 6    # Frame:2, CmdType: 1+1, Result: 1 (Write_successful/failed)
+
+#        else:
+#            response_num = 0
+#            str_pin_state = "Pin state" + str(message_data.responseRead)
+
+        response_list = []
+        for i in self.LL.rx_buffer:
+            i = format(i,'02X')
+            response_list.append(i)
+        response = ' '.join(str(e) for e in response_list)
+        return response
 
 
 #            last_widget = scroll_layout.itemAt(scroll_layout.count()-1).widget()
@@ -950,7 +974,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             self.ser.write(self.LL.tx_buffer)
             command_send_success = 'Command sent'
-            response = "Response: " + self.read_data_depending_on_cmd_type(self.cmd_box.currentData())
+            response = "Response: " + self.read_data_depending_on_cmd_type(test_object)
             responseLabel = QLabel(response)
             self.scroll_layout.addWidget(responseLabel)
         except serial.serialutil.SerialException:
@@ -963,6 +987,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.scroll_layout.addWidget(commandStringLabel)
         commandSendingLabel = QLabel(command_send_success)
         self.scroll_layout.addWidget(commandSendingLabel)
+
 
 
 

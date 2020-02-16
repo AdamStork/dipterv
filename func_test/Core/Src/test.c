@@ -137,7 +137,8 @@ void command_reset(Command* message)
 	// Reset analog_in
 	message->has_analog_in = false;
 	message->analog_in.instance = _adcInstance_MIN;
-	message->analog_in.pin = _gpioPins_MIN;
+	message->analog_in.channel = _adcChannel_MIN;
+	message->analog_in.pin = _gpioPins_MAX;
 	message->analog_in.resolution = _adcResolution_MIN;
 	message->analog_in.clockPrescaler = _adcClockPrescaler_MIN;
 
@@ -223,8 +224,7 @@ void enter_processing_state(void)
 				break;
 
 			case CommandTypeEnum_Analog_read:
-//				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-//				message_out.commandType = CommandTypeEnum_Analog_read;
+				analog_read_test(&message_in, &message_out);
 				break;
 
 			case CommandTypeEnum_Analog_write:
@@ -251,7 +251,208 @@ void enter_processing_state(void)
 
 
 
-/** @brief	GPIO digital test **/
+
+/**********************			Analog read 			******************************/
+/** @brief	Analog read (ADC) test
+ *  @param	message_in: pointer to received message
+ *  @param  message_out: pointer to transmit message	**/
+void analog_read_test(Command* message_in, Command* message_out)
+{
+	GPIO_TypeDef *gpioPort;
+	uint16_t gpioPin;
+	ADC_HandleTypeDef adcHandler;
+
+
+	// choose GPIO port and pin
+	if(message_in->analog_in.pin != gpioPins_P_INVALID){
+		gpioPort = gpio_port_pin(message_in, &gpioPin);
+	}
+
+	// Initialize ADC & GPIO if CubeMX config file is not available
+	analog_read_init(message_in, &adcHandler, gpioPort, gpioPin);
+
+	// ADC test
+	HAL_ADC_GetValue(&adcHandler);
+
+	// ADC deinit
+	analog_read_deinit(&adcHandler, gpioPort, gpioPin);
+
+}
+
+
+/** @brief	Analog read (ADC) peripheral init
+ *  @param	message_in: pointer to received message
+ *  @param  gpioPort: pointer to GPIO port handler
+ *  @param	gpioPin: GPIO pin number [0-15]				**/
+void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_TypeDef* gpioPort, uint16_t gpioPin)
+{
+	/* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	__HAL_RCC_GPIOH_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+	// Pin configuration
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = gpioPin;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);
+
+
+	// Configure ADC instance
+	if(message_in->analog_in.instance == adcInstance_ADC1){
+		adcHandle->Instance = ADC1;
+	    __HAL_RCC_ADC1_CLK_ENABLE();
+	}
+	else if(message_in->analog_in.instance == adcInstance_ADC2){
+//		adcHandle->Instance = ADC2;
+//	    __HAL_RCC_ADC2_CLK_ENABLE();
+	}
+	else if(message_in->analog_in.instance == adcInstance_ADC3){
+//		adcHandle->Instance = ADC3;
+//	    __HAL_RCC_ADC3_CLK_ENABLE();
+	}
+
+	// Configure ADC clock prescaler
+	if(message_in->analog_in.clockPrescaler == adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_4){
+		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+	}
+	else if(message_in->analog_in.clockPrescaler == adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_6){
+		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV6;
+	}
+	else if(message_in->analog_in.clockPrescaler == adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_8){
+		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
+	}
+
+	if(message_in->analog_in.resolution == adcResolution_ADC_12_BITS){
+		adcHandle->Init.Resolution = ADC_RESOLUTION_12B;
+	}
+	else if(message_in->analog_in.resolution == adcResolution_ADC_10_BITS){
+		adcHandle->Init.Resolution = ADC_RESOLUTION_10B;
+	}
+	else if(message_in->analog_in.resolution == adcResolution_ADC_8_BITS){
+		adcHandle->Init.Resolution = ADC_RESOLUTION_8B;
+	}
+	else if(message_in->analog_in.resolution == adcResolution_ADC_6_BITS){
+		adcHandle->Init.Resolution = ADC_RESOLUTION_6B;
+	}
+
+	adcHandle->Init.ScanConvMode = DISABLE;
+	adcHandle->Init.ContinuousConvMode = DISABLE;
+	adcHandle->Init.DiscontinuousConvMode = DISABLE;
+	adcHandle->Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+	adcHandle->Init.ExternalTrigConv = ADC_SOFTWARE_START;
+	adcHandle->Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	adcHandle->Init.NbrOfConversion = 1;
+	adcHandle->Init.DMAContinuousRequests = DISABLE;
+	adcHandle->Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+	if (HAL_ADC_Init(adcHandle) != HAL_OK){
+		Error_Handler();
+	}
+
+
+	// Define ADC Channel handler
+	ADC_ChannelConfTypeDef sConfig = {0};
+
+	/** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. **/
+	sConfig.Channel = analog_read_choose_channel(message_in);
+	sConfig.Rank = 1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+	if (HAL_ADC_ConfigChannel(adcHandle, &sConfig) != HAL_OK){
+		Error_Handler();
+	}
+}
+
+
+/** @brief	GPIO peripheral deinit
+ *  @param	message_in: pointer to received message
+ *  @param  gpioPort: pointer to GPIO port handler
+ *  @param	gpioPin: GPIO pin number [0-15]				**/
+void analog_read_deinit(ADC_HandleTypeDef* adcHandle,GPIO_TypeDef* gpioPort, uint16_t gpioPin)
+{
+	if(adcHandle->Instance == ADC1){
+		__HAL_RCC_ADC1_CLK_DISABLE();
+		HAL_GPIO_DeInit(gpioPort, gpioPin);
+		HAL_ADC_DeInit(adcHandle);
+	}
+}
+
+/** @brief	choose ADC channel
+ *  @param	message_in: pointer to received message
+ *  @param  adcChannel: pointer to adc channel		**/
+uint32_t analog_read_choose_channel(Command* message_in)
+{
+	uint32_t adcChannel = 0;
+
+	switch(message_in->analog_in.channel){
+	case adcChannel_ADC_CHANNEL_IN0:
+		adcChannel = ADC_CHANNEL_0;
+		break;
+	case adcChannel_ADC_CHANNEL_IN1:
+		adcChannel = ADC_CHANNEL_1;
+		break;
+	case adcChannel_ADC_CHANNEL_IN2:
+		adcChannel = ADC_CHANNEL_2;
+		break;
+	case adcChannel_ADC_CHANNEL_IN3:
+		adcChannel = ADC_CHANNEL_3;
+		break;
+	case adcChannel_ADC_CHANNEL_IN4:
+		adcChannel = ADC_CHANNEL_4;
+		break;
+	case adcChannel_ADC_CHANNEL_IN5:
+		adcChannel = ADC_CHANNEL_5;
+		break;
+	case adcChannel_ADC_CHANNEL_IN6:
+		adcChannel = ADC_CHANNEL_6;
+		break;
+	case adcChannel_ADC_CHANNEL_IN7:
+		adcChannel = ADC_CHANNEL_7;
+		break;
+	case adcChannel_ADC_CHANNEL_IN8:
+		adcChannel = ADC_CHANNEL_8;
+		break;
+	case adcChannel_ADC_CHANNEL_IN9:
+		adcChannel = ADC_CHANNEL_9;
+		break;
+	case adcChannel_ADC_CHANNEL_IN10:
+		adcChannel = ADC_CHANNEL_10;
+		break;
+	case adcChannel_ADC_CHANNEL_IN11:
+		adcChannel = ADC_CHANNEL_11;
+		break;
+	case adcChannel_ADC_CHANNEL_IN12:
+		adcChannel = ADC_CHANNEL_12;
+		break;
+	case adcChannel_ADC_CHANNEL_IN13:
+		adcChannel = ADC_CHANNEL_13;
+		break;
+	case adcChannel_ADC_CHANNEL_IN14:
+		adcChannel = ADC_CHANNEL_14;
+		break;
+	case adcChannel_ADC_CHANNEL_IN15:
+		adcChannel = ADC_CHANNEL_15;
+		break;
+//	case adcChannel_ADC_CHANNEL_TEMP:
+//		adcChannel = ADC_CHANNEL_TEMP;
+//		break;
+	case adcChannel_ADC_CHANNEL_VREFINT:
+		adcChannel = ADC_CHANNEL_VREFINT;
+		break;
+	case adcChannel_ADC_CHANNEL_VBAT:
+		adcChannel = ADC_CHANNEL_VBAT;
+		break;
+	default:
+		break;
+	}
+
+	return adcChannel;
+}
+/**********************			GPIO digital 			******************************/
+/** @brief	GPIO peripheral test
+ *  @param	message_in: pointer to received message
+ *  @param  message_out: pointer to transmit message	**/
 void gpio_test(Command* message_in, Command* message_out)
 {
 	GPIO_TypeDef *gpioPort;
@@ -305,7 +506,10 @@ void gpio_test(Command* message_in, Command* message_out)
 }
 
 
-/** @brief	GPIO digital init **/
+/** @brief	GPIO peripheral init
+ *  @param	message_in: pointer to received message
+ *  @param  gpioPort: pointer to GPIO port handler
+ *  @param	gpioPin: GPIO pin number [0-15]				**/
 void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 {
 	/* GPIO Ports Clock Enable */
@@ -354,7 +558,11 @@ void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 }
 
 
-/** @brief	GPIO digital deinit **/
+
+/** @brief	GPIO peripheral deinit
+ *  @param	message_in: pointer to received message
+ *  @param  gpioPort: pointer to GPIO port handler
+ *  @param	gpioPin: GPIO pin number [0-15]				**/
 void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 {
 	HAL_GPIO_DeInit(gpioPort, gpioPin);
@@ -366,6 +574,7 @@ void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 	__HAL_RCC_GPIOB_CLK_DISABLE();
 
 }
+
 
 
 /** @brief			Choose port & pin according to message
