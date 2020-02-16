@@ -328,23 +328,25 @@ message usartMessage{
 }
 
 
-enum successfulWrite{
+enum responseWriteEnum{
  LED_SET = 0;
  I2C_WRITE_OK = 1;
  I2C_WRITE_FAIL = 2;
- SPI_WRITE_OK = 3;
- SPI_WRITE_FAIL = 4;
- GPIO_SET_HIGH = 5;
- GPIO_SET_LOW = 6;
- GPIO_WRITE_FAIL = 7;
- PWM_SET = 8;
- PWM_RESET = 9;
- PWM_WRITE_FAIL = 10;
+ SPI_TRANSMISSION_OK = 3;
+ SPI_TRANSMISSION_FAIL = 4;
+ USART_TX_OK = 5;
+ USART_TX_FAIL = 6;
+ GPIO_SET_HIGH = 7;
+ GPIO_SET_LOW = 8;
+ GPIO_WRITE_FAIL = 9;
+ PWM_SET = 10;
+ PWM_RESET = 11;
+ PWM_SET_FAIL = 12;
 }
 
 message responseMessage{
  optional uint32 responseRead = 1;
- optional successfulWrite responseWrite = 2;
+ optional responseWriteEnum responseWrite = 2;
 }
 
 

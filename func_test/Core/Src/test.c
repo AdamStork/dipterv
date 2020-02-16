@@ -156,7 +156,7 @@ void command_reset(Command* message)
 	message->response.has_responseRead = false;
 	message->response.has_responseWrite = false;
 	message->response.responseRead = 0;
-	message->response.responseWrite = _successfulWrite_MIN;
+	message->response.responseWrite = _responseWriteEnum_MIN;
 
 	// Reset autoConfig
 	message->has_autoConfig = false;
@@ -265,7 +265,7 @@ void analog_read_test(Command* message_in, Command* message_out)
 
 	// choose GPIO port and pin
 	if(message_in->analog_in.pin != gpioPins_P_INVALID){
-		gpioPort = gpio_port_pin(message_in, &gpioPin);
+		gpioPort = gpio_port_pin(message_in->analog_in.pin, &gpioPin);
 	}
 
 	// Initialize ADC & GPIO if CubeMX config file is not available
@@ -460,7 +460,7 @@ void gpio_test(Command* message_in, Command* message_out)
 	uint32_t gpioReadState = 0;		//message: responseRead is stored in uint32_t
 
 	// choose GPIO port and pin
-	gpioPort = gpio_port_pin(message_in, &gpioPin);
+	gpioPort = gpio_port_pin(message_in->gpio.pin, &gpioPin);
 
 	// Initialize GPIO if CubeMX config file is not available
 	if(message_in->has_autoConfig == false){
@@ -478,13 +478,13 @@ void gpio_test(Command* message_in, Command* message_out)
 			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_SET);
 			message_out->has_response = true;
 			message_out->response.has_responseWrite = true;
-			message_out->response.responseWrite = successfulWrite_GPIO_SET_HIGH;
+			message_out->response.responseWrite = responseWriteEnum_GPIO_SET_HIGH;
 		}
 		else if(message_in->gpio.state == gpioPinState_GPIO_LOW){
 			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_RESET);
 			message_out->has_response = true;
 			message_out->response.has_responseWrite = true;
-			message_out->response.responseWrite = successfulWrite_GPIO_SET_LOW;
+			message_out->response.responseWrite = responseWriteEnum_GPIO_SET_LOW;
 		}
 	}
 	else if(message_in->gpio.direction == gpioDirection_GPIO_INPUT){

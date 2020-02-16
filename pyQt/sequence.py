@@ -288,6 +288,23 @@ dict_pwm_time_dependency = {
     "Enabled": 1,
 }
 
+# Response dictionaries
+dict_response_write = {
+    "LED set": 0,
+    "I2C write successful": 1,
+    "I2C write failed": 2,
+    "SPI transmission successful": 3,
+    "SPI transmission failed": 4,
+    "USART TX successful": 5,
+    "USART TX failed": 6,
+    "GPIO set High": 7,
+    "GPIO set Low": 8,
+    "GPIO set failed": 9,
+    "PWM set": 10,
+    "PWM reset": 11,
+    "PWM set failed": 12,
+}
+
 
 # @brief        Make test objects from the selected options and add it to test_list.
 # @param[in]    UI: user interface (e.g. MyWindow class)

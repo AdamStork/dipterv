@@ -888,10 +888,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #        print(message_data)
 
         if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:
-            print("read response: ", message_data.response.responseRead)
+            response = "GPIO state " + list(sequence.dict_gpio_state.keys())[list(sequence.dict_gpio_state.values()).index(message_data.response.responseRead)] # Search key by value (GPIO state)
         elif test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_OUTPUT:
-            print("write response: ", message_data.response.responseWrite)
-
+            response =  list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseWrite)] # Search key by value (responseWrite enum)
+            response += " [" + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.gpio.pin)] + "]"
 #        if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
 #            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
 #                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
@@ -923,11 +923,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #            response_num = 0
 #            str_pin_state = "Pin state" + str(message_data.responseRead)
 
-        response_list = []
-        for i in self.LL.rx_buffer:
-            i = format(i,'02X')
-            response_list.append(i)
-        response = ' '.join(str(e) for e in response_list)
+#        response_list = []
+#        for i in self.LL.rx_buffer:
+#            i = format(i,'02X')
+#            response_list.append(i)
+#        response = ' '.join(str(e) for e in response_list)
         return response
 
 
@@ -986,9 +986,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         str_test_object = sequence.make_string_from_test_object(test_object)    # Make string from test object
         self.LL.link_frame_data(pb)                                             # Frame protobuf encoded data
         print("TxBuffer: ",self.LL.tx_buffer)
+        commandStringLabel = QLabel(str_test_object)
+        commandStringLabel.setFont(self.italicFont)
+        self.scroll_layout.addWidget(commandStringLabel)
         try:
             self.ser.write(self.LL.tx_buffer)
-            command_send_success = 'Command sent'
             response = "Response: " + self.read_data_depending_on_cmd_type(test_object)
             responseLabel = QLabel(response)
             self.scroll_layout.addWidget(responseLabel)
@@ -997,11 +999,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 command_send_success = 'Error while sending command'
             else:
                 command_send_success = 'Port is not open'
-        commandStringLabel = QLabel(str_test_object)
-        commandStringLabel.setFont(self.italicFont)
-        self.scroll_layout.addWidget(commandStringLabel)
-        commandSendingLabel = QLabel(command_send_success)
-        self.scroll_layout.addWidget(commandSendingLabel)
+            commandSendingLabel = QLabel(command_send_success)
+            self.scroll_layout.addWidget(commandSendingLabel)
+
+
 
 
 
