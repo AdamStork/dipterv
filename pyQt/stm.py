@@ -407,14 +407,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.options_layout.setColumnMinimumWidth(0,80)
 
         if cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
-            print("LED options")
             if self.LED_active == False:
                 self.LED_active = True
                 self.led_label = QLabel("Let there be (LED) light!", self)
                 self.options_layout.addWidget(self.led_label)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
-            print("I2C options")
             if self.I2C_active == False:
                 self.I2C_active = True
                 self.i2c_bus_label = QLabel("I2C bus", self)
@@ -484,7 +482,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.setColumnMinimumWidth(1,10)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
-            print("SPI options")
             if self.SPI_active == False:
                 self.SPI_active = True
                 self.spi_bus_label = QLabel("SPI bus", self)
@@ -574,7 +571,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.setColumnMinimumWidth(1,0)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
-            print("GPIO digital optons")
             if self.GPIO_active == False:
                 self.GPIO_active = True
                 self.gpio_pin_label = QLabel("GPIO pin", self)
@@ -593,7 +589,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     for i in range(len(config.dict_available_digital_pins)):
                         self.gpio_pin_select.addItem(list(config.dict_available_digital_pins.keys())[i],list(config.dict_available_digital_pins.values())[i] )
                 else:
-                    for i in range(len(sequence.dict_gpio_digital_pins)):
+                    for i in range(len(sequence.dict_gpio_digital_pins) - 1):   # Last pin in list is the 'invalid' pin
                         self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
 
                 # Fill GPIO direction combobox
@@ -629,7 +625,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
-            print("AnalogRead optons")
             if self.AnalogRead_active == False:
                 self.AnalogRead_active = True
                 self.adc_instance_label = QLabel("ADC Instance", self)
@@ -691,7 +686,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
-            print("AnalogWrite optons")
             if self.AnalogWrite_active == False:
                 self.AnalogWrite_active = True
                 self.gpio_pin_label = QLabel("GPIO pin", self)
@@ -710,7 +704,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     for i in range(len(config.dict_available_digital_pins)):
                         self.gpio_pin_select.addItem(list(config.dict_available_digital_pins.keys())[i],list(config.dict_available_digital_pins.values())[i] )
                 else:
-                    for i in range(len(sequence.dict_gpio_digital_pins)):
+                    for i in range(len(sequence.dict_gpio_digital_pins) - 1):       # Last pin in list is the 'invalid' pin
                         self.gpio_pin_select.addItem(list(sequence.dict_gpio_digital_pins.keys())[i],list(sequence.dict_gpio_digital_pins.values())[i] )
 
                 # Set validators and placeholders for input fields
@@ -877,7 +871,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def read_data_depending_on_cmd_type(self, test_object):
         cmdType = test_object.commandType
         response_num = 20 # Should depend on buad rate..
-        print("response_num:", response_num)
 
         # Get response
         response_data = self.ser.read(response_num)             # Read response data
@@ -887,11 +880,15 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         message_data.ParseFromString(pb)                        # Deserialize response data into data structure
 #        print(message_data)
 
-        if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:
-            response = "GPIO state " + list(sequence.dict_gpio_state.keys())[list(sequence.dict_gpio_state.values()).index(message_data.response.responseRead)] # Search key by value (GPIO state)
-        elif test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_OUTPUT:
-            response =  list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseWrite)] # Search key by value (responseWrite enum)
-            response += " [" + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.gpio.pin)] + "]"
+        if cmdType == functional_test_pb2.GPIO_digital:
+            if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:
+                response = "GPIO state: " + list(sequence.dict_gpio_state.keys())[list(sequence.dict_gpio_state.values()).index(message_data.response.responseRead)] # Search key by value (GPIO state)
+            elif test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_OUTPUT:
+                response =  list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseWrite)] # Search key by value (responseWrite enum)
+                response += ": " + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.gpio.pin)]
+
+        elif cmdType == functional_test_pb2.Analog_read:
+            response = "Voltage: " + str(message_data.response.responseRead) + " mV"
 #        if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
 #            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
 #                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
@@ -991,7 +988,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.scroll_layout.addWidget(commandStringLabel)
         try:
             self.ser.write(self.LL.tx_buffer)
-            response = "Response: " + self.read_data_depending_on_cmd_type(test_object)
+            response = ">> " + self.read_data_depending_on_cmd_type(test_object)
             responseLabel = QLabel(response)
             self.scroll_layout.addWidget(responseLabel)
         except serial.serialutil.SerialException:

@@ -272,11 +272,12 @@ void analog_read_test(Command* message_in, Command* message_out)
 	analog_read_init(message_in, &adcHandler, gpioPort, gpioPin);
 
 	// ADC test
-	HAL_ADC_GetValue(&adcHandler);
+	message_out->has_response = true;
+	message_out->response.has_responseRead = true;
+	message_out->response.responseRead = HAL_ADC_GetValue(&adcHandler);
 
 	// ADC deinit
 	analog_read_deinit(&adcHandler, gpioPort, gpioPin);
-
 }
 
 
