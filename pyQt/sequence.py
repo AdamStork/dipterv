@@ -155,6 +155,7 @@ dict_gpio_digital_pins = {
     "PC13": 53,
     "PC14": 54,
     "PC15": 55,
+    "P_INVALID": 100,
 }
 
 
@@ -365,9 +366,11 @@ def make_test_object_from_options(UI):
 
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.Analog_read:
         cmd.analog_in.instance = UI.adc_instance_select.currentData()
-        cmd.analog_in.pin = UI.gpio_pin_select.currentData()
+        cmd.analog_in.channel = UI.adc_channel_select.currentData()
+        cmd.analog_in.pin = list(dict_gpio_analog_pins.values())[list(dict_gpio_analog_pins.keys()).index(UI.adc_pin_select.text())]
         cmd.analog_in.resolution = UI.adc_resolution_select.currentData()
         cmd.analog_in.clockPrescaler = UI.adc_clock_prescaler_select.currentData()
+        print("Analog pin:",cmd.analog_in.pin)
 
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.Analog_write:
         cmd.analog_out.pin = UI.gpio_pin_select.currentData()
@@ -483,6 +486,7 @@ def make_string_from_test_object(test_object):
     elif test_object.commandType == functional_test_pb2.CommandTypeEnum.Analog_read:
         string += "Analog_read"
         string += "  Instance: " + list(dict_adc_instances.keys())[list(dict_adc_instances.values()).index(test_object.analog_in.instance)]
+        string += "  Channel: " + list(dict_adc_channels.keys())[list(dict_adc_channels.values()).index(test_object.analog_in.channel)]
         string += "  Pin: " + list(dict_gpio_analog_pins.keys())[list(dict_gpio_analog_pins.values()).index(test_object.analog_in.pin)]
         string += "  Resolution: " + list(dict_adc_res.keys())[list(dict_adc_res.values()).index(test_object.analog_in.resolution)]
         string += "  Prescaler: " + list(dict_adc_clock_prescaler.keys())[list(dict_adc_clock_prescaler.values()).index(test_object.analog_in.clockPrescaler)]
@@ -572,9 +576,10 @@ def make_test_object_from_string(string):
     elif words[0] == list_cmd_types[4]:
         test_object.commandType = functional_test_pb2.CommandTypeEnum.Analog_read
         test_object.analog_in.instance = list(dict_adc_instances.values())[list(dict_adc_instances.keys()).index(optionValue[0])]
-        test_object.analog_in.pin = list(dict_gpio_analog_pins.values())[list(dict_gpio_analog_pins.keys()).index(optionValue[1])]
-        test_object.analog_in.resolution = list(dict_adc_res.values())[list(dict_adc_res.keys()).index(optionValue[2])]
-        test_object.analog_in.clockPrescaler = list(dict_adc_clock_prescaler.values())[list(dict_adc_clock_prescaler.keys()).index(optionValue[3])]
+        test_object.analog_in.channel = list(dict_adc_channels.values())[list(dict_adc_channels.keys()).index(optionValue[1])]
+        test_object.analog_in.pin = list(dict_gpio_analog_pins.values())[list(dict_gpio_analog_pins.keys()).index(optionValue[2])]
+        test_object.analog_in.resolution = list(dict_adc_res.values())[list(dict_adc_res.keys()).index(optionValue[3])]
+        test_object.analog_in.clockPrescaler = list(dict_adc_clock_prescaler.values())[list(dict_adc_clock_prescaler.keys()).index(optionValue[4])]
         return test_object
 
     elif words[0] == list_cmd_types[5]:

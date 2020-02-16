@@ -581,11 +581,11 @@ void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin)
  * 	@param[in]		message_in: message received
  * 	@param[in/out]	gpioPin: pin [0-15]
  * 	@return			pointer to GPIO port [GPIOA, GPIOB...]	**/
-GPIO_TypeDef* gpio_port_pin(Command* message_in, uint16_t* gpioPin)
+GPIO_TypeDef* gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin)
 {
 	GPIO_TypeDef* gpioPort;
 
-	switch(message_in->gpio.pin){
+	switch(pinEnum){
 
 	case gpioPins_PA0:
 		gpioPort = GPIOA;

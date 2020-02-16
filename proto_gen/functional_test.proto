@@ -167,7 +167,7 @@ enum gpioPins{
 	PC13 = 53;
 	PC14 = 54;
 	PC15 = 55;
-	P_INVALID = 60;
+	P_INVALID = 100;
 }
 
 
