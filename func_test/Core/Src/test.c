@@ -260,7 +260,7 @@ void analog_read_test(Command* message_in, Command* message_out)
 {
 	GPIO_TypeDef *gpioPort;
 	uint16_t gpioPin;
-	ADC_HandleTypeDef adcHandler;
+	ADC_HandleTypeDef adcHandle;
 
 
 	// choose GPIO port and pin
@@ -269,15 +269,18 @@ void analog_read_test(Command* message_in, Command* message_out)
 	}
 
 	// Initialize ADC & GPIO if CubeMX config file is not available
-	analog_read_init(message_in, &adcHandler, gpioPort, gpioPin);
+	analog_read_init(message_in, &adcHandle, gpioPort, gpioPin);
 
 	// ADC test
+	HAL_ADC_Start(&adcHandle);
+	uint32_t adcValue = HAL_ADC_GetValue(&adcHandle);
+	// Set response
 	message_out->has_response = true;
 	message_out->response.has_responseRead = true;
-	message_out->response.responseRead = HAL_ADC_GetValue(&adcHandler);
+	message_out->response.responseRead = 3300*adcValue/4096;
 
 	// ADC deinit
-	analog_read_deinit(&adcHandler, gpioPort, gpioPin);
+	analog_read_deinit(&adcHandle, gpioPort, gpioPin);
 }
 
 
@@ -299,7 +302,6 @@ void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);
-
 
 	// Configure ADC instance
 	if(message_in->analog_in.instance == adcInstance_ADC1){
@@ -326,6 +328,7 @@ void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
 	}
 
+	// Configure ADC resolution
 	if(message_in->analog_in.resolution == adcResolution_ADC_12_BITS){
 		adcHandle->Init.Resolution = ADC_RESOLUTION_12B;
 	}
@@ -435,9 +438,9 @@ uint32_t analog_read_choose_channel(Command* message_in)
 	case adcChannel_ADC_CHANNEL_IN15:
 		adcChannel = ADC_CHANNEL_15;
 		break;
-//	case adcChannel_ADC_CHANNEL_TEMP:
-//		adcChannel = ADC_CHANNEL_TEMP;
-//		break;
+	case adcChannel_ADC_CHANNEL_TEMP:
+		adcChannel = ADC_CHANNEL_16;
+		break;
 	case adcChannel_ADC_CHANNEL_VREFINT:
 		adcChannel = ADC_CHANNEL_VREFINT;
 		break;

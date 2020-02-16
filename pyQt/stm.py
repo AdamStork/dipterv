@@ -204,25 +204,25 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             try:
                 self.ser.write(self.LL.tx_buffer)
                 command_send_success = 'Command sent'
-                self.read_data_depending_on_cmd_type(self.test_list[i])
+                read_response = self.read_data_depending_on_cmd_type(self.test_list[i])
             except serial.serialutil.SerialException:
                 if self.ser.is_open:
                     command_send_success = 'Error while sending command'
                 else:
                     command_send_success = 'Port is not open'
                 # If serial write is unsuccessful, then display it on scrollArea and return immediately.
-#                successLabel = QLabel(command_send_success)
-#                self.scroll_layout.addWidget(successLabel)
-#                return
+                successLabel = QLabel(command_send_success)
+                self.scroll_layout.addWidget(successLabel)
+                break
 
             # Print current command
             self.sequence_list.setCurrentRow(i)
-            currentCommand = "Cmd: " + self.sequence_list.currentItem().text()
+            currentCommand = self.sequence_list.currentItem().text()
             currentCommandLabel = QLabel(currentCommand)
             currentCommandLabel.setFont(self.italicFont)             # Set own font style for command print
 
             # Print serial read response
-            response = "Response: " + command_send_success
+            response = ">>  " + read_response
             responseLabel = QLabel(response)
 
             # Add widgets (labels) to scrollArea
@@ -875,7 +875,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Get response
         response_data = self.ser.read(response_num)             # Read response data
         self.LL.link_unframe_data(response_data)                # Unframe response data
-        pb = array.array('b',self.LL.rx_buffer).tobytes()      # Make string from response data
+        pb = array.array('B',self.LL.rx_buffer).tobytes()      # Make string from response data
         message_data = functional_test_pb2.Command()
         message_data.ParseFromString(pb)                        # Deserialize response data into data structure
 #        print(message_data)
