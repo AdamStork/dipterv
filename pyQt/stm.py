@@ -360,6 +360,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.spi_frame_format_select.model().item(1).setEnabled(True)
 
+
     # Called when USART mode setting is changed
     def on_changed_usart_mode(self):
         # If 'Asynchronous' mode is selected: remove clock settings if necessary, add HW Flow Control settings
@@ -392,6 +393,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.options_layout.addWidget(self.usart_clock_polarity_select,8,2)
             self.options_layout.addWidget(self.usart_clock_phase_select,9,2)
             self.options_layout.addWidget(self.usart_clock_last_bit_select,10,2)
+
+
+    def on_changed_adc_channel(self):
+        pin = sequence.select_pin_for_adc_channel(self.adc_channel_select.currentData())
+        self.adc_pin_select.setText(pin)
 
 
 
@@ -627,12 +633,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.AnalogRead_active == False:
                 self.AnalogRead_active = True
                 self.adc_instance_label = QLabel("ADC Instance", self)
-                self.gpio_pin_label = QLabel("ADC pin", self)
+                self.adc_channel_label = QLabel("ADC channel", self)
+                self.adc_pin_label = QLabel("ADC pin", self)
                 self.adc_resolution_label = QLabel("ADC resolution", self)
                 self.adc_clock_prescaler_label = QLabel("ADC clock prescaler", self)
 
                 self.adc_instance_select = QComboBox(self)
-                self.gpio_pin_select = QComboBox(self)
+                self.adc_channel_select = QComboBox(self)
+                self.adc_pin_select = QLineEdit("", self)
                 self.adc_resolution_select = QComboBox(self)
                 self.adc_clock_prescaler_select = QComboBox(self)
 
@@ -644,13 +652,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     for i in range(len(sequence.dict_adc_instances)):
                         self.adc_instance_select.addItem(list(sequence.dict_adc_instances.keys())[i],list(sequence.dict_adc_instances.values())[i] )
 
-                # Fill ADC pins combobox
+                # Fill ADC channels combobox
                 if self.use_config_file == True:
-                    for i in range(len(config.dict_available_analog_pins)):
-                        self.gpio_pin_select.addItem(list(config.dict_available_analog_pins.keys())[i],list(config.dict_available_analog_pins.values())[i] )
+                    for i in range(len(config.dict_available_adc_channels)):
+                        self.adc_channel_select.addItem(list(config.dict_available_adc_channels.keys())[i],list(config.dict_available_adc_channels.values())[i] )
                 else:
-                    for i in range(len(sequence.dict_gpio_analog_pins)):
-                        self.gpio_pin_select.addItem(list(sequence.dict_gpio_analog_pins.keys())[i],list(sequence.dict_gpio_analog_pins.values())[i] )
+                    for i in range(len(sequence.dict_adc_channels)):
+                        self.adc_channel_select.addItem(list(sequence.dict_adc_channels.keys())[i],list(sequence.dict_adc_channels.values())[i] )
 
                 # Fill ADC resolution combobox
                 for i in range(len(sequence.dict_adc_res)):
@@ -660,19 +668,26 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for i in range(len(sequence.dict_adc_clock_prescaler)):
                     self.adc_clock_prescaler_select.addItem(list(sequence.dict_adc_clock_prescaler.keys())[i],list(sequence.dict_adc_clock_prescaler.values())[i] )
 
+                # Connect signal and call function explicitly, disable ADC pin input field
+                self.adc_channel_select.activated[str].connect(self.on_changed_adc_channel)
+                self.on_changed_adc_channel()
+                self.adc_pin_select.setEnabled(False)
+
                 # Add widgets to layout
                 self.options_layout.addWidget(self.adc_instance_label,0,0)
-                self.options_layout.addWidget(self.gpio_pin_label,1,0)
-                self.options_layout.addWidget(self.adc_resolution_label,2,0)
-                self.options_layout.addWidget(self.adc_clock_prescaler_label,3,0)
+                self.options_layout.addWidget(self.adc_channel_label,1,0)
+                self.options_layout.addWidget(self.adc_pin_label,2,0)
+                self.options_layout.addWidget(self.adc_resolution_label,3,0)
+                self.options_layout.addWidget(self.adc_clock_prescaler_label,4,0)
 
                 self.options_layout.addWidget(self.adc_instance_select,0,2)
-                self.options_layout.addWidget(self.gpio_pin_select,1,2)
-                self.options_layout.addWidget(self.adc_resolution_select,2,2)
-                self.options_layout.addWidget(self.adc_clock_prescaler_select,3,2)
+                self.options_layout.addWidget(self.adc_channel_select,1,2)
+                self.options_layout.addWidget(self.adc_pin_select,2,2)
+                self.options_layout.addWidget(self.adc_resolution_select,3,2)
+                self.options_layout.addWidget(self.adc_clock_prescaler_select,4,2)
 
                 # Layout settings
-                self.options_layout.addItem(self.spacerItem,4,0)
+                self.options_layout.addItem(self.spacerItem,5,0)
                 self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:

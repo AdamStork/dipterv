@@ -18,6 +18,7 @@ import functional_test_pb2
 #    delete_test_list(test_list)
 #    is_empty(field)
 #    make_protobuf_command_from_test_object(test_object)
+#    select_pin_for_adc_channel(adcChannelValue):
 
 
 # List of command types
@@ -164,7 +165,28 @@ dict_adc_instances = {
     "ADC3": 3,
 }
 
-dict_gpio_analog_pins = {
+
+dict_adc_channels = {
+    "IN0": 0,
+    "IN1": 1,
+    "IN2": 2,
+    "IN3": 3,
+    "IN4": 4,
+    "IN5": 5,
+    "IN6": 6,
+    "IN7": 7,
+    "IN8": 8,
+    "IN9": 9,
+    "IN10": 10,
+    "IN11": 11,
+    "IN12": 12,
+    "IN13": 13,
+    "IN14": 14,
+    "IN15": 15,
+}
+
+
+dict_gpio_analog_pins = {   # pin values represent the ADC channel IN[0..15] values
     "PA0": 0,
     "PA1": 1,
     "PA2": 2,
@@ -173,17 +195,17 @@ dict_gpio_analog_pins = {
     "PA5": 5,
     "PA6": 6,
     "PA7": 7,
-    "PB0": 20,
-    "PB1": 21,
-    "PC0": 40,
-    "PA1": 41,
-    "PC2": 42,
-    "PC3": 43,
-    "PC4": 44,
-    "PC5": 45,
-    "Temp": 60,
-    "Vrefint": 61,
-    "Vbat": 62
+    "PB0": 8,
+    "PB1": 9,
+    "PC0": 10,
+    "PC1": 11,
+    "PC2": 12,
+    "PC3": 13,
+    "PC4": 14,
+    "PC5": 15,
+#    "Temp": 60,
+#    "Vrefint": 61,
+#    "Vbat": 62
 }
 
 dict_adc_res = {
@@ -594,3 +616,9 @@ def is_empty(field):
     if field == "":
         return True
 
+
+# @brief    Select pin for ADC channel
+# @param    adcChannelValue: value for ADC channel taken from dictionary
+def select_pin_for_adc_channel(adcChannelValue):
+    pin = list(dict_gpio_analog_pins.keys())[list(dict_gpio_analog_pins.values()).index(adcChannelValue)]
+    return pin
