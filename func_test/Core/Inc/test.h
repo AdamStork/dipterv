@@ -50,8 +50,9 @@ void analog_read_deinit(ADC_HandleTypeDef* adcHandler, GPIO_TypeDef* gpioPort, u
 uint32_t analog_read_choose_channel(Command* message_in);
 
 
-void pwm_init(void);
-void pwm_test(void);
-void pwm_deinit(void);
+void pwm_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin);
+void pwm_test(Command* message_in, Command* message_out);
+void pwm_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin);
+void timer_init(TIM_HandleTypeDef* htim, TIM_TypeDef* Instance, uint32_t period);
 
 #endif /* INC_TEST_H_ */

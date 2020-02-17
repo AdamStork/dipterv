@@ -889,6 +889,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         elif cmdType == functional_test_pb2.Analog_read:
             response = "Voltage: " + str(message_data.response.responseRead) + " mV"
+
+        elif cmdType == functional_test_pb2.Analog_write:
+            response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseWrite)] # Search key by value (responseWrite enum)
+            response += ": " + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.analog_out.pin)]
 #        if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
 #            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
 #                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)

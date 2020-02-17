@@ -23,6 +23,9 @@ uint8_t receiveBufferLen;
 link_layer_t linkLayer;
 StateType deviceState;
 
+uint8_t pwmDutyMax = 100;
+uint8_t pwmDutyCounter = 0;
+uint8_t tim3Counter = 0;
 
 
 /** @brief 	Encode message
@@ -228,8 +231,7 @@ void enter_processing_state(void)
 				break;
 
 			case CommandTypeEnum_Analog_write:
-//				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-//				message_out.commandType = CommandTypeEnum_Analog_write;
+				pwm_test(&message_in, &message_out);
 				break;
 
 			default:
@@ -251,6 +253,114 @@ void enter_processing_state(void)
 
 
 
+/**********************			PWM test				******************************/
+/** @brief	Analog write (PWM) test
+ *  @param	message_in: pointer to received message
+ *  @param  message_out: pointer to transmit message	**/
+void pwm_test(Command* message_in, Command* message_out)
+{
+	GPIO_TypeDef *gpioPort;
+	uint16_t gpioPin;
+
+
+	// choose GPIO port and pin
+	gpioPort = gpio_port_pin(message_in->analog_in.pin, &gpioPin);
+
+	// Initialize PWM (GPIO + Timer)
+	pwm_init(message_in, gpioPort, gpioPin);
+
+	// Start PWM
+//	HAL_TIM_Base_Init();
+
+	// Set response commandType
+	message_out->commandType = CommandTypeEnum_Analog_write;
+	message_out->has_response = true;
+	message_out->response.has_responseWrite = true;
+	message_out->response.responseWrite = responseWriteEnum_PWM_SET;
+
+	// Deinitialize pwm in timer callback
+
+
+}
+
+
+/** @brief	Analog read (ADC) peripheral init
+ *  @param	message_in: pointer to received message
+ *  @param  gpioPort: pointer to GPIO port handler
+ *  @param	gpioPin: GPIO pin number [0-15]				**/
+void pwm_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
+{
+	/* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	__HAL_RCC_GPIOH_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+	// Pin configuration
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = gpioPin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);
+
+    TIM_HandleTypeDef htim1;
+    TIM_HandleTypeDef htim3;
+    timer_init(&htim3,TIM3, 1000);
+
+    /** TIM1 timer configuration **/
+//    float pwmPeriodInMilliSeconds = 1000*1/(message_in->analog_out.frequency);
+//    float timerInterruptPeriordInMilliSeconds = pwmPeriodInMilliSeconds/pwmDutyMax;
+//    uint32_t timerInterruptPeriordTicks =
+
+
+
+
+}
+
+
+/** @brief	ADC peripheral deinit
+ *  @param	message_in: pointer to received message
+ *  @param  gpioPort: pointer to GPIO port handler
+ *  @param	gpioPin: GPIO pin number [0-15]				**/
+void pwm_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin)
+{
+ // Timer & GPIO deinit
+}
+
+
+/** @brief	Timer peripheral init
+ *  @param	htim: pointer to Timer handle		**/
+void timer_init(TIM_HandleTypeDef* htim, TIM_TypeDef* Instance, uint32_t period)
+{
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+    TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+    htim->Instance = Instance;
+    htim->Init.Prescaler = 0;
+    htim->Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim->Init.Period = period;
+    htim->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim->Init.RepetitionCounter = 0;
+    htim->Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(htim) != HAL_OK)
+    {
+      Error_Handler();
+    }
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+    if (HAL_TIM_ConfigClockSource(htim, &sClockSourceConfig) != HAL_OK)
+    {
+      Error_Handler();
+    }
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(htim, &sMasterConfig) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    //Start
+    HAL_TIM_Base_Start_IT(htim);
+}
 
 /**********************			Analog read 			******************************/
 /** @brief	Analog read (ADC) test
@@ -369,7 +479,8 @@ void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 }
 
 
-/** @brief	GPIO peripheral deinit
+
+/** @brief	ADC peripheral deinit
  *  @param	message_in: pointer to received message
  *  @param  gpioPort: pointer to GPIO port handler
  *  @param	gpioPin: GPIO pin number [0-15]				**/
@@ -453,6 +564,8 @@ uint32_t analog_read_choose_channel(Command* message_in)
 
 	return adcChannel;
 }
+
+
 /**********************			GPIO digital 			******************************/
 /** @brief	GPIO peripheral test
  *  @param	message_in: pointer to received message
