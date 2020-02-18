@@ -17,7 +17,7 @@ typedef enum{
 	STATE_TEST
 } StateType;
 
-
+#define PWM_DUTY_MAX 100
 
 bool encode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_out, uint8_t* bytesWritten);
 bool decode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_in);
@@ -50,7 +50,7 @@ void analog_read_deinit(ADC_HandleTypeDef* adcHandler, GPIO_TypeDef* gpioPort, u
 uint32_t analog_read_choose_channel(Command* message_in);
 
 
-void pwm_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin);
+void pwm_init(Command* message_in);
 void pwm_test(Command* message_in, Command* message_out);
 
 

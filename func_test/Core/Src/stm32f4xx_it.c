@@ -21,6 +21,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_it.h"
+#include "test.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -60,6 +61,10 @@ extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart2_tx;
+extern GPIO_TypeDef *gpioPortPWM;
+extern uint16_t gpioPinPWM;
+extern uint32_t pwmCounter;
+extern uint8_t pwmDuty;
 
 /* USER CODE BEGIN EV */
 
@@ -239,7 +244,17 @@ void TIM2_IRQHandler(void)
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
-  HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_5);
+  pwmCounter++;
+  if(pwmCounter > PWM_DUTY_MAX){
+	  pwmCounter = 0;
+  }
+
+  if(pwmCounter < pwmDuty){
+	  HAL_GPIO_WritePin(gpioPortPWM, gpioPinPWM, 1);
+  }
+  else{
+	  HAL_GPIO_WritePin(gpioPortPWM, gpioPinPWM, 0);
+  }
   /* USER CODE END TIM2_IRQn 1 */
 }
 
@@ -255,6 +270,7 @@ void TIM3_IRQHandler(void)
   /* USER CODE BEGIN TIM3_IRQn 1 */
   HAL_TIM_OC_Stop_IT(&htim2,TIM_CHANNEL_1);
   HAL_TIM_OC_Stop_IT(&htim3,TIM_CHANNEL_1);
+  HAL_GPIO_DeInit(gpioPortPWM, gpioPinPWM);
 
   /* USER CODE END TIM3_IRQn 1 */
 }

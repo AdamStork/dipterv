@@ -24,13 +24,15 @@ uint8_t receiveBufferLen;
 link_layer_t linkLayer;
 StateType deviceState;
 
-uint8_t pwmDutyMax = 100;
-uint8_t pwmDutyCounter = 0;
-uint8_t tim3Counter = 0;
-
-
+uint32_t pwmCounter;
+uint8_t pwmDuty;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
+
+GPIO_TypeDef *gpioPortPWM;
+uint16_t gpioPinPWM;
+
+
 
 /** @brief 	Encode message
  * @param[out]	pBuffer: pointer to encoded buffer
@@ -262,15 +264,12 @@ void enter_processing_state(void)
  *  @param  message_out: pointer to transmit message	**/
 void pwm_test(Command* message_in, Command* message_out)
 {
-	GPIO_TypeDef *gpioPort;
-	uint16_t gpioPin;
-
 
 	// choose GPIO port and pin
-	gpioPort = gpio_port_pin(message_in->analog_out.pin, &gpioPin);
+	gpioPortPWM = gpio_port_pin(message_in->analog_out.pin, &gpioPinPWM);
 
 	// Initialize and start PWM (GPIO + Timer)
-	pwm_init(message_in, gpioPort, gpioPin);
+	pwm_init(message_in);
 
 	// Set response commandType
 	message_out->commandType = CommandTypeEnum_Analog_write;
@@ -285,7 +284,7 @@ void pwm_test(Command* message_in, Command* message_out)
  *  @param	message_in: pointer to received message
  *  @param  gpioPort: pointer to GPIO port handler
  *  @param	gpioPin: GPIO pin number [0-15]				**/
-void pwm_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
+void pwm_init(Command* message_in)
 {
 	/* GPIO Ports Clock Enable */
 	__HAL_RCC_GPIOC_CLK_ENABLE();
@@ -293,15 +292,18 @@ void pwm_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
+
 	// Pin configuration
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = gpioPin;
+    GPIO_InitStruct.Pin = gpioPinPWM;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);
+    HAL_GPIO_Init(gpioPortPWM, &GPIO_InitStruct);
 
     // Timer2 set new period
-    htim2.Init.Period = (1000/(message_in->analog_out.frequency) - 1);
+    pwmCounter = 0;
+    pwmDuty = message_in->analog_out.dutyCycle;
+    htim2.Init.Period = ((1000/(message_in->analog_out.frequency))/PWM_DUTY_MAX) - 1;
     HAL_TIM_Base_Init(&htim2);
 
     // Init and start Timer3 if PWM time dependency is enabled (active for given time only)
@@ -311,7 +313,6 @@ void pwm_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 		HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
 	}
 	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
-
 }
 
 
