@@ -60,6 +60,7 @@ extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart2_tx;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -238,7 +239,7 @@ void TIM2_IRQHandler(void)
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
-
+  HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_5);
   /* USER CODE END TIM2_IRQn 1 */
 }
 
@@ -252,8 +253,9 @@ void TIM3_IRQHandler(void)
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-  HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
+  HAL_TIM_OC_Stop_IT(&htim2,TIM_CHANNEL_1);
+  HAL_TIM_OC_Stop_IT(&htim3,TIM_CHANNEL_1);
+
   /* USER CODE END TIM3_IRQn 1 */
 }
 

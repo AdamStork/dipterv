@@ -12,6 +12,7 @@
 #include "test.h"
 #include "link_layer.h"
 #include "functional_test.pb.h"
+#include "tim.h"
 
 
 bool frameReady = false;
@@ -27,6 +28,9 @@ uint8_t pwmDutyMax = 100;
 uint8_t pwmDutyCounter = 0;
 uint8_t tim3Counter = 0;
 
+
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 
 /** @brief 	Encode message
  * @param[out]	pBuffer: pointer to encoded buffer
@@ -252,7 +256,6 @@ void enter_processing_state(void)
 }
 
 
-
 /**********************			PWM test				******************************/
 /** @brief	Analog write (PWM) test
  *  @param	message_in: pointer to received message
@@ -264,22 +267,16 @@ void pwm_test(Command* message_in, Command* message_out)
 
 
 	// choose GPIO port and pin
-	gpioPort = gpio_port_pin(message_in->analog_in.pin, &gpioPin);
+	gpioPort = gpio_port_pin(message_in->analog_out.pin, &gpioPin);
 
-	// Initialize PWM (GPIO + Timer)
+	// Initialize and start PWM (GPIO + Timer)
 	pwm_init(message_in, gpioPort, gpioPin);
-
-	// Start PWM
-//	HAL_TIM_Base_Init();
 
 	// Set response commandType
 	message_out->commandType = CommandTypeEnum_Analog_write;
 	message_out->has_response = true;
 	message_out->response.has_responseWrite = true;
 	message_out->response.responseWrite = responseWriteEnum_PWM_SET;
-
-	// Deinitialize pwm in timer callback
-
 
 }
 
@@ -303,64 +300,21 @@ void pwm_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);
 
-    TIM_HandleTypeDef htim1;
-    TIM_HandleTypeDef htim3;
-    timer_init(&htim3,TIM3, 1000);
+    // Timer2 set new period
+    htim2.Init.Period = (1000/(message_in->analog_out.frequency) - 1);
+    HAL_TIM_Base_Init(&htim2);
 
-    /** TIM1 timer configuration **/
-//    float pwmPeriodInMilliSeconds = 1000*1/(message_in->analog_out.frequency);
-//    float timerInterruptPeriordInMilliSeconds = pwmPeriodInMilliSeconds/pwmDutyMax;
-//    uint32_t timerInterruptPeriordTicks =
-
-
-
+    // Init and start Timer3 if PWM time dependency is enabled (active for given time only)
+	if((message_in->analog_out.has_time == true) && (message_in->analog_out.dependency == pwmTimeDependency_PWM_TIME_DEPENDENCY_ENABLED)){
+		htim3.Init.Period = (message_in->analog_out.time) - 1;
+	    HAL_TIM_Base_Init(&htim3);
+		HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
+	}
+	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
 
 }
 
 
-/** @brief	ADC peripheral deinit
- *  @param	message_in: pointer to received message
- *  @param  gpioPort: pointer to GPIO port handler
- *  @param	gpioPin: GPIO pin number [0-15]				**/
-void pwm_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin)
-{
- // Timer & GPIO deinit
-}
-
-
-/** @brief	Timer peripheral init
- *  @param	htim: pointer to Timer handle		**/
-void timer_init(TIM_HandleTypeDef* htim, TIM_TypeDef* Instance, uint32_t period)
-{
-    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-    TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-    htim->Instance = Instance;
-    htim->Init.Prescaler = 0;
-    htim->Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim->Init.Period = period;
-    htim->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    htim->Init.RepetitionCounter = 0;
-    htim->Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if (HAL_TIM_Base_Init(htim) != HAL_OK)
-    {
-      Error_Handler();
-    }
-    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-    if (HAL_TIM_ConfigClockSource(htim, &sClockSourceConfig) != HAL_OK)
-    {
-      Error_Handler();
-    }
-    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(htim, &sMasterConfig) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    //Start
-    HAL_TIM_Base_Start_IT(htim);
-}
 
 /**********************			Analog read 			******************************/
 /** @brief	Analog read (ADC) test

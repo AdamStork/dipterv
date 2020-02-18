@@ -689,10 +689,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.AnalogWrite_active == False:
                 self.AnalogWrite_active = True
                 self.gpio_pin_label = QLabel("GPIO pin", self)
-                self.pwm_freq_label= QLabel("Frequency", self)
+                self.pwm_freq_label= QLabel("Frequency (Hz)", self)
                 self.pwm_duty_label = QLabel("Duty cycle", self)
-                self.pwm_time_checkbox = QCheckBox("Active for given time (ms) only")
-                self.pwm_time_label = QLabel("Time",self)
+                self.pwm_time_checkbox = QCheckBox("Active for given time only")
+                self.pwm_time_label = QLabel("Time (ms)",self)
 
                 self.gpio_pin_select = QComboBox(self)
                 self.pwm_freq_select = QLineEdit(self)
