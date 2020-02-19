@@ -266,16 +266,37 @@ void enter_processing_state(void)
 void i2c_test(Command* message_in, Command* message_out)
 {
 	I2C_HandleTypeDef hi2c;
+	uint16_t i2cAddress = message_in->i2c.address;
+	uint8_t reg = message_in->i2c.reg;
+//	uint32_t responseWord;
+	uint8_t byteResponse;
+
+	// < --- TODO : kiolvasast  megcsinalni jol (uint32_t legyen, azaz 4 bajtot fogadjunk?)
 
 	// Init I2C peripheral
 	i2c_init(message_in, &hi2c);
 
 	// Perform I2C test and set response
-	// todo
+	switch(message_in->i2c.direction){
+	case i2cDirection_I2C_write:
+		HAL_I2C_Master_Transmit(&hi2c,i2cAddress,&reg,sizeof(reg), HAL_MAX_DELAY);
+		message_out->has_response = true;
+		message_out->response.has_responseWrite = true;
+		message_out->response.responseWrite = responseWriteEnum_I2C_WRITE_OK;
+		break;
+	case i2cDirection_I2C_read:
+		HAL_I2C_Master_Receive(&hi2c, i2cAddress,&byteResponse, sizeof(byteResponse), HAL_MAX_DELAY);
+		message_out->has_response = true;
+		message_out->response.has_responseRead = true;
+		message_out->response.responseRead = byteResponse;
+		break;
+	}
 
 	// Deinit I2C peripheral
 	HAL_I2C_MspDeInit(&hi2c);
 }
+
+
 
 /** @brief	I2C init
  *  @param	message_in: pointer to received message
@@ -308,7 +329,7 @@ void i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c)
 			break;
 		}
 	}
-	else{
+	else{ // Standard mode
 		hi2c->Init.DutyCycle = I2C_DUTYCYCLE_2;
 	}
 
@@ -327,6 +348,7 @@ void i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c)
 }
 
 
+
 /**********************			SPI test				******************************/
 /** @brief	SPI test
  *  @param	message_in: pointer to received message
@@ -334,21 +356,49 @@ void i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c)
 void spi_test(Command* message_in, Command* message_out)
 {
 	SPI_HandleTypeDef hspi;
+	uint8_t command = message_in->spi.command;
+//	uint8_t dummyClocks = message_in->spi.dummyclocks;
+//	uint32_t responseWord;
+	uint8_t responseByte;
+
+	// < --- TODO : command + dummyclocks osszepakolni uint8_t* bufferbe, kiolvasast is megcsinalni jol
 
 	// Init SPI peripheral
 	spi_init(message_in, &hspi);
 
 	// Perform SPI test and set response
-	// todo
+	switch(message_in->spi.operatingMode){
+	case spiOperatingMode_SPI_MODE_FULL_DUPLEX_MASTER:
+		HAL_SPI_TransmitReceive(&hspi,&command, &responseByte, sizeof(responseByte), HAL_MAX_DELAY);
+		message_out->has_response = true;
+		message_out->response.has_responseRead = true;
+		message_out->response.responseRead = responseByte;
+		break;
+	case spiOperatingMode_SPI_MODE_HALF_DUPLEX_MASTER:
+		HAL_SPI_TransmitReceive(&hspi,&command, &responseByte, sizeof(responseByte), HAL_MAX_DELAY);
+		message_out->has_response = true;
+		message_out->response.has_responseRead = true;
+		message_out->response.responseRead = responseByte;
+		break;
+	case spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER:
+		HAL_SPI_Transmit(&hspi,&command, sizeof(command), HAL_MAX_DELAY);
+		message_out->has_response = true;
+		message_out->response.has_responseWrite = true;
+		message_out->response.responseWrite = responseWriteEnum_SPI_TRANSMISSION_OK;
+		break;
+	default:
+		break;
+	}
 
 	// Deinit SPI peripheral
 	HAL_SPI_MspDeInit(&hspi);
 }
 
 
+
 /** @brief	SPI init
  *  @param	message_in: pointer to received message
- *  @param	hspi: pointer to USART handler	**/
+ *  @param	hspi: pointer to SPI handler	**/
 void spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
 {
 	switch(message_in->spi.bus){
@@ -420,12 +470,20 @@ void spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
 
 		switch(message_in->spi.clockMode){
 		case clockMode_SPI_MODE_0:
+			hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+			hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
 			break;
 		case clockMode_SPI_MODE_1:
+			hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+			hspi->Init.CLKPhase = SPI_PHASE_2EDGE;
 			break;
 		case clockMode_SPI_MODE_2:
+			hspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
+			hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
 			break;
 		case clockMode_SPI_MODE_3:
+			hspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
+			hspi->Init.CLKPhase = SPI_PHASE_2EDGE;
 			break;
 		default:
 			break;
@@ -435,17 +493,10 @@ void spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
 	}
 	// TI frame forat
 	else{
+		hspi->Init.TIMode = SPI_TIMODE_ENABLED;
 
 
 	}
-//	hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-//	hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-//	hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-//	hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-
-
-
-
 
 	// Default settings
 	hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
