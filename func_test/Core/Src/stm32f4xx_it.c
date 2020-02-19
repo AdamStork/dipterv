@@ -59,8 +59,6 @@
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
-extern DMA_HandleTypeDef hdma_usart2_rx;
-extern DMA_HandleTypeDef hdma_usart2_tx;
 extern GPIO_TypeDef *gpioPortPWM;
 extern uint16_t gpioPinPWM;
 extern uint32_t pwmCounter;
