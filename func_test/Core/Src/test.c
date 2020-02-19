@@ -267,18 +267,22 @@ void enter_processing_state(void)
 void usart_test(Command* message_in, Command* message_out)
 {
 	UART_HandleTypeDef huart;
+	USART_HandleTypeDef husart;
 
 	// Initialize and start PWM (GPIO + Timer)
-	usart_init(message_in);
+	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+		uart_init(message_in,&huart);
+	}
+	else{
+		usart_init(message_in,&husart);
+	}
+
 
 	// Perform test and set response
 	switch(message_in->usart.direction){
-	case usartDirection_USART_RX:
-
-		break;
 	case usartDirection_USART_TX:
 		break;
-	case usartDirection_USART_RX_AND_TX:
+	case usartDirection_USART_TX_AND_RX:
 		break;
 	default:
 		break;
@@ -312,10 +316,10 @@ void usart_init(Command* message_in, USART_HandleTypeDef* husart)
 
 	switch(message_in->usart.wordLength){
 	case usartWordLength_USART_8_BITS:
-		husart->Init.WordLength = UART_WORDLENGTH_8B;
+		husart->Init.WordLength = USART_WORDLENGTH_8B;
 		break;
 	case usartWordLength_USART_9_BITS:
-		husart->Init.WordLength = UART_WORDLENGTH_9B;
+		husart->Init.WordLength = USART_WORDLENGTH_9B;
 		break;
 	default:
 		break;
@@ -323,23 +327,23 @@ void usart_init(Command* message_in, USART_HandleTypeDef* husart)
 
 	switch(message_in->usart.stopBits){
 	case usartStopBits_USART_STOP_BITS_1:
-		husart->Init.StopBits = UART_STOPBITS_1;
+		husart->Init.StopBits = USART_STOPBITS_1;
 		break;
 	case usartStopBits_USART_STOP_BITS_2:
-		husart->Init.StopBits = UART_STOPBITS_2;
+		husart->Init.StopBits = USART_STOPBITS_2;
 	default:
 		break;
 	}
 
 	switch(message_in->usart.parity){
 	case usartParity_USART_PARITY_NONE:
-		husart->Init.Parity = UART_PARITY_NONE;
+		husart->Init.Parity = USART_PARITY_NONE;
 		break;
 	case usartParity_USART_PARITY_EVEN:
-		husart->Init.Parity = UART_PARITY_EVEN;
+		husart->Init.Parity = USART_PARITY_EVEN;
 		break;
 	case usartParity_USART_PARITY_ODD:
-		husart->Init.Parity = UART_PARITY_ODD;
+		husart->Init.Parity = USART_PARITY_ODD;
 		break;
 	default:
 		break;
@@ -347,13 +351,11 @@ void usart_init(Command* message_in, USART_HandleTypeDef* husart)
 
 
 	switch(message_in->usart.direction){
-	case usartDirection_USART_RX:
-		husart->Init.Mode = UART_MODE_RX;
-		break;
 	case usartDirection_USART_TX:
-		husart->Init.Mode = UART_MODE_TX;
-	case usartDirection_USART_RX_AND_TX:
-		husart->Init.Mode = UART_MODE_TX_RX;
+		husart->Init.Mode = USART_MODE_RX;
+		break;
+	case usartDirection_USART_TX_AND_RX:
+		husart->Init.Mode = USART_MODE_TX_RX;
 		break;
 	default:
 		break;
@@ -386,7 +388,6 @@ void usart_init(Command* message_in, USART_HandleTypeDef* husart)
 		break;
 	}
 
-	husart->Init.OverSampling = UART_OVERSAMPLING_16;
 
 
 	if (HAL_USART_Init(husart) != HAL_OK)
@@ -458,49 +459,35 @@ void uart_init(Command* message_in, UART_HandleTypeDef* huart)
 
 
 	switch(message_in->usart.direction){
-	case usartDirection_USART_RX:
+	case usartDirection_USART_TX:
 		huart->Init.Mode = UART_MODE_RX;
 		break;
-	case usartDirection_USART_TX:
-		huart->Init.Mode = UART_MODE_TX;
-	case usartDirection_USART_RX_AND_TX:
+	case usartDirection_USART_TX_AND_RX:
 		huart->Init.Mode = UART_MODE_TX_RX;
 		break;
 	default:
 		break;
 	}
 
-	switch(message_in->usart.clockPolarity){
-	case usartClockPolarity_USART_CLOCK_POLARITY_LOW:
-		huart->Init.CLKPolarity = USART_POLARITY_LOW;
-	case usartClockPolarity_USART_CLOCK_POLARITY_HIGH:
-		huart->Init.CLKPolarity = USART_POLARITY_HIGH;
-	default:
+	switch(message_in->usart.hwFlowControl){
+	case usartHardwareFlowControl_USART_HW_FLOW_DISABLE:
+		huart->Init.HwFlowCtl = UART_HWCONTROL_NONE;
 		break;
-	}
-
-	switch(message_in->usart.clockPhase){
-	case usartClockPhase_USART_CLOCK_PHASE_ONE_EDGE:
-		huart->Init.CLKPhase = USART_PHASE_1EDGE;
-	case usartClockPhase_USART_CLOCK_PHASE_TWO_EDGE:
-		huart->Init.CLKPhase = USART_PHASE_2EDGE;
-	default:
+	case usartHardwareFlowControl_USART_HW_FLOW_CTS_ONLY:
+		huart->Init.HwFlowCtl = UART_HWCONTROL_CTS;
 		break;
-	}
-
-	switch(message_in->usart.clockLastBit){
-	case usartClockLastBit_USART_CLOCK_LAST_BIT_DISABLE:
-		huart->Init.CLKLastBit = USART_LASTBIT_DISABLE;
-	case usartClockLastBit_USART_CLOCK_LAST_BIT_ENABLE:
-		huart->Init.CLKLastBit = USART_LASTBIT_ENABLE;
-	default:
+	case usartHardwareFlowControl_USART_HW_FLOW_RTS_ONLY:
+		huart->Init.HwFlowCtl = UART_HWCONTROL_RTS;
+		break;
+	case usartHardwareFlowControl_USART_HW_FLOW_CTS_AND_RTS:
+		huart->Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
 		break;
 	}
 
 	huart->Init.OverSampling = UART_OVERSAMPLING_16;
 
 
-	if (HAL_USART_Init(huart) != HAL_OK)
+	if (HAL_UART_Init(huart) != HAL_OK)
 	{
 	Error_Handler();
 	}

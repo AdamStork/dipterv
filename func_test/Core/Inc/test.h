@@ -38,7 +38,7 @@ void spi_test(void);
 void spi_deinit(void);
 
 void uart_init(Command* message_in, UART_HandleTypeDef* huart);
-void usart_init(Command* message_in, UART_HandleTypeDef* huart);
+void usart_init(Command* message_in, USART_HandleTypeDef* husart);
 void usart_test(Command* message_in, Command* message_out);
 void usart_deinit(USART_TypeDef* husart);
 

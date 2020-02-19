@@ -234,9 +234,8 @@ dict_usart_bus = {
 }
 
 dict_usart_direction = {
-    "RX and TX": 0,
-    "RX only": 1,
-    "TX only": 2,
+    "TX only": 0,
+    "TX and RX": 1,
 }
 
 dict_usart_word_length = {
