@@ -268,6 +268,8 @@ void usart_test(Command* message_in, Command* message_out)
 {
 	UART_HandleTypeDef huart;
 	USART_HandleTypeDef husart;
+	uint8_t txByte;
+	uint8_t rxByte;
 
 	// Initialize and start PWM (GPIO + Timer)
 	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
@@ -281,8 +283,34 @@ void usart_test(Command* message_in, Command* message_out)
 	// Perform test and set response
 	switch(message_in->usart.direction){
 	case usartDirection_USART_TX:
+		transmitByte = message_in->usart.command;
+		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+			HAL_UART_Transmit(&huart, &txByte, sizeof(txByte),HAL_MAX_DELAY);
+			message_out->has_response = true;
+			message_out->response.has_responseWrite = true;
+			message_out->response.responseWrite = responseWriteEnum_USART_TX_OK;
+		}
+		else{
+			HAL_USART_Transmit(&husart,&txByte,sizeof(txByte),HAL_MAX_DELAY);
+			message_out->has_response = true;
+			message_out->response.has_responseWrite = true;
+			message_out->response.responseWrite = responseWriteEnum_USART_TX_OK;
+		}
 		break;
 	case usartDirection_USART_TX_AND_RX:
+		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+			HAL_UART_Transmit(&huart, &txByte, sizeof(txByte),HAL_MAX_DELAY);
+			HAL_UART_Receive(&huart,&rxByte,sizeof(rxByte), HAL_MAX_DELAY);
+			message_out->has_response = true;
+			message_out->response.has_responseRead = true;
+			message_out->response.responseRead = rxByte;
+		}
+		else{
+			HAL_USART_TransmitReceive(&husart, &txByte, &rxByte, sizeof(txByte),HAL_MAX_DELAY);
+			message_out->has_response = true;
+			message_out->response.has_responseRead = true;
+			message_out->response.responseRead = rxByte;
+		}
 		break;
 	default:
 		break;
