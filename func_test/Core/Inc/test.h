@@ -28,14 +28,11 @@ void buffer_send(uint8_t* pBuffer, uint8_t pSize);
 
 void enter_processing_state(void);
 
-void i2c_init(void);
-void i2c_test(void);
-void i2c_deinit(void);
+void i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c);
+void i2c_test(Command* message_in, Command* message_out);
 
-
-void spi_init(void);
-void spi_test(void);
-void spi_deinit(void);
+void spi_init(Command* message_in, SPI_HandleTypeDef* hspi);
+void spi_test(Command* message_in, Command* message_out);
 
 void uart_init(Command* message_in, UART_HandleTypeDef* huart);
 void usart_init(Command* message_in, USART_HandleTypeDef* husart);

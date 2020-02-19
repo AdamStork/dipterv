@@ -259,6 +259,205 @@ void enter_processing_state(void)
 
 
 
+/**********************			I2C test				******************************/
+/** @brief	I2C test
+ *  @param	message_in: pointer to received message
+ *  @param  message_out: pointer to transmit message	**/
+void i2c_test(Command* message_in, Command* message_out)
+{
+	I2C_HandleTypeDef hi2c;
+
+	// Init I2C peripheral
+	i2c_init(message_in, &hi2c);
+
+	// Perform I2C test and set response
+	// todo
+
+	// Deinit I2C peripheral
+	HAL_I2C_MspDeInit(&hi2c);
+}
+
+/** @brief	I2C init
+ *  @param	message_in: pointer to received message
+ *  @param	hi2c: pointer to I2C handler	**/
+void i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c)
+{
+	switch(message_in->i2c.bus){
+	case i2cBus_I2C1:
+		hi2c->Instance = I2C1;
+		break;
+	case i2cBus_I2C2:
+		hi2c->Instance = I2C2;
+		break;
+	case i2cBus_I2C3:
+		hi2c->Instance = I2C3;
+		break;
+	}
+
+	hi2c->Init.ClockSpeed = message_in->i2c.clockSpeed;
+
+	if(message_in->i2c.speedMode == i2cSpeedMode_I2C_SPEED_MODE_FAST){
+		switch(message_in->i2c.dutyCycle){
+		case i2cFastModeDutyCycle_I2C_DUTY_CYCLE_TLOW_THIGH_2:
+			hi2c->Init.DutyCycle = I2C_DUTYCYCLE_2;
+			break;
+		case i2cFastModeDutyCycle_I2C_DUTY_CYCLE_TLOW_THIGH_16_9:
+			hi2c->Init.DutyCycle = I2C_DUTYCYCLE_16_9;
+			break;
+		default:
+			break;
+		}
+	}
+	else{
+		hi2c->Init.DutyCycle = I2C_DUTYCYCLE_2;
+	}
+
+
+	//	Default settings
+	hi2c->Init.OwnAddress1 = 0;
+	hi2c->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+	hi2c->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+	hi2c->Init.OwnAddress2 = 0;
+	hi2c->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+	hi2c->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+
+	if (HAL_I2C_Init(hi2c) != HAL_OK){
+		Error_Handler();
+	}
+}
+
+
+/**********************			SPI test				******************************/
+/** @brief	SPI test
+ *  @param	message_in: pointer to received message
+ *  @param  message_out: pointer to transmit message	**/
+void spi_test(Command* message_in, Command* message_out)
+{
+	SPI_HandleTypeDef hspi;
+
+	// Init SPI peripheral
+	spi_init(message_in, &hspi);
+
+	// Perform SPI test and set response
+	// todo
+
+	// Deinit SPI peripheral
+	HAL_SPI_MspDeInit(&hspi);
+}
+
+
+/** @brief	SPI init
+ *  @param	message_in: pointer to received message
+ *  @param	hspi: pointer to USART handler	**/
+void spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
+{
+	switch(message_in->spi.bus){
+	case spiBus_SPI1:
+		hspi->Instance = SPI1;
+		break;
+	case spiBus_SPI2:
+		hspi->Instance = SPI2;
+		break;
+	case spiBus_SPI3:
+		hspi->Instance = SPI3;
+		break;
+	}
+
+	// Master mode only
+	switch(message_in->spi.operatingMode){
+	case spiOperatingMode_SPI_MODE_FULL_DUPLEX_MASTER:
+		hspi->Init.Mode = SPI_MODE_MASTER;
+		hspi->Init.Direction = SPI_DIRECTION_2LINES;
+		break;
+	case spiOperatingMode_SPI_MODE_HALF_DUPLEX_MASTER:
+		hspi->Init.Mode = SPI_MODE_MASTER;
+		hspi->Init.Direction = SPI_DIRECTION_1LINE;
+		break;
+	case spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER:
+		hspi->Init.Mode = SPI_MODE_MASTER;
+		hspi->Init.Direction = SPI_DIRECTION_2LINES;
+		break;
+	}
+
+
+	switch(message_in->spi.dataSize){
+	case spiDataSize_SPI_DATA_SIZE_8_BITS:
+		hspi->Init.DataSize = SPI_DATASIZE_8BIT;
+		break;
+	case spiDataSize_SPI_DATA_SIZE_16_BITS:
+		hspi->Init.DataSize = SPI_DATASIZE_16BIT;
+		break;
+	default:
+		break;
+	}
+
+	switch(message_in->spi.hardwareNSS){
+	case spiHardwareNSS_DISABLE:
+		hspi->Init.NSS = SPI_NSS_SOFT;
+		break;
+	case spiHardwareNSS_NSS_INPUT:
+		hspi->Init.NSS = SPI_NSS_HARD_INPUT;
+		break;
+	case spiHardwareNSS_NSS_OUTPUT:
+		hspi->Init.NSS = SPI_NSS_HARD_OUTPUT;
+		break;
+	}
+
+	// Motorola frame format
+	if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
+		hspi->Init.TIMode = SPI_TIMODE_DISABLED;
+
+		switch(message_in->spi.firstBit){
+		case spiFirstBit_SPI_FIRST_BIT_MSB:
+			hspi->Init.FirstBit = SPI_FIRSTBIT_MSB;
+			break;
+		case spiFirstBit_SPI_FIRST_BIT_LSB:
+			hspi->Init.FirstBit = SPI_FIRSTBIT_LSB;
+			break;
+		default:
+			break;
+		}
+
+		switch(message_in->spi.clockMode){
+		case clockMode_SPI_MODE_0:
+			break;
+		case clockMode_SPI_MODE_1:
+			break;
+		case clockMode_SPI_MODE_2:
+			break;
+		case clockMode_SPI_MODE_3:
+			break;
+		default:
+			break;
+		}
+
+
+	}
+	// TI frame forat
+	else{
+
+
+	}
+//	hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+//	hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+//	hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+//	hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+
+
+
+
+
+	// Default settings
+	hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+	hspi->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+	hspi->Init.CRCPolynomial = 10;
+	if (HAL_SPI_Init(hspi) != HAL_OK){
+		Error_Handler();
+	}
+}
+
+
+
 /**********************			USART test				******************************/
 /** @brief	USART test
  *  @param	message_in: pointer to received message
@@ -270,7 +469,7 @@ void usart_test(Command* message_in, Command* message_out)
 	uint8_t txByte;
 	uint8_t rxByte;
 
-	// Initialize and start PWM (GPIO + Timer)
+	// Initialize UART/USART
 	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
 		uart_init(message_in,&huart);
 	}
@@ -328,7 +527,8 @@ void usart_test(Command* message_in, Command* message_out)
 
 
 /** @brief	USART init
- *  @param	message_in: pointer to received message		**/
+ *  @param	message_in: pointer to received message
+ *  @param	husart: pointer to USART handler	**/
 void usart_init(Command* message_in, USART_HandleTypeDef* husart)
 {
 	switch(message_in->usart.bus){
@@ -436,7 +636,8 @@ void usart_init(Command* message_in, USART_HandleTypeDef* husart)
 
 
 /** @brief	UART init
- *  @param	message_in: pointer to received message		**/
+ *  @param	message_in: pointer to received message
+ *  @param	huart: pointer to UART handler	**/
 void uart_init(Command* message_in, UART_HandleTypeDef* huart)
 {
 	switch(message_in->usart.bus){
