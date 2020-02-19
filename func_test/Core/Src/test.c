@@ -258,6 +258,48 @@ void enter_processing_state(void)
 }
 
 
+
+
+/**********************			USART test				******************************/
+/** @brief	USART test
+ *  @param	message_in: pointer to received message
+ *  @param  message_out: pointer to transmit message	**/
+void usart_test(Command* message_in, Command* message_out)
+{
+	// Initialize and start PWM (GPIO + Timer)
+	usart_init(message_in);
+
+	// Perform test and set response
+	switch(message_in->usart.direction){
+	case usartDirection_USART_RX:
+
+		break;
+	case usartDirection_USART_TX:
+		break;
+	case usartDirection_USART_RX_AND_TX:
+		break;
+	default:
+		break;
+	}
+
+}
+
+
+/** @brief	USART init
+ *  @param	message_in: pointer to received message		**/
+void usart_init(Command* message_in)
+{
+	// todo
+}
+
+/** @brief	USART deinit
+ *  @param	husart: pointer to USART handle	**/
+void usart_deinit(USART_TypeDef* husart)
+{
+	// todo
+}
+
+
 /**********************			PWM test				******************************/
 /** @brief	Analog write (PWM) test
  *  @param	message_in: pointer to received message
@@ -281,9 +323,7 @@ void pwm_test(Command* message_in, Command* message_out)
 
 
 /** @brief	Analog read (ADC) peripheral init
- *  @param	message_in: pointer to received message
- *  @param  gpioPort: pointer to GPIO port handler
- *  @param	gpioPin: GPIO pin number [0-15]				**/
+ *  @param	message_in: pointer to received message		**/
 void pwm_init(Command* message_in)
 {
 	/* GPIO Ports Clock Enable */

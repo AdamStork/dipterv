@@ -33,10 +33,13 @@ void i2c_test(void);
 void i2c_deinit(void);
 
 
-
 void spi_init(void);
 void spi_test(void);
 void spi_deinit(void);
+
+void usart_init(Command* message_in);
+void usart_test(Command* message_in, Command* message_out);
+void usart_deinit(USART_TypeDef* husart);
 
 void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin);
 void gpio_test(Command* message_in, Command* message_out);
