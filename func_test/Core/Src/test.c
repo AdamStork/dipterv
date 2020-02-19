@@ -224,8 +224,7 @@ void enter_processing_state(void)
 				break;
 
 			case CommandTypeEnum_USART_test:
-//				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-//				message_out.commandType = CommandTypeEnum_USART_test;
+				usart_test(&message_in, &message_out);
 				break;
 
 			case CommandTypeEnum_GPIO_digital:
@@ -314,6 +313,14 @@ void usart_test(Command* message_in, Command* message_out)
 		break;
 	default:
 		break;
+	}
+
+	// Deinit UART/USART
+	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+		HAL_UART_MspDeInit(&huart);
+	}
+	else{
+		HAL_USART_MspDeInit(&husart);
 	}
 
 }
@@ -525,12 +532,6 @@ void uart_init(Command* message_in, UART_HandleTypeDef* huart)
 //	HAL_UART_MspInit()
 }
 
-/** @brief	USART deinit
- *  @param	husart: pointer to USART handle	**/
-void usart_deinit(USART_TypeDef* husart)
-{
-	// todo
-}
 
 
 /**********************			PWM test				******************************/
@@ -807,12 +808,8 @@ void gpio_test(Command* message_in, Command* message_out)
 	// choose GPIO port and pin
 	gpioPort = gpio_port_pin(message_in->gpio.pin, &gpioPin);
 
-	// Initialize GPIO if CubeMX config file is not available
-	if(message_in->has_autoConfig == false){
-		if(message_in->autoConfig == false){
-			gpio_init(message_in, gpioPort, gpioPin);
-		}
-	}
+	// Initialize GPIO
+	gpio_init(message_in, gpioPort, gpioPin);
 
 	// Set response commandType
 	message_out->commandType = CommandTypeEnum_GPIO_digital;
