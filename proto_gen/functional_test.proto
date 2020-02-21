@@ -45,6 +45,8 @@ message i2cMessage{
  required i2cSpeedMode speedMode = 5;
  required uint32 clockSpeed = 6;
  optional i2cFastModeDutyCycle dutyCycle = 7;
+ required uint32 size = 8;
+ optional uint32 writeValue = 9;
 }
 
 
@@ -327,10 +329,10 @@ message usartMessage{
 }
 
 
-enum responseWriteEnum{
- LED_SET = 0;
- I2C_WRITE_OK = 1;
- I2C_WRITE_FAIL = 2;
+enum responseEnum_t{
+ I2C_WRITE_OK = 0;
+ I2C_WRITE_FAIL = 1;
+ I2C_READ_FAIL = 2;
  SPI_TRANSMISSION_OK = 3;
  SPI_TRANSMISSION_FAIL = 4;
  USART_TX_OK = 5;
@@ -345,7 +347,7 @@ enum responseWriteEnum{
 
 message responseMessage{
  optional uint32 responseRead = 1;
- optional responseWriteEnum responseWrite = 2;
+ optional responseEnum_t responseEnum = 2;
 }
 
 

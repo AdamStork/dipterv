@@ -54,11 +54,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.close_button.setEnabled(False)
         # Validators
         self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]"))          # Byte validator for input fields (0xhh format)
+        self.byteSizeValidator  = QRegExpValidator(QRegExp("[1-4]"))                        # 1-digit decimal validator for input fields
         self.decValidator  = QRegExpValidator(QRegExp("[0-9][0-9]"))                        # 2-digit decimal validator for input fields
         self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9]"))      # 5-digit decimal validator for input fields
         self.baudValidator  = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9][0-9]"))   # 6-digit decimal validator for input fields
         self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]"))                   # Max. 3 digit validator for duty cycle [0-100], limits checked
         self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]"))              # Max. 4 digit validator for freqency [0-1000], limits checked
+        self.valueValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]")) # Max. 2 bytes validator for i2c write value
         self.test_list = []     # List filled with test objects
         self.helpLabel_list = []
         self.scroll_layout.addStretch()                            # Add stretch for scroll area
@@ -329,8 +331,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.i2c_duty_cycle_select.setParent(None)
         else:
             self.i2c_clock_speed_select.setText("400000")           # Set default value to 400000 in case standard mode selected
-            self.options_layout.addWidget(self.i2c_duty_cycle_label,6,0)
-            self.options_layout.addWidget(self.i2c_duty_cycle_select,6,2)
+            self.options_layout.addWidget(self.i2c_duty_cycle_label,8,0)
+            self.options_layout.addWidget(self.i2c_duty_cycle_select,8,2)
+
+    def on_changed_i2c_rw(self):
+        if self.i2c_rw_select.currentData() == list(sequence.dict_i2c_rw.values())[0]:
+            self.i2c_write_value_select.setEnabled(True)
+        else:
+            self.i2c_write_value_select.setEnabled(False)
 
 
     # Called when SPI frame format option is changed: add/remove widgets and set parent
@@ -415,21 +423,27 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
             if self.I2C_active == False:
                 self.I2C_active = True
-                self.i2c_bus_label = QLabel("I2C bus", self)
-                self.i2c_addr_label = QLabel("I2C address", self)
-                self.i2c_reg_label = QLabel("I2C register", self)
-                self.i2c_rw_label = QLabel("I2C R/W", self)
-                self.i2c_speed_mode_label = QLabel("I2C speed mode",self)
-                self.i2c_clock_speed_label = QLabel("I2C clock speed",self)
-                self.i2c_duty_cycle_label = QLabel("I2C duty cycle", self)
+                self.i2c_bus_label = QLabel("Bus", self)
+                self.i2c_rw_label = QLabel("R/W", self)
+                self.i2c_addr_label = QLabel("Address", self)
+                self.i2c_reg_label = QLabel("Register", self)
+                self.i2c_write_value_label = QLabel("Write value", self)
+                self.i2c_size_label = QLabel("Size (bytes)", self)
+                self.i2c_speed_mode_label = QLabel("Speed mode",self)
+                self.i2c_clock_speed_label = QLabel("Clock speed",self)
+                self.i2c_duty_cycle_label = QLabel("Duty cycle", self)
+
 
                 self.i2c_bus_select = QComboBox(self)
+                self.i2c_rw_select = QComboBox(self)
                 self.i2c_addr_select = QLineEdit(self)
                 self.i2c_reg_select = QLineEdit(self)
-                self.i2c_rw_select = QComboBox(self)
+                self.i2c_write_value_select = QLineEdit(self)
+                self.i2c_size_select = QLineEdit(self)
                 self.i2c_speed_mode_select = QComboBox(self)
                 self.i2c_clock_speed_select = QLineEdit(self)
                 self.i2c_duty_cycle_select = QComboBox(self)
+
 
                 # Fill I2C bus combobox
                 if self.use_config_file == True:
@@ -453,32 +467,44 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Set validators and placeholders for input fields
                 self.i2c_addr_select.setValidator(self.byteValidator)
-                self.i2c_addr_select.setPlaceholderText("0xFF")
+                self.i2c_addr_select.setPlaceholderText("0x00")
 
                 self.i2c_reg_select.setValidator(self.byteValidator)
-                self.i2c_reg_select.setPlaceholderText("0xFF")
+                self.i2c_reg_select.setPlaceholderText("0x00")
+
+                self.i2c_write_value_select.setValidator(self.valueValidator)
+                self.i2c_write_value_select.setPlaceholderText("0x00..0xFFFF")
+
+                self.i2c_size_select.setValidator(self.byteSizeValidator)
+                self.i2c_size_select.setPlaceholderText("1..4")
 
                 # Connect signals and call functions explicitly
                 self.i2c_speed_mode_select.activated[str].connect(self.on_changed_i2c_speed_mode)
+                self.i2c_rw_select.activated[str].connect(self.on_changed_i2c_rw)
                 self.on_changed_i2c_speed_mode()
+                self.on_changed_i2c_rw()
 
                 # Add widgets to layout
                 self.options_layout.addWidget(self.i2c_bus_label,0,0)
-                self.options_layout.addWidget(self.i2c_addr_label,1,0)
-                self.options_layout.addWidget(self.i2c_reg_label,2,0)
-                self.options_layout.addWidget(self.i2c_rw_label,3,0)
-                self.options_layout.addWidget(self.i2c_speed_mode_label,4,0)
-                self.options_layout.addWidget(self.i2c_clock_speed_label,5,0)
+                self.options_layout.addWidget(self.i2c_rw_label,1,0)
+                self.options_layout.addWidget(self.i2c_addr_label,2,0)
+                self.options_layout.addWidget(self.i2c_reg_label,3,0)
+                self.options_layout.addWidget(self.i2c_write_value_label,4,0)
+                self.options_layout.addWidget(self.i2c_size_label,5,0)
+                self.options_layout.addWidget(self.i2c_speed_mode_label,6,0)
+                self.options_layout.addWidget(self.i2c_clock_speed_label,7,0)
 
                 self.options_layout.addWidget(self.i2c_bus_select,0,2)
-                self.options_layout.addWidget(self.i2c_addr_select,1,2)
-                self.options_layout.addWidget(self.i2c_reg_select,2,2)
-                self.options_layout.addWidget(self.i2c_rw_select,3,2)
-                self.options_layout.addWidget(self.i2c_speed_mode_select,4,2)
-                self.options_layout.addWidget(self.i2c_clock_speed_select,5,2)
+                self.options_layout.addWidget(self.i2c_rw_select,1,2)
+                self.options_layout.addWidget(self.i2c_addr_select,2,2)
+                self.options_layout.addWidget(self.i2c_reg_select,3,2)
+                self.options_layout.addWidget(self.i2c_write_value_select,4,2)
+                self.options_layout.addWidget(self.i2c_size_select,5,2)
+                self.options_layout.addWidget(self.i2c_speed_mode_select,6,2)
+                self.options_layout.addWidget(self.i2c_clock_speed_select,7,2)
 
                 # Layout settings
-                self.options_layout.addItem(self.spacerItem,7,0)
+                self.options_layout.addItem(self.spacerItem,9,0)
                 self.options_layout.setColumnMinimumWidth(1,10)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
@@ -690,7 +716,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.AnalogWrite_active = True
                 self.gpio_pin_label = QLabel("GPIO pin", self)
                 self.pwm_freq_label= QLabel("Frequency (Hz)", self)
-                self.pwm_duty_label = QLabel("Duty cycle", self)
+                self.pwm_duty_label = QLabel("Duty cycle (%)", self)
                 self.pwm_time_checkbox = QCheckBox("Active for given time only")
                 self.pwm_time_label = QLabel("Time (ms)",self)
 
@@ -739,7 +765,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.setColumnMinimumWidth(1,40)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
-            print("USART optons")
             if self.USART_active == False:
                 self.USART_active = True
                 self.usart_bus_label = QLabel("Bus", self)
@@ -878,24 +903,30 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pb = array.array('B',self.LL.rx_buffer).tobytes()      # Make string from response data
         message_data = functional_test_pb2.Command()
         message_data.ParseFromString(pb)                        # Deserialize response data into data structure
-#        print(message_data)
 
-        if cmdType == functional_test_pb2.GPIO_digital:
+        if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
+            if test_object.i2c.direction == functional_test_pb2.i2cDirection.I2C_write: # I2C write response: OK/failed
+                response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
+            else:   # I2C read response: data/failed
+                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[2]:
+                    response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
+                else:
+                    response = "I2C read OK: " + str(message_data.response.responseRead)
+
+        elif cmdType == functional_test_pb2.GPIO_digital:
             if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:
                 response = "GPIO state: " + list(sequence.dict_gpio_state.keys())[list(sequence.dict_gpio_state.values()).index(message_data.response.responseRead)] # Search key by value (GPIO state)
-            elif test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_OUTPUT:
-                response =  list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseWrite)] # Search key by value (responseWrite enum)
+            else:
+                response =  list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)] # Search key by value (responseWrite enum)
                 response += ": " + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.gpio.pin)]
 
         elif cmdType == functional_test_pb2.Analog_read:
             response = "Voltage: " + str(message_data.response.responseRead) + " mV"
 
         elif cmdType == functional_test_pb2.Analog_write:
-            response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseWrite)] # Search key by value (responseWrite enum)
+            response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)] # Search key by value (responseWrite enum)
             response += ": " + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.analog_out.pin)]
-#        if cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
-#            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
-#                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
+
 
 #        elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
 #            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)

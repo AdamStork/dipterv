@@ -289,9 +289,9 @@ dict_pwm_time_dependency = {
 
 # Response dictionaries
 dict_response_write = {
-    "LED set": 0,
-    "I2C write successful": 1,
-    "I2C write failed": 2,
+    "I2C write OK": 0,
+    "I2C write failed!": 1,
+    "I2C read failed!": 2,
     "SPI transmission successful": 3,
     "SPI transmission failed": 4,
     "USART TX successful": 5,
@@ -314,6 +314,7 @@ def make_test_object_from_options(UI):
 
     if UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.I2C_test:
         cmd.i2c.bus = UI.i2c_bus_select.currentData()
+        cmd.i2c.direction = UI.i2c_rw_select.currentData()
         if is_empty(UI.i2c_addr_select.text()):
             cmd.i2c.address = 0
             UI.i2c_addr_select.setText("0x00")
@@ -324,11 +325,22 @@ def make_test_object_from_options(UI):
             UI.i2c_reg_select.setText("0x00")
         else:
             cmd.i2c.reg = int(UI.i2c_reg_select.text(),16)           # Convert to int
-        cmd.i2c.direction = UI.i2c_rw_select.currentData()
+        if UI.i2c_rw_select.currentData() == list(dict_i2c_rw.values())[0]: # If "Write" is selected, save write value as well
+            if is_empty(UI.i2c_write_value_select.text()):
+                cmd.i2c.writeValue = 0
+                UI.i2c_write_value_select.setText("0x00")
+            else:
+                cmd.i2c.writeValue = int(UI.i2c_write_value_select.text(),16)      # Convert to int
+        if is_empty(UI.i2c_size_select.text()):
+            cmd.i2c.size = 1
+            UI.i2c_size_select.setText("1")
+        else:
+            cmd.i2c.size = int(UI.i2c_size_select.text())
         cmd.i2c.speedMode = UI.i2c_speed_mode_select.currentData()
         cmd.i2c.clockSpeed = int(UI.i2c_clock_speed_select.text())
         if UI.i2c_speed_mode_select.currentData() == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, save duty cycle option as well
             cmd.i2c.dutyCycle = UI.i2c_duty_cycle_select.currentData()
+
 
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.SPI_test:
         cmd.spi.bus = UI.spi_bus_select.currentData()
@@ -454,9 +466,12 @@ def make_string_from_test_object(test_object):
     if test_object.commandType == functional_test_pb2.CommandTypeEnum.I2C_test:
         string += "I2C"
         string += "  Bus: " + list(dict_i2c_bus.keys())[list(dict_i2c_bus.values()).index(test_object.i2c.bus)]
+        string += "  R/W: " + list(dict_i2c_rw.keys())[list(dict_i2c_rw.values()).index(test_object.i2c.direction)]
         string += "  Addr: " + "0x{:02X}".format(test_object.i2c.address)
         string += "  Reg: " + "0x{:02X}".format(test_object.i2c.reg)
-        string += "  R/W: " + list(dict_i2c_rw.keys())[list(dict_i2c_rw.values()).index(test_object.i2c.direction)]
+        if test_object.i2c.direction == list(dict_i2c_rw.values())[0]:
+            string += "  writeValue: " + "0x{:04X}".format(test_object.i2c.writeValue)
+        string += "  Size: " + str(test_object.i2c.size)
         string += "  Mode: " + list(dict_i2c_speedmode.keys())[list(dict_i2c_speedmode.values()).index(test_object.i2c.speedMode)]
         string += "  Speed: " + str(test_object.i2c.clockSpeed)
         if test_object.i2c.speedMode == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, add duty cycle as well
@@ -540,13 +555,22 @@ def make_test_object_from_string(string):
     if words[0] == list_cmd_types[0]:
         test_object.commandType = functional_test_pb2.CommandTypeEnum.I2C_test
         test_object.i2c.bus = list(dict_i2c_bus.values())[list(dict_i2c_bus.keys()).index(optionValue[0])]
-        test_object.i2c.address = int(optionValue[1],16)
-        test_object.i2c.reg = int(optionValue[2],16)
-        test_object.i2c.direction = list(dict_i2c_rw.values())[list(dict_i2c_rw.keys()).index(optionValue[3])]
-        test_object.i2c.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[4])]
-        test_object.i2c.clockSpeed = int(optionValue[5])
-        if test_object.i2c.speedMode == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, add duty cycle as well
-            test_object.i2c.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[6])]
+        test_object.i2c.direction = list(dict_i2c_rw.values())[list(dict_i2c_rw.keys()).index(optionValue[1])]
+        test_object.i2c.address = int(optionValue[2],16)
+        test_object.i2c.reg = int(optionValue[3],16)
+        if test_object.i2c.direction == list(dict_i2c_rw.values())[0]: # If 'Write' is selected, add writeValue also
+            test_object.i2c.writeValue = int(optionValue[4],16)
+            test_object.i2c.size = int(optionValue[5])
+            test_object.i2c.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[6])]
+            test_object.i2c.clockSpeed = int(optionValue[7])
+            if test_object.i2c.speedMode == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, add duty cycle as well
+                test_object.i2c.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[8])]
+        else:
+            test_object.i2c.size = int(optionValue[4])
+            test_object.i2c.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[5])]
+            test_object.i2c.clockSpeed = int(optionValue[6])
+            if test_object.i2c.speedMode == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, add duty cycle as well
+                test_object.i2c.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[7])]
         return test_object
 
     elif words[0] == list_cmd_types[1]:

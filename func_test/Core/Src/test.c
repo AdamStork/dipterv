@@ -163,9 +163,9 @@ void command_reset(Command* message)
 	// Reset response
 	message->has_response = false;
 	message->response.has_responseRead = false;
-	message->response.has_responseWrite = false;
+	message->response.has_responseEnum = false;
 	message->response.responseRead = 0;
-	message->response.responseWrite = _responseWriteEnum_MIN;
+	message->response.responseEnum = _responseEnum_t_MIN;
 
 	// Reset autoConfig
 	message->has_autoConfig = false;
@@ -214,13 +214,11 @@ void enter_processing_state(void)
 			switch(message_in.commandType){
 
 			case CommandTypeEnum_I2C_test:
-//				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-//				message_out.commandType = CommandTypeEnum_I2C_test;
+				i2c_test(&message_in, &message_out);
 				break;
 
 			case CommandTypeEnum_SPI_test:
-//				HAL_GPIO_TogglePin(LD2_GPIO_Port,LD2_Pin);
-//				message_out.commandType = CommandTypeEnum_SPI_test;
+				spi_test(&message_in, &message_out);
 				break;
 
 			case CommandTypeEnum_USART_test:
@@ -266,31 +264,64 @@ void enter_processing_state(void)
 void i2c_test(Command* message_in, Command* message_out)
 {
 	I2C_HandleTypeDef hi2c;
-	uint16_t i2cAddress = message_in->i2c.address;
-	uint8_t reg = message_in->i2c.reg;
-//	uint32_t responseWord;
-	uint8_t byteResponse;
-
-	// < --- TODO : kiolvasast  megcsinalni jol (uint32_t legyen, azaz 4 bajtot fogadjunk?)
+	uint16_t deviceAddress = message_in->i2c.address;
+	uint8_t deviceRegister = message_in->i2c.reg;
+	HAL_StatusTypeDef status;
 
 	// Init I2C peripheral
 	i2c_init(message_in, &hi2c);
 
 	// Perform I2C test and set response
-	switch(message_in->i2c.direction){
-	case i2cDirection_I2C_write:
-		HAL_I2C_Master_Transmit(&hi2c,i2cAddress,&reg,sizeof(reg), HAL_MAX_DELAY);
+	message_out->commandType = CommandTypeEnum_I2C_test;
+	if(message_in->i2c.direction == i2cDirection_I2C_write){
+		uint8_t writeSize = message_in->i2c.size;
+		uint8_t writeBuff[writeSize + 1];
+		uint8_t i;
+
+		// Place writeValue into buffer
+		uint32_t writeValue_32 = message_in->i2c.writeValue;
+		writeBuff[0] = deviceRegister;
+		for(i = 0; i<writeSize; i++){
+			writeBuff[1+i] = (uint8_t)(writeValue_32 >> (i*8));
+		}
+
+		// Send out data via I2C
+		status = HAL_I2C_Master_Transmit(&hi2c,deviceAddress,writeBuff, sizeof(writeBuff), TEST_TIMEOUT_DURATION);
 		message_out->has_response = true;
-		message_out->response.has_responseWrite = true;
-		message_out->response.responseWrite = responseWriteEnum_I2C_WRITE_OK;
-		break;
-	case i2cDirection_I2C_read:
-		HAL_I2C_Master_Receive(&hi2c, i2cAddress,&byteResponse, sizeof(byteResponse), HAL_MAX_DELAY);
-		message_out->has_response = true;
-		message_out->response.has_responseRead = true;
-		message_out->response.responseRead = byteResponse;
-		break;
+		message_out->response.has_responseEnum = true;
+		if(status == HAL_OK){
+			message_out->response.responseEnum = responseEnum_t_I2C_WRITE_OK;
+		}
+		else{
+			message_out->response.responseEnum = responseEnum_t_I2C_WRITE_FAIL;
+		}
 	}
+	else{
+		uint8_t* readBuff;
+		uint8_t readSize = message_in->i2c.size;
+
+		// Read out data via I2C
+		status = HAL_I2C_Master_Transmit(&hi2c, deviceAddress, &deviceRegister, 1, TEST_TIMEOUT_DURATION);
+		status &= HAL_I2C_Master_Receive(&hi2c, deviceAddress, readBuff, readSize, TEST_TIMEOUT_DURATION);
+		message_out->has_response = true;
+
+		if(status == HAL_OK){
+			uint32_t readValue_32 = 0;
+			uint8_t i;
+
+			for(i = 0; i<readSize; i++){
+				readValue_32 |= (readBuff[i] << (i*8));
+			}
+			message_out->response.has_responseRead = true;
+			message_out->response.responseRead = readValue_32;
+		}
+		else{
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_I2C_READ_FAIL;
+		}
+
+	}
+
 
 	// Deinit I2C peripheral
 	HAL_I2C_MspDeInit(&hi2c);
@@ -367,6 +398,7 @@ void spi_test(Command* message_in, Command* message_out)
 	spi_init(message_in, &hspi);
 
 	// Perform SPI test and set response
+	message_out->commandType = CommandTypeEnum_SPI_test;
 	switch(message_in->spi.operatingMode){
 	case spiOperatingMode_SPI_MODE_FULL_DUPLEX_MASTER:
 		HAL_SPI_TransmitReceive(&hspi,&command, &responseByte, sizeof(responseByte), HAL_MAX_DELAY);
@@ -383,8 +415,8 @@ void spi_test(Command* message_in, Command* message_out)
 	case spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER:
 		HAL_SPI_Transmit(&hspi,&command, sizeof(command), HAL_MAX_DELAY);
 		message_out->has_response = true;
-		message_out->response.has_responseWrite = true;
-		message_out->response.responseWrite = responseWriteEnum_SPI_TRANSMISSION_OK;
+		message_out->response.has_responseEnum = true;
+		message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_OK;
 		break;
 	default:
 		break;
@@ -528,7 +560,7 @@ void usart_test(Command* message_in, Command* message_out)
 		usart_init(message_in,&husart);
 	}
 
-
+	message_out->commandType = CommandTypeEnum_USART_test;
 	// Perform test and set response
 	switch(message_in->usart.direction){
 	case usartDirection_USART_TX:
@@ -536,14 +568,14 @@ void usart_test(Command* message_in, Command* message_out)
 		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
 			HAL_UART_Transmit(&huart, &txByte, sizeof(txByte),HAL_MAX_DELAY);
 			message_out->has_response = true;
-			message_out->response.has_responseWrite = true;
-			message_out->response.responseWrite = responseWriteEnum_USART_TX_OK;
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_USART_TX_OK;
 		}
 		else{
 			HAL_USART_Transmit(&husart,&txByte,sizeof(txByte),HAL_MAX_DELAY);
 			message_out->has_response = true;
-			message_out->response.has_responseWrite = true;
-			message_out->response.responseWrite = responseWriteEnum_USART_TX_OK;
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_USART_TX_OK;
 		}
 		break;
 	case usartDirection_USART_TX_AND_RX:
@@ -802,8 +834,8 @@ void pwm_test(Command* message_in, Command* message_out)
 	// Set response commandType
 	message_out->commandType = CommandTypeEnum_Analog_write;
 	message_out->has_response = true;
-	message_out->response.has_responseWrite = true;
-	message_out->response.responseWrite = responseWriteEnum_PWM_SET;
+	message_out->response.has_responseEnum = true;
+	message_out->response.responseEnum = responseEnum_t_PWM_SET;
 
 }
 
@@ -866,6 +898,7 @@ void analog_read_test(Command* message_in, Command* message_out)
 	HAL_ADC_Start(&adcHandle);
 	uint32_t adcValue = HAL_ADC_GetValue(&adcHandle);
 	// Set response
+	message_out->commandType = CommandTypeEnum_Analog_read;
 	message_out->has_response = true;
 	message_out->response.has_responseRead = true;
 	message_out->response.responseRead = 3300*adcValue/4096;
@@ -1071,14 +1104,14 @@ void gpio_test(Command* message_in, Command* message_out)
 		if(message_in->gpio.state == gpioPinState_GPIO_HIGH){
 			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_SET);
 			message_out->has_response = true;
-			message_out->response.has_responseWrite = true;
-			message_out->response.responseWrite = responseWriteEnum_GPIO_SET_HIGH;
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_GPIO_SET_HIGH;
 		}
 		else if(message_in->gpio.state == gpioPinState_GPIO_LOW){
 			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_RESET);
 			message_out->has_response = true;
-			message_out->response.has_responseWrite = true;
-			message_out->response.responseWrite = responseWriteEnum_GPIO_SET_LOW;
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_GPIO_SET_LOW;
 		}
 	}
 	else if(message_in->gpio.direction == gpioDirection_GPIO_INPUT){

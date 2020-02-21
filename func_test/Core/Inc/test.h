@@ -18,6 +18,7 @@ typedef enum{
 } StateType;
 
 #define PWM_DUTY_MAX 100
+#define TEST_TIMEOUT_DURATION	100
 
 bool encode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_out, uint8_t* bytesWritten);
 bool decode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_in);
