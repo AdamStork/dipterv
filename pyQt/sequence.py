@@ -344,17 +344,32 @@ def make_test_object_from_options(UI):
 
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.SPI_test:
         cmd.spi.bus = UI.spi_bus_select.currentData()
+        cmd.spi.operatingMode = UI.spi_operating_mode_select.currentData()
         if is_empty(UI.spi_command_select.text()):
             cmd.spi.command = 0
             UI.spi_command_select.setText("0x00")
         else:
             cmd.spi.command = int(UI.spi_command_select.text(),16)
         if is_empty(UI.spi_dummyclocks_select.text()):
-            cmd.spi.dummyclocks = 0
+            cmd.spi.dummyClocks = 0
             UI.spi_dummyclocks_select.setText("0")
         else:
-            cmd.spi.dummyclocks = int(UI.spi_dummyclocks_select.text())
-        cmd.spi.operatingMode = UI.spi_operating_mode_select.currentData()
+            cmd.spi.dummyClocks = int(UI.spi_dummyclocks_select.text())
+        if is_empty(UI.spi_write_value_select.text()):
+            cmd.spi.writeValue = 0
+            UI.spi_write_value_select.setText("0")
+        else:
+            cmd.spi.writeValue = int(UI.spi_write_value_select.text(),16)
+        if is_empty(UI.spi_write_size_select.text()):
+            cmd.spi.writeSize = 0
+            UI.spi_write_size_select.setText("0")
+        else:
+            cmd.spi.writeSize = int(UI.spi_write_size_select.text())
+        if is_empty(UI.spi_slave_response_select.text()):
+            cmd.spi.slaveResponse = 0
+            UI.spi_slave_response_select.setText("0")
+        else:
+            cmd.spi.slaveResponse = int(UI.spi_slave_response_select.text())
         cmd.spi.hardwareNSS = UI.spi_hardware_nss_select.currentData()
         cmd.spi.frameFormat = UI.spi_frame_format_select.currentData()
         cmd.spi.dataSize = UI.spi_data_size_select.currentData()
@@ -480,9 +495,12 @@ def make_string_from_test_object(test_object):
     elif test_object.commandType == functional_test_pb2.CommandTypeEnum.SPI_test:
         string += "SPI"
         string += "  Bus: " + list(dict_spi_bus.keys())[list(dict_spi_bus.values()).index(test_object.spi.bus)]
+        string += "  Op.mode: " + list(dict_spi_operating_mode.keys())[list(dict_spi_operating_mode.values()).index(test_object.spi.operatingMode)]
         string += "  Cmd: " + "0x{:02X}".format(test_object.spi.command)
         string += "  Dummy: " + str(test_object.spi.dummyclocks)
-        string += "  Op.mode: " + list(dict_spi_operating_mode.keys())[list(dict_spi_operating_mode.values()).index(test_object.spi.operatingMode)]
+        string += "  writeValue: " + "0x{:04X}".format(test_object.spi.writeValue)
+        string += "  writeSize: " + str(test_object.spi.writeSize)
+        string += "  slaveResponse: " + str(test_object.spi.slaveResponse)
         string += "  HW NSS: " + list(dict_spi_hardware_nss.keys())[list(dict_spi_hardware_nss.values()).index(test_object.spi.hardwareNSS)]
         string += "  Frame format: " + list(dict_spi_frame_format.keys())[list(dict_spi_frame_format.values()).index(test_object.spi.frameFormat)]
         string += "  Data size: " + list(dict_spi_data_size.keys())[list(dict_spi_data_size.values()).index(test_object.spi.dataSize)]
@@ -576,15 +594,18 @@ def make_test_object_from_string(string):
     elif words[0] == list_cmd_types[1]:
         test_object.commandType = functional_test_pb2.CommandTypeEnum.SPI_test
         test_object.spi.bus = list(dict_spi_bus.values())[list(dict_spi_bus.keys()).index(optionValue[0])]
-        test_object.spi.command = int(optionValue[1],16)
-        test_object.spi.dummyclocks = int(optionValue[2])
-        test_object.spi.operatingMode = list(dict_spi_operating_mode.values())[list(dict_spi_operating_mode.keys()).index(optionValue[3])]
-        test_object.spi.hardwareNSS = list(dict_spi_hardware_nss.values())[list(dict_spi_hardware_nss.keys()).index(optionValue[4])]
-        test_object.spi.frameFormat = list(dict_spi_frame_format.values())[list(dict_spi_frame_format.keys()).index(optionValue[5])]
-        test_object.spi.dataSize = list(dict_spi_data_size.values())[list(dict_spi_data_size.keys()).index(optionValue[6])]
+        test_object.spi.operatingMode = list(dict_spi_operating_mode.values())[list(dict_spi_operating_mode.keys()).index(optionValue[1])]
+        test_object.spi.command = int(optionValue[2],16)
+        test_object.spi.dummyclocks = int(optionValue[3])
+        test_object.spi.writeValue = int(optionValue[4],16)
+        test_object.spi.writeSize = int(optionValue[5])
+        test_object.spi.slaveResponse = int(optionValue[6])
+        test_object.spi.hardwareNSS = list(dict_spi_hardware_nss.values())[list(dict_spi_hardware_nss.keys()).index(optionValue[7])]
+        test_object.spi.frameFormat = list(dict_spi_frame_format.values())[list(dict_spi_frame_format.keys()).index(optionValue[8])]
+        test_object.spi.dataSize = list(dict_spi_data_size.values())[list(dict_spi_data_size.keys()).index(optionValue[9])]
         if test_object.spi.frameFormat == list(dict_spi_frame_format.values())[0]: # If 'Motorola' option is selected
-            test_object.spi.firstBit = list(dict_spi_first_bit.values())[list(dict_spi_first_bit.keys()).index(optionValue[7])]
-            test_object.spi.clockMode = list(dict_spi_clockmode.values())[list(dict_spi_clockmode.keys()).index(optionValue[8])]
+            test_object.spi.firstBit = list(dict_spi_first_bit.values())[list(dict_spi_first_bit.keys()).index(optionValue[10])]
+            test_object.spi.clockMode = list(dict_spi_clockmode.values())[list(dict_spi_clockmode.keys()).index(optionValue[11])]
         return test_object
 
     elif words[0] == list_cmd_types[2]:

@@ -54,13 +54,15 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.close_button.setEnabled(False)
         # Validators
         self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]"))          # Byte validator for input fields (0xhh format)
-        self.byteSizeValidator  = QRegExpValidator(QRegExp("[1-4]"))                        # 1-digit decimal validator for input fields
-        self.decValidator  = QRegExpValidator(QRegExp("[0-9][0-9]"))                        # 2-digit decimal validator for input fields
+        self.byteSizeValidatorI2C  = QRegExpValidator(QRegExp("[1-4]"))                        # 1-digit decimal validator for input fields
+        self.byteSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-2]"))                        # 1-digit decimal validator for input fields
+        self.slaveSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-4]"))                        # 1-digit decimal validator for input fields
+        self.dummyValidator  = QRegExpValidator(QRegExp("[0-1][0-5]"))                        # 2-digit decimal validator for input fields
         self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9]"))      # 5-digit decimal validator for input fields
         self.baudValidator  = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9][0-9]"))   # 6-digit decimal validator for input fields
         self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]"))                   # Max. 3 digit validator for duty cycle [0-100], limits checked
         self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]"))              # Max. 4 digit validator for freqency [0-1000], limits checked
-        self.valueValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]")) # Max. 2 bytes validator for i2c write value
+        self.valueValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]")) # Max. 2 bytes validator for i2c/spi write value
         self.test_list = []     # List filled with test objects
         self.helpLabel_list = []
         self.scroll_layout.addStretch()                            # Add stretch for scroll area
@@ -344,10 +346,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Called when SPI frame format option is changed: add/remove widgets and set parent
     def on_changed_spi_frame_format(self):
         if self.spi_frame_format_select.currentData() == list(sequence.dict_spi_frame_format.values())[0]:
-            self.options_layout.addWidget(self.spi_first_bit_label,7,0)
-            self.options_layout.addWidget(self.spi_first_bit_select,7,2)
-            self.options_layout.addWidget(self.spi_clockmode_label,8,0)
-            self.options_layout.addWidget(self.spi_clockmode_select,8,2)
+            self.options_layout.addWidget(self.spi_first_bit_label,10,0)
+            self.options_layout.addWidget(self.spi_first_bit_select,10,2)
+            self.options_layout.addWidget(self.spi_clockmode_label,11,0)
+            self.options_layout.addWidget(self.spi_clockmode_select,11,2)
         else:
             self.options_layout.removeWidget(self.spi_first_bit_label)
             self.options_layout.removeWidget(self.spi_first_bit_select)
@@ -475,7 +477,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_write_value_select.setValidator(self.valueValidator)
                 self.i2c_write_value_select.setPlaceholderText("0x00..0xFFFF")
 
-                self.i2c_size_select.setValidator(self.byteSizeValidator)
+                self.i2c_size_select.setValidator(self.byteSizeValidatorI2C)
                 self.i2c_size_select.setPlaceholderText("1..4")
 
                 # Connect signals and call functions explicitly
@@ -510,25 +512,31 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             if self.SPI_active == False:
                 self.SPI_active = True
-                self.spi_bus_label = QLabel("SPI bus", self)
-                self.spi_clockmode_label = QLabel("SPI clock mode", self)
-                self.spi_command_label = QLabel("SPI command", self)
-                self.spi_dummyclocks_label = QLabel("SPI dummy clocks", self)
                 self.spi_operating_mode_label = QLabel("SPI operating mode", self)
-                self.spi_hardware_nss_label = QLabel("SPI hardware NSS",self)
-                self.spi_frame_format_label = QLabel("SPI frame format", self)
-                self.spi_data_size_label = QLabel("SPI data size", self)
-                self.spi_first_bit_label = QLabel("SPI first bit", self)
+                self.spi_bus_label = QLabel("Bus", self)
+                self.spi_command_label = QLabel("Command", self)
+                self.spi_dummyclocks_label = QLabel("Dummy clocks (bytes)", self)
+                self.spi_write_value_label = QLabel("Write value", self)
+                self.spi_write_size_label = QLabel("Write size (bytes)", self)
+                self.spi_slave_response_label = QLabel("Slave resposne (bytes)", self)
+                self.spi_hardware_nss_label = QLabel("Hardware NSS",self)
+                self.spi_frame_format_label = QLabel("Frame format", self)
+                self.spi_data_size_label = QLabel("Data size", self)
+                self.spi_first_bit_label = QLabel("First bit", self)
+                self.spi_clockmode_label = QLabel("Clock mode", self)
 
+                self.spi_operating_mode_select = QComboBox(self)
                 self.spi_bus_select = QComboBox(self)
-                self.spi_clockmode_select = QComboBox(self)
                 self.spi_command_select = QLineEdit(self)
                 self.spi_dummyclocks_select = QLineEdit(self)
-                self.spi_operating_mode_select = QComboBox(self)
+                self.spi_write_value_select = QLineEdit(self)
+                self.spi_write_size_select = QLineEdit(self)
+                self.spi_slave_response_select = QLineEdit(self)
                 self.spi_hardware_nss_select = QComboBox(self)
                 self.spi_frame_format_select = QComboBox(self)
                 self.spi_data_size_select = QComboBox(self)
                 self.spi_first_bit_select = QComboBox(self)
+                self.spi_clockmode_select = QComboBox(self)
 
                 # Fill SPI bus combobox
                 if self.use_config_file == True:
@@ -538,16 +546,23 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     for i in range(len(sequence.dict_spi_bus)):
                         self.spi_bus_select.addItem(list(sequence.dict_spi_bus.keys())[i],list(sequence.dict_spi_bus.values())[i] )
 
-                # Fill SPI clock mode combobox
-                for i in range(len(sequence.dict_spi_clockmode)):
-                    self.spi_clockmode_select.addItem(list(sequence.dict_spi_clockmode.keys())[i],list(sequence.dict_spi_clockmode.values())[i] )
 
                 # Set placeholders and validators for input field
                 self.spi_command_select.setValidator(self.byteValidator)
                 self.spi_command_select.setPlaceholderText("0xFF")
 
-                self.spi_dummyclocks_select.setValidator(self.decValidator)
-                self.spi_dummyclocks_select.setPlaceholderText("0..99")
+                self.spi_dummyclocks_select.setValidator(self.dummyValidator)
+                self.spi_dummyclocks_select.setPlaceholderText("0..15")
+
+                self.spi_write_value_select.setValidator(self.valueValidator)
+                self.spi_write_value_select.setPlaceholderText("0x00..0xFFFF")
+
+                self.spi_write_size_select.setValidator(self.byteSizeValidatorSPI)
+                self.spi_write_size_select.setPlaceholderText("0..2")
+
+                self.spi_slave_response_select.setValidator(self.slaveSizeValidatorSPI)
+                self.spi_slave_response_select.setPlaceholderText("0..4")
+
 
                 # Fill SPI operating mode combobox
                 for i in range(len(sequence.dict_spi_operating_mode)):
@@ -569,6 +584,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for i in range(len(sequence.dict_spi_first_bit)):
                     self.spi_first_bit_select.addItem(list(sequence.dict_spi_first_bit.keys())[i],list(sequence.dict_spi_first_bit.values())[i] )
 
+                # Fill SPI clock mode combobox
+                for i in range(len(sequence.dict_spi_clockmode)):
+                    self.spi_clockmode_select.addItem(list(sequence.dict_spi_clockmode.keys())[i],list(sequence.dict_spi_clockmode.values())[i] )
+
                 # Connect signals and call functions explicitly
                 self.spi_frame_format_select.activated[str].connect(self.on_changed_spi_frame_format)
                 self.spi_hardware_nss_select.activated[str].connect(self.on_changed_spi_hardware_nss)
@@ -577,23 +596,29 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Add widgets to layout
                 self.options_layout.addWidget(self.spi_bus_label,0,0)
-                self.options_layout.addWidget(self.spi_command_label,1,0)
-                self.options_layout.addWidget(self.spi_dummyclocks_label,2,0)
-                self.options_layout.addWidget(self.spi_operating_mode_label,3,0)
-                self.options_layout.addWidget(self.spi_hardware_nss_label,4,0)
-                self.options_layout.addWidget(self.spi_frame_format_label,5,0)
-                self.options_layout.addWidget(self.spi_data_size_label,6,0)
+                self.options_layout.addWidget(self.spi_operating_mode_label,1,0)
+                self.options_layout.addWidget(self.spi_command_label,2,0)
+                self.options_layout.addWidget(self.spi_dummyclocks_label,3,0)
+                self.options_layout.addWidget(self.spi_write_value_label,4,0)
+                self.options_layout.addWidget(self.spi_write_size_label,5,0)
+                self.options_layout.addWidget(self.spi_slave_response_label,6,0)
+                self.options_layout.addWidget(self.spi_hardware_nss_label,7,0)
+                self.options_layout.addWidget(self.spi_frame_format_label,8,0)
+                self.options_layout.addWidget(self.spi_data_size_label,9,0)
 
                 self.options_layout.addWidget(self.spi_bus_select,0,2)
-                self.options_layout.addWidget(self.spi_command_select,1,2)
-                self.options_layout.addWidget(self.spi_dummyclocks_select,2,2)
-                self.options_layout.addWidget(self.spi_operating_mode_select,3,2)
-                self.options_layout.addWidget(self.spi_hardware_nss_select,4,2)
-                self.options_layout.addWidget(self.spi_frame_format_select,5,2)
-                self.options_layout.addWidget(self.spi_data_size_select,6,2)
+                self.options_layout.addWidget(self.spi_operating_mode_select,1,2)
+                self.options_layout.addWidget(self.spi_command_select,2,2)
+                self.options_layout.addWidget(self.spi_dummyclocks_select,3,2)
+                self.options_layout.addWidget(self.spi_write_value_select,4,2)
+                self.options_layout.addWidget(self.spi_write_size_select,5,2)
+                self.options_layout.addWidget(self.spi_slave_response_select,6,2)
+                self.options_layout.addWidget(self.spi_hardware_nss_select,7,2)
+                self.options_layout.addWidget(self.spi_frame_format_select,8,2)
+                self.options_layout.addWidget(self.spi_data_size_select,9,2)
 
                 # Layout settings
-                self.options_layout.addItem(self.spacerItem,9,0)
+                self.options_layout.addItem(self.spacerItem,12,0)
                 self.options_layout.setColumnMinimumWidth(1,0)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
