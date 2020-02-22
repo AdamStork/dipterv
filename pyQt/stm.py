@@ -936,7 +936,17 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if message_data.response.responseEnum == list(sequence.dict_response_write.values())[2]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
-                    response = "I2C read OK: " + str(message_data.response.responseRead)
+                    response = "I2C read: " + str(message_data.response.responseRead)
+
+        elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
+            if test_object.spi.operatingMode == list(sequence.dict_spi_operating_mode.values())[2]: # SPI Transmit-only response: OK/failed
+                response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
+            else:   # SPI transmit/receive response: data/failed
+                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[4]:
+                    response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
+                else:
+                    response = "SPI transmit/receive: " + str(message_data.response.responseRead)
+
 
         elif cmdType == functional_test_pb2.GPIO_digital:
             if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:
@@ -953,32 +963,13 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             response += ": " + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.analog_out.pin)]
 
 
-#        elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
-#            response_num = 5        # Frame:2, CmdType: 1+1, Result: 1 (register value)
-#                                    # Frame:2, CmdType:1+1, Result: 1 (Write_successful/failed)
+
 
 #        elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
 #            response_num = 5        # todo
 
-#        elif cmdType == functional_test_pb2.CommandTypeEnum.LED_test:
-#            response_num = 4        # Frame:2, CmdType: 1+1
 
-#        elif cmdType == functional_test_pb2.CommandTypeEnum.GPIO_digital:
-#            response_num = 10    # Frame:2, CmdType: 1+1, Result+type: 1+1
-#            if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_OUTPUT:
-#                response_str = ""
-#            elif test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:
-#                response_str = ""
 
-#        elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
-#            response_num = 6    # Frame:2, CmdType: 1+1, Result: 2 (16bit value)
-
-#        elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
-#            response_num = 6    # Frame:2, CmdType: 1+1, Result: 1 (Write_successful/failed)
-
-#        else:
-#            response_num = 0
-#            str_pin_state = "Pin state" + str(message_data.responseRead)
 
 #        response_list = []
 #        for i in self.LL.rx_buffer:
