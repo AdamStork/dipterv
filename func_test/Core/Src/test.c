@@ -106,9 +106,12 @@ void command_reset(Command* message)
 	// Reset SPI
 	message->has_spi = false;
 	message->spi.bus = _spiBus_MIN;
-	message->spi.command = 0;
-	message->spi.dummyclocks = 0;
 	message->spi.operatingMode = _spiOperatingMode_MIN;
+	message->spi.command = 0;
+	message->spi.dummyClocks = 0;
+	message->spi.writeValue = 0;
+	message->spi.writeSize = 0;
+	message->spi.slaveResponse = 0;
 	message->spi.hardwareNSS = _spiHardwareNSS_MIN;
 	message->spi.frameFormat = _spiFrameFormat_MIN;
 	message->spi.dataSize = _spiDataSize_MIN;
@@ -388,39 +391,129 @@ void spi_test(Command* message_in, Command* message_out)
 {
 	SPI_HandleTypeDef hspi;
 	uint8_t command = message_in->spi.command;
-//	uint8_t dummyClocks = message_in->spi.dummyclocks;
-//	uint32_t responseWord;
-	uint8_t responseByte;
+	uint8_t dummyClocks = message_in->spi.dummyClocks;
+	uint16_t writeValue = message_in->spi.writeValue;
+	uint8_t writeSize = message_in->spi.writeSize;
+	uint8_t slaveResponse = message_in->spi.slaveResponse;
+	HAL_StatusTypeDef status;
+	bool firstMSB = false;
 
-	// < --- TODO : command + dummyclocks osszepakolni uint8_t* bufferbe, kiolvasast is megcsinalni jol
+	if(message_in->spi.has_firstBit){
+		if(message_in->spi.firstBit == spiFirstBit_SPI_FIRST_BIT_MSB){
+			firstMSB = true;
+		}
+		else{
+			firstMSB = false;
+		}
+	}
+
+	uint8_t tx_buffer[sizeof(command) + dummyClocks+ writeSize];
+	tx_buffer[0] = command;
+	if(dummyClocks > 0){
+		uint8_t i;
+		for(i = 0; i < dummyClocks; i++){
+			tx_buffer[1+i] = 0;
+		}
+	}
+	if(writeSize > 0){
+		uint8_t i;
+		// MSB first
+		if(firstMSB){
+			for(i = 0; i < writeSize; i++){
+				tx_buffer[1+dummyClocks+i] = (uint8_t)(writeValue >> ((writeSize-1-i)*8));
+			}
+		}
+		// LSB first
+		else{
+			for(i = 0; i < writeSize; i++){
+				tx_buffer[1+dummyClocks+i] = (uint8_t)(writeValue >> (i*8));
+			}
+		}
+
+	}
 
 	// Init SPI peripheral
 	spi_init(message_in, &hspi);
 
 	// Perform SPI test and set response
 	message_out->commandType = CommandTypeEnum_SPI_test;
-	switch(message_in->spi.operatingMode){
-	case spiOperatingMode_SPI_MODE_FULL_DUPLEX_MASTER:
-		HAL_SPI_TransmitReceive(&hspi,&command, &responseByte, sizeof(responseByte), HAL_MAX_DELAY);
+
+	if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_FULL_DUPLEX_MASTER){
+		uint8_t rx_buffer[sizeof(tx_buffer) + slaveResponse];
+		status = HAL_SPI_TransmitReceive(&hspi,tx_buffer,rx_buffer,sizeof(rx_buffer), TEST_TIMEOUT_DURATION);
 		message_out->has_response = true;
-		message_out->response.has_responseRead = true;
-		message_out->response.responseRead = responseByte;
-		break;
-	case spiOperatingMode_SPI_MODE_HALF_DUPLEX_MASTER:
-		HAL_SPI_TransmitReceive(&hspi,&command, &responseByte, sizeof(responseByte), HAL_MAX_DELAY);
-		message_out->has_response = true;
-		message_out->response.has_responseRead = true;
-		message_out->response.responseRead = responseByte;
-		break;
-	case spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER:
-		HAL_SPI_Transmit(&hspi,&command, sizeof(command), HAL_MAX_DELAY);
-		message_out->has_response = true;
-		message_out->response.has_responseEnum = true;
-		message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_OK;
-		break;
-	default:
-		break;
+		if(status == HAL_OK){
+			uint8_t i;
+			uint32_t resp = 0;
+			// MSB first
+			if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
+				if(firstMSB){
+					for(i = 0; i<slaveResponse; i++){
+						resp |= (rx_buffer[sizeof(tx_buffer)+i] << ((slaveResponse-1-i)*8));
+					}
+				}
+				else{
+					for(i = 0; i<slaveResponse; i++){
+						resp |= (rx_buffer[sizeof(tx_buffer)+i] << (i*8));
+					}
+				}
+			}
+
+			message_out->response.has_responseRead = true;
+			message_out->response.responseRead = resp;
+		}
+		else{
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
+		}
 	}
+
+	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_HALF_DUPLEX_MASTER){
+		uint8_t rx_buffer[slaveResponse];
+		status = HAL_SPI_TransmitReceive(&hspi,tx_buffer,rx_buffer,sizeof(rx_buffer), TEST_TIMEOUT_DURATION);
+		message_out->has_response = true;
+		if(status == HAL_OK){
+			uint8_t i;
+			uint32_t resp = 0;
+			// MSB first
+			if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
+				if(firstMSB){
+					for(i = 0; i<slaveResponse; i++){
+						resp |= (rx_buffer[i] << ((slaveResponse-1-i)*8));
+					}
+				}
+				else{
+					for(i = 0; i<slaveResponse; i++){
+						resp |= (rx_buffer[i] << (i*8));
+					}
+				}
+			}
+			message_out->response.has_responseRead = true;
+			message_out->response.responseRead = resp;
+		}
+		else{
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
+		}
+
+	}
+
+	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER){
+		status = HAL_SPI_Transmit(&hspi, tx_buffer,sizeof(tx_buffer),TEST_TIMEOUT_DURATION);
+		message_out->has_response = true;
+		if(status == HAL_OK){
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_OK;
+		}
+		else{
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
+		}
+	}
+	else{
+		// empty
+	}
+
 
 	// Deinit SPI peripheral
 	HAL_SPI_MspDeInit(&hspi);
