@@ -54,15 +54,17 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.close_button.setEnabled(False)
         # Validators
         self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]"))          # Byte validator for input fields (0xhh format)
-        self.byteSizeValidatorI2C  = QRegExpValidator(QRegExp("[1-4]"))                        # 1-digit decimal validator for input fields
+        self.byteSizeValidatorI2CWrite  = QRegExpValidator(QRegExp("[1-2]"))                        # 1-digit decimal validator for input fields
+        self.byteSizeValidatorI2CRead  = QRegExpValidator(QRegExp("[1-4]"))                        # 1-digit decimal validator for input fields
         self.byteSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-2]"))                        # 1-digit decimal validator for input fields
         self.slaveSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-4]"))                        # 1-digit decimal validator for input fields
+        self.byteSizeValidatorUSART  = QRegExpValidator(QRegExp("[0-4]"))                        # 1-digit decimal validator for input fields
         self.dummyValidator  = QRegExpValidator(QRegExp("[0-1][0-5]"))                        # 2-digit decimal validator for input fields
         self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9]"))      # 5-digit decimal validator for input fields
         self.baudValidator  = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9][0-9]"))   # 6-digit decimal validator for input fields
         self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]"))                   # Max. 3 digit validator for duty cycle [0-100], limits checked
         self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]"))              # Max. 4 digit validator for freqency [0-1000], limits checked
-        self.valueValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]")) # Max. 2 bytes validator for i2c/spi write value
+        self.valueValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]")) # Max. 2 bytes validator for i2c/spi/usart write value
         self.test_list = []     # List filled with test objects
         self.helpLabel_list = []
         self.scroll_layout.addStretch()                            # Add stretch for scroll area
@@ -339,8 +341,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_changed_i2c_rw(self):
         if self.i2c_rw_select.currentData() == list(sequence.dict_i2c_rw.values())[0]:
             self.i2c_write_value_select.setEnabled(True)
+            self.i2c_write_value_select.setText("")
+            self.i2c_size_select.setPlaceholderText("1..2")
+            self.i2c_size_select.setValidator(self.byteSizeValidatorI2CWrite)
         else:
             self.i2c_write_value_select.setEnabled(False)
+            self.i2c_write_value_select.setText("0x00")
+            self.i2c_size_select.setPlaceholderText("1..4")
+            self.i2c_size_select.setValidator(self.byteSizeValidatorI2CRead)
 
 
     # Called when SPI frame format option is changed: add/remove widgets and set parent
@@ -370,6 +378,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.spi_frame_format_select.model().item(1).setEnabled(True)
 
+    # Called when SPI operating mode option is changed: enables/disable slave response (bytes) field
+    def on_changed_spi_opmode(self):
+        if self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[2]:
+            self.spi_slave_response_select.setEnabled(False)
+            self.spi_slave_response_select.setText("0")
+        else:
+            self.spi_slave_response_select.setEnabled(True)
+            self.spi_slave_response_select.setText("")
 
     # Called when USART mode setting is changed
     def on_changed_usart_mode(self):
@@ -389,21 +405,28 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_clock_phase_select.setParent(None)
                 self.usart_clock_last_bit_select.setParent(None)
 
-            self.options_layout.addWidget(self.usart_hw_flow_control_label,8,0)
-            self.options_layout.addWidget(self.usart_hw_flow_control_select,8,2)
+            self.options_layout.addWidget(self.usart_hw_flow_control_label,10,0)
+            self.options_layout.addWidget(self.usart_hw_flow_control_select,10,2)
         # If 'Synchronous' mode is selected: remove HW flow control settings if necessary, add clock settings
         else:
             self.options_layout.removeWidget(self.usart_hw_flow_control_label)
             self.options_layout.removeWidget(self.usart_hw_flow_control_select)
             self.usart_hw_flow_control_label.setParent(None)
             self.usart_hw_flow_control_select.setParent(None)
-            self.options_layout.addWidget(self.usart_clock_polarity_label,8,0)
-            self.options_layout.addWidget(self.usart_clock_phase_label,9,0)
-            self.options_layout.addWidget(self.usart_clock_last_bit_label,10,0)
-            self.options_layout.addWidget(self.usart_clock_polarity_select,8,2)
-            self.options_layout.addWidget(self.usart_clock_phase_select,9,2)
-            self.options_layout.addWidget(self.usart_clock_last_bit_select,10,2)
+            self.options_layout.addWidget(self.usart_clock_polarity_label,10,0)
+            self.options_layout.addWidget(self.usart_clock_phase_label,11,0)
+            self.options_layout.addWidget(self.usart_clock_last_bit_label,12,0)
+            self.options_layout.addWidget(self.usart_clock_polarity_select,10,2)
+            self.options_layout.addWidget(self.usart_clock_phase_select,11,2)
+            self.options_layout.addWidget(self.usart_clock_last_bit_select,12,2)
 
+    def on_changed_usart_direction(self):
+        if self.usart_direction_select.currentData() == list(sequence.dict_usart_direction.values())[0]: # If 'TX only' is selected
+            self.usart_rx_size_select.setEnabled(False)
+            self.usart_rx_size_select.setText("0")
+        else:
+            self.usart_rx_size_select.setEnabled(True)
+            self.usart_rx_size_select.setText("")
 
     def on_changed_adc_channel(self):
         pin = sequence.select_pin_for_adc_channel(self.adc_channel_select.currentData())
@@ -477,8 +500,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_write_value_select.setValidator(self.valueValidator)
                 self.i2c_write_value_select.setPlaceholderText("0x00..0xFFFF")
 
-                self.i2c_size_select.setValidator(self.byteSizeValidatorI2C)
-                self.i2c_size_select.setPlaceholderText("1..4")
 
                 # Connect signals and call functions explicitly
                 self.i2c_speed_mode_select.activated[str].connect(self.on_changed_i2c_speed_mode)
@@ -507,7 +528,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Layout settings
                 self.options_layout.addItem(self.spacerItem,9,0)
-                self.options_layout.setColumnMinimumWidth(1,10)
+                self.options_layout.setColumnMinimumWidth(1,30)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             if self.SPI_active == False:
@@ -591,6 +612,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Connect signals and call functions explicitly
                 self.spi_frame_format_select.activated[str].connect(self.on_changed_spi_frame_format)
                 self.spi_hardware_nss_select.activated[str].connect(self.on_changed_spi_hardware_nss)
+                self.spi_operating_mode_select.activated[str].connect(self.on_changed_spi_opmode)
                 self.on_changed_spi_frame_format()
                 self.on_changed_spi_hardware_nss()
 
@@ -625,9 +647,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.GPIO_active == False:
                 self.GPIO_active = True
                 self.gpio_pin_label = QLabel("GPIO pin", self)
-                self.gpio_direction_label = QLabel("GPIO direction", self)
-                self.gpio_state_label = QLabel("GPIO state", self)
-                self.gpio_pull_label = QLabel("GPIO pull-up/pull-down", self)
+                self.gpio_direction_label = QLabel("Direction", self)
+                self.gpio_state_label = QLabel("State", self)
+                self.gpio_pull_label = QLabel("Pull-up/pull-down", self)
 
                 self.gpio_pin_select = QComboBox(self)
                 self.gpio_direction_select = QComboBox(self)
@@ -673,16 +695,16 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Layout settings
                 self.options_layout.addItem(self.spacerItem,4,0)
-                self.options_layout.setColumnMinimumWidth(1,40)
+                self.options_layout.setColumnMinimumWidth(1,0)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_read:
             if self.AnalogRead_active == False:
                 self.AnalogRead_active = True
-                self.adc_instance_label = QLabel("ADC Instance", self)
-                self.adc_channel_label = QLabel("ADC channel", self)
-                self.adc_pin_label = QLabel("ADC pin", self)
-                self.adc_resolution_label = QLabel("ADC resolution", self)
-                self.adc_clock_prescaler_label = QLabel("ADC clock prescaler", self)
+                self.adc_instance_label = QLabel("Instance", self)
+                self.adc_channel_label = QLabel("Channel", self)
+                self.adc_pin_label = QLabel("GPIO pin", self)
+                self.adc_resolution_label = QLabel("Resolution", self)
+                self.adc_clock_prescaler_label = QLabel("Clock prescaler", self)
 
                 self.adc_instance_select = QComboBox(self)
                 self.adc_channel_select = QComboBox(self)
@@ -734,7 +756,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Layout settings
                 self.options_layout.addItem(self.spacerItem,5,0)
-                self.options_layout.setColumnMinimumWidth(1,40)
+                self.options_layout.setColumnMinimumWidth(1,30)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.Analog_write:
             if self.AnalogWrite_active == False:
@@ -787,7 +809,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Layout settings
                 self.options_layout.addItem(self.spacerItem,5,0)
-                self.options_layout.setColumnMinimumWidth(1,40)
+                self.options_layout.setColumnMinimumWidth(1,30)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
             if self.USART_active == False:
@@ -800,6 +822,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_stop_bits_label = QLabel("Stop Bits", self)
                 self.usart_direction_label = QLabel("Direction", self)
                 self.usart_command_label = QLabel("Command", self)
+                self.usart_tx_size_label = QLabel("TX size (bytes)", self)
+                self.usart_rx_size_label = QLabel("RX size (bytes)", self)
                 self.usart_clock_polarity_label = QLabel("Clock Polarity", self)
                 self.usart_clock_phase_label = QLabel("Clock Phase", self)
                 self.usart_clock_last_bit_label = QLabel("Clock Last Bit", self)
@@ -813,6 +837,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_stop_bits_select = QComboBox(self)
                 self.usart_direction_select = QComboBox(self)
                 self.usart_command_select = QLineEdit(self)
+                self.usart_tx_size_select = QLineEdit(self)
+                self.usart_rx_size_select = QLineEdit(self)
                 self.usart_clock_polarity_select = QComboBox(self)
                 self.usart_clock_phase_select = QComboBox(self)
                 self.usart_clock_last_bit_select = QComboBox(self)
@@ -865,12 +891,22 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Set placeholders and validator for input fields
                 self.usart_baudrate_select.setValidator(self.baudValidator)
                 self.usart_baudrate_select.setPlaceholderText("115200")
-                self.usart_command_select.setValidator(self.byteValidator)
-                self.usart_command_select.setPlaceholderText("0xFF")
+
+                self.usart_command_select.setValidator(self.valueValidator)
+                self.usart_command_select.setPlaceholderText("0x00..0xFFFF")
+
+                self.usart_tx_size_select.setValidator(self.byteSizeValidatorUSART)
+                self.usart_tx_size_select.setPlaceholderText("0..4")
+
+                self.usart_rx_size_select.setValidator(self.byteSizeValidatorUSART)
+                self.usart_rx_size_select.setPlaceholderText("0..4")
 
                 # Connect signal and call function explicitly
                 self.usart_mode_select.activated[str].connect(self.on_changed_usart_mode)
                 self.on_changed_usart_mode()
+
+                self.usart_direction_select.activated[str].connect(self.on_changed_usart_direction)
+                self.on_changed_usart_direction()
 
                 # Add widgets to layout
                 self.options_layout.addWidget(self.usart_bus_label,0,0)
@@ -881,6 +917,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.usart_stop_bits_label,5,0)
                 self.options_layout.addWidget(self.usart_direction_label,6,0)
                 self.options_layout.addWidget(self.usart_command_label,7,0)
+                self.options_layout.addWidget(self.usart_tx_size_label,8,0)
+                self.options_layout.addWidget(self.usart_rx_size_label,9,0)
 
                 self.options_layout.addWidget(self.usart_bus_select,0,2)
                 self.options_layout.addWidget(self.usart_mode_select,1,2)
@@ -890,10 +928,12 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.usart_stop_bits_select,5,2)
                 self.options_layout.addWidget(self.usart_direction_select,6,2)
                 self.options_layout.addWidget(self.usart_command_select,7,2)
+                self.options_layout.addWidget(self.usart_tx_size_select,8,2)
+                self.options_layout.addWidget(self.usart_rx_size_select,9,2)
 
                 # Layout settings
-                self.options_layout.addItem(self.spacerItem,11,0)
-                self.options_layout.setColumnMinimumWidth(1,10)
+                self.options_layout.addItem(self.spacerItem,13,0)
+                self.options_layout.setColumnMinimumWidth(1,30)
 
 
     # Delete all child widget from a layout

@@ -497,7 +497,7 @@ def make_string_from_test_object(test_object):
         string += "  Bus: " + list(dict_spi_bus.keys())[list(dict_spi_bus.values()).index(test_object.spi.bus)]
         string += "  Op.mode: " + list(dict_spi_operating_mode.keys())[list(dict_spi_operating_mode.values()).index(test_object.spi.operatingMode)]
         string += "  Cmd: " + "0x{:02X}".format(test_object.spi.command)
-        string += "  Dummy: " + str(test_object.spi.dummyclocks)
+        string += "  Dummy: " + str(test_object.spi.dummyClocks)
         string += "  writeValue: " + "0x{:04X}".format(test_object.spi.writeValue)
         string += "  writeSize: " + str(test_object.spi.writeSize)
         string += "  slaveResponse: " + str(test_object.spi.slaveResponse)

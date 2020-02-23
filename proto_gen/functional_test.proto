@@ -325,10 +325,12 @@ message usartMessage{
  required usartStopBits stopBits = 6;
  required usartDirection direction = 7;
  required uint32 command = 8;			// byte
- optional usartClockPolarity clockPolarity = 9;
- optional usartClockPhase clockPhase = 10;
- optional usartClockLastBit clockLastBit = 11;
- optional usartHardwareFlowControl hwFlowControl = 12;
+ required uint32 txSize = 9;
+ required uint32 rxSize = 10;
+ optional usartClockPolarity clockPolarity = 11;
+ optional usartClockPhase clockPhase = 12;
+ optional usartClockLastBit clockLastBit = 13;
+ optional usartHardwareFlowControl hwFlowControl = 14;
 }
 
 
