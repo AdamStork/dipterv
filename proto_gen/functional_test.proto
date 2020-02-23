@@ -270,7 +270,8 @@ enum usartBus{
 
 enum usartDirection{
 	USART_TX = 0;
-	USART_TX_AND_RX = 1;	
+	USART_RX = 1;
+	USART_TX_AND_RX = 2;	
 }
 
 enum usartWordLength{

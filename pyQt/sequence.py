@@ -235,7 +235,8 @@ dict_usart_bus = {
 
 dict_usart_direction = {
     "TX only": 0,
-    "TX and RX": 1,
+    "RX only": 1,
+    "TX and RX": 2,
 }
 
 dict_usart_word_length = {
@@ -391,9 +392,19 @@ def make_test_object_from_options(UI):
         cmd.usart.direction = UI.usart_direction_select.currentData()
         if is_empty(UI.usart_command_select.text()):
             cmd.usart.command = 0
-            UI.usart_command_select.setText("0x00")
+            UI.usart_command_select.setText("0x00000000")
         else:
             cmd.usart.command = int(UI.usart_command_select.text(),16)
+        if is_empty(UI.usart_tx_size_select.text()):
+            cmd.usart.txSize = 0
+            UI.usart_tx_size_select.setText("0")
+        else:
+            cmd.usart.txSize = int(UI.usart_tx_size_select.text())
+        if is_empty(UI.usart_rx_size_select.text()):
+            cmd.usart.rxSize = 0
+            UI.usart_rx_size_select.setText("0")
+        else:
+            cmd.usart.rxSize = int(UI.usart_rx_size_select.text())
         if UI.usart_mode_select.currentData() == list(dict_usart_mode.values())[0]:     # If 'Asynchronous' mode is selected, save HW flow control settings
             cmd.usart.hwFlowControl = UI.usart_hw_flow_control_select.currentData()
         elif UI.usart_mode_select.currentData() == list(dict_usart_mode.values())[1]:   # If 'Synchronous' mode is selected, save clock settings
@@ -518,6 +529,8 @@ def make_string_from_test_object(test_object):
         string += "  Stop bits: " + list(dict_usart_stop_bits.keys())[list(dict_usart_stop_bits.values()).index(test_object.usart.stopBits)]
         string += "  Direction: " + list(dict_usart_direction.keys())[list(dict_usart_direction.values()).index(test_object.usart.direction)]
         string += "  Cmd: " + "0x{:02X}".format(test_object.usart.command)
+        string += "  txSize: " + str(test_object.usart.txSize)
+        string += "  rxSize: " + str(test_object.usart.rxSize)
         if test_object.usart.mode == list(dict_usart_mode.values())[0]:   # If 'Asynchronous' option is selected
             string += "  HW Flow control: " + list(dict_usart_hw_flow.keys())[list(dict_usart_hw_flow.values()).index(test_object.usart.hwFlowControl)]
         elif test_object.usart.mode == list(dict_usart_mode.values())[1]:   # If 'Synchronous' option is selected
@@ -596,7 +609,7 @@ def make_test_object_from_string(string):
         test_object.spi.bus = list(dict_spi_bus.values())[list(dict_spi_bus.keys()).index(optionValue[0])]
         test_object.spi.operatingMode = list(dict_spi_operating_mode.values())[list(dict_spi_operating_mode.keys()).index(optionValue[1])]
         test_object.spi.command = int(optionValue[2],16)
-        test_object.spi.dummyclocks = int(optionValue[3])
+        test_object.spi.dummyClocks = int(optionValue[3])
         test_object.spi.writeValue = int(optionValue[4],16)
         test_object.spi.writeSize = int(optionValue[5])
         test_object.spi.slaveResponse = int(optionValue[6])
@@ -618,12 +631,14 @@ def make_test_object_from_string(string):
         test_object.usart.stopBits = list(dict_usart_stop_bits.values())[list(dict_usart_stop_bits.keys()).index(optionValue[5])]
         test_object.usart.direction = list(dict_usart_direction.values())[list(dict_usart_direction.keys()).index(optionValue[6])]
         test_object.usart.command = int(optionValue[7],16)
+        test_object.usart.txSize = int(optionValue[8])
+        test_object.usart.rxSize = int(optionValue[9])
         if test_object.usart.mode == list(dict_usart_mode.values())[0]:   # If 'Asynchronous' option is selected
-            test_object.usart.hwFlowControl = list(dict_usart_hw_flow.values())[list(dict_usart_hw_flow.keys()).index(optionValue[8])]
+            test_object.usart.hwFlowControl = list(dict_usart_hw_flow.values())[list(dict_usart_hw_flow.keys()).index(optionValue[10])]
         elif test_object.usart.mode == list(dict_usart_mode.values())[1]:   # If 'Synchronous' option is selected
-            test_object.usart.clockPolarity = list(dict_usart_clock_polarity.values())[list(dict_usart_clock_polarity.keys()).index(optionValue[8])]
-            test_object.usart.clockPhase = list(dict_usart_clock_phase.values())[list(dict_usart_clock_phase.keys()).index(optionValue[9])]
-            test_object.usart.clockLastBit = list(dict_usart_clock_last_bit.values())[list(dict_usart_clock_last_bit.keys()).index(optionValue[10])]
+            test_object.usart.clockPolarity = list(dict_usart_clock_polarity.values())[list(dict_usart_clock_polarity.keys()).index(optionValue[10])]
+            test_object.usart.clockPhase = list(dict_usart_clock_phase.values())[list(dict_usart_clock_phase.keys()).index(optionValue[11])]
+            test_object.usart.clockLastBit = list(dict_usart_clock_last_bit.values())[list(dict_usart_clock_last_bit.keys()).index(optionValue[12])]
         return test_object
 
     elif words[0] == list_cmd_types[3]:

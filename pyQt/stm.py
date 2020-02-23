@@ -54,6 +54,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.close_button.setEnabled(False)
         # Validators
         self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]"))          # Byte validator for input fields (0xhh format)
+        self.wordValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]")) # Word validator for input fields (0xhhhhhhhh format)
         self.byteSizeValidatorI2CWrite  = QRegExpValidator(QRegExp("[1-2]"))                        # 1-digit decimal validator for input fields
         self.byteSizeValidatorI2CRead  = QRegExpValidator(QRegExp("[1-4]"))                        # 1-digit decimal validator for input fields
         self.byteSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-2]"))                        # 1-digit decimal validator for input fields
@@ -424,9 +425,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.usart_direction_select.currentData() == list(sequence.dict_usart_direction.values())[0]: # If 'TX only' is selected
             self.usart_rx_size_select.setEnabled(False)
             self.usart_rx_size_select.setText("0")
+            self.usart_tx_size_select.setEnabled(True)
+            self.usart_tx_size_select.setText("")
+        elif self.usart_direction_select.currentData() == list(sequence.dict_usart_direction.values())[1]: # If 'RX only' is selected
+            self.usart_rx_size_select.setEnabled(True)
+            self.usart_rx_size_select.setText("")
+            self.usart_tx_size_select.setEnabled(False)
+            self.usart_tx_size_select.setText("0")
         else:
             self.usart_rx_size_select.setEnabled(True)
             self.usart_rx_size_select.setText("")
+            self.usart_tx_size_select.setEnabled(True)
+            self.usart_tx_size_select.setText("")
 
     def on_changed_adc_channel(self):
         pin = sequence.select_pin_for_adc_channel(self.adc_channel_select.currentData())
@@ -892,8 +902,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_baudrate_select.setValidator(self.baudValidator)
                 self.usart_baudrate_select.setPlaceholderText("115200")
 
-                self.usart_command_select.setValidator(self.valueValidator)
-                self.usart_command_select.setPlaceholderText("0x00..0xFFFF")
+                self.usart_command_select.setValidator(self.wordValidator)
+                self.usart_command_select.setPlaceholderText("0x00000000")
 
                 self.usart_tx_size_select.setValidator(self.byteSizeValidatorUSART)
                 self.usart_tx_size_select.setPlaceholderText("0..4")
