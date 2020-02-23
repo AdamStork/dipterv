@@ -427,16 +427,23 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.usart_rx_size_select.setText("0")
             self.usart_tx_size_select.setEnabled(True)
             self.usart_tx_size_select.setText("")
+            self.usart_command_select.setEnabled(True)
+            self.usart_command_select.setText("")
         elif self.usart_direction_select.currentData() == list(sequence.dict_usart_direction.values())[1]: # If 'RX only' is selected
             self.usart_rx_size_select.setEnabled(True)
             self.usart_rx_size_select.setText("")
             self.usart_tx_size_select.setEnabled(False)
             self.usart_tx_size_select.setText("0")
+            self.usart_command_select.setEnabled(False)
+            self.usart_command_select.setText("0x00000000")
         else:
             self.usart_rx_size_select.setEnabled(True)
             self.usart_rx_size_select.setText("")
             self.usart_tx_size_select.setEnabled(True)
             self.usart_tx_size_select.setText("")
+            self.usart_command_select.setEnabled(True)
+            self.usart_command_select.setText("")
+
 
     def on_changed_adc_channel(self):
         pin = sequence.select_pin_for_adc_channel(self.adc_channel_select.currentData())
@@ -997,6 +1004,19 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     response = "SPI transmit/receive: " + str(message_data.response.responseRead)
 
+        elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
+            if test_object.usart.direction == list(sequence.dict_usart_direction.values())[0]:      # USART TX-only response: OK/failed
+                response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
+            elif test_object.usart.direction == list(sequence.dict_usart_direction.values())[1]:    # USART RX-only response: data/failed
+                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[7]:
+                    response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
+                else:
+                    response = "USART/UART receive: " + str(message_data.response.responseRead)
+            else:                                                                                   # USART TX+RX response: data/failed
+                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[8]:
+                    response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
+                else:
+                    response = "USART/UART receive: " + str(message_data.response.responseRead)
 
         elif cmdType == functional_test_pb2.GPIO_digital:
             if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:
@@ -1012,20 +1032,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)] # Search key by value (responseWrite enum)
             response += ": " + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.analog_out.pin)]
 
-
-
-
-#        elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
-#            response_num = 5        # todo
-
-
-
-
-#        response_list = []
-#        for i in self.LL.rx_buffer:
-#            i = format(i,'02X')
-#            response_list.append(i)
-#        response = ' '.join(str(e) for e in response_list)
         return response
 
 

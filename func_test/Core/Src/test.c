@@ -130,6 +130,8 @@ void command_reset(Command* message)
 	message->usart.stopBits = _usartStopBits_MIN;
 	message->usart.direction = _usartDirection_MIN;
 	message->usart.command = 0;
+	message->usart.txSize = 0;
+	message->usart.rxSize = 0;
 	message->usart.has_clockPolarity = false;
 	message->usart.clockPolarity = _usartClockPolarity_MIN;
 	message->usart.has_clockPhase = false;
@@ -276,6 +278,7 @@ void i2c_test(Command* message_in, Command* message_out)
 
 	// Perform I2C test and set response
 	message_out->commandType = CommandTypeEnum_I2C_test;
+	// I2C write
 	if(message_in->i2c.direction == i2cDirection_I2C_write){
 		uint8_t writeSize = message_in->i2c.size;
 		uint8_t writeBuff[writeSize + 1];
@@ -299,6 +302,7 @@ void i2c_test(Command* message_in, Command* message_out)
 			message_out->response.responseEnum = responseEnum_t_I2C_WRITE_FAIL;
 		}
 	}
+	// I2C read
 	else{
 		uint8_t* readBuff;
 		uint8_t readSize = message_in->i2c.size;
@@ -642,8 +646,10 @@ void usart_test(Command* message_in, Command* message_out)
 {
 	UART_HandleTypeDef huart;
 	USART_HandleTypeDef husart;
-	uint8_t txByte;
-	uint8_t rxByte;
+	uint8_t txSize = message_in->usart.txSize;
+	uint8_t rxSize = message_in->usart.rxSize;
+	uint32_t command = message_in->usart.command;
+	HAL_StatusTypeDef status;
 
 	// Initialize UART/USART
 	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
@@ -653,42 +659,101 @@ void usart_test(Command* message_in, Command* message_out)
 		usart_init(message_in,&husart);
 	}
 
-	message_out->commandType = CommandTypeEnum_USART_test;
 	// Perform test and set response
-	switch(message_in->usart.direction){
-	case usartDirection_USART_TX:
-		transmitByte = message_in->usart.command;
+	message_out->commandType = CommandTypeEnum_USART_test;
+	// USART/UART TX
+	if(message_in->usart.direction == usartDirection_USART_TX){
+		uint8_t* txBuffer;
+
+		// Fill txBuffer
+		for(uint8_t i = 0; i<txSize; i++){
+			txBuffer[i] = (uint8_t)(command >> (i*8)); // Byte: LSB first
+		}
+
+		// UART
 		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-			HAL_UART_Transmit(&huart, &txByte, sizeof(txByte),HAL_MAX_DELAY);
-			message_out->has_response = true;
-			message_out->response.has_responseEnum = true;
+			status = HAL_UART_Transmit(&huart, txBuffer, txSize,TEST_TIMEOUT_DURATION);
+		}
+		// USART
+		else{
+			status = HAL_USART_Transmit(&husart,txBuffer,txSize,TEST_TIMEOUT_DURATION);
+		}
+
+		message_out->has_response = true;
+		message_out->response.has_responseEnum = true;
+		if(status == HAL_OK){
 			message_out->response.responseEnum = responseEnum_t_USART_TX_OK;
 		}
 		else{
-			HAL_USART_Transmit(&husart,&txByte,sizeof(txByte),HAL_MAX_DELAY);
-			message_out->has_response = true;
-			message_out->response.has_responseEnum = true;
-			message_out->response.responseEnum = responseEnum_t_USART_TX_OK;
+			message_out->response.responseEnum = responseEnum_t_USART_TX_FAIL;
 		}
-		break;
-	case usartDirection_USART_TX_AND_RX:
-		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-			HAL_UART_Transmit(&huart, &txByte, sizeof(txByte),HAL_MAX_DELAY);
-			HAL_UART_Receive(&huart,&rxByte,sizeof(rxByte), HAL_MAX_DELAY);
-			message_out->has_response = true;
-			message_out->response.has_responseRead = true;
-			message_out->response.responseRead = rxByte;
-		}
-		else{
-			HAL_USART_TransmitReceive(&husart, &txByte, &rxByte, sizeof(txByte),HAL_MAX_DELAY);
-			message_out->has_response = true;
-			message_out->response.has_responseRead = true;
-			message_out->response.responseRead = rxByte;
-		}
-		break;
-	default:
-		break;
 	}
+
+	// USART/UART RX
+	else if(message_in->usart.direction == usartDirection_USART_RX){
+		uint8_t* rxBuffer;
+
+		// UART
+		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+			status = HAL_UART_Receive(&huart, rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+		}
+		// USART
+		else{
+			status = HAL_USART_Receive(&husart, rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+		}
+
+		message_out->has_response = true;
+		if(status == HAL_OK){
+			uint32_t resp;
+			// decode rxBuffer
+			for(uint8_t i = 0; i<rxSize; i++){
+				resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+			}
+			message_out->response.has_responseRead = true;
+			message_out->response.responseRead = resp;
+		}
+		else{
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_USART_RX_FAIL;
+		}
+	}
+
+	// USART/UART TX + RX
+	else{
+		uint8_t* rxBuffer;
+		uint8_t* txBuffer;
+
+		// Fill txBuffer
+		for(uint8_t i = 0; i<txSize; i++){
+			txBuffer[i] = (uint8_t)(command >> (i*8)); // Byte: LSB first
+		}
+
+		// UART
+		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+			status = HAL_UART_Transmit(&huart, txBuffer, txSize, TEST_TIMEOUT_DURATION);
+			status &= HAL_UART_Receive(&huart, rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+		}
+		// USART
+		else{
+			status = HAL_USART_TransmitReceive(&husart, txBuffer, rxBuffer, txSize, TEST_TIMEOUT_DURATION);
+		}
+
+		message_out->has_response = true;
+		if(status == HAL_OK){
+			uint32_t resp;
+			// decode rxBuffer
+			for(uint8_t i = 0; i<rxSize; i++){
+				resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+			}
+			message_out->response.has_responseRead = true;
+			message_out->response.responseRead = resp;
+		}
+		else{
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_USART_TX_RX_FAIL;
+		}
+	}
+
 
 	// Deinit UART/USART
 	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
