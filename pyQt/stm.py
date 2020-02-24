@@ -990,7 +990,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if test_object.i2c.direction == functional_test_pb2.i2cDirection.I2C_write: # I2C write response: OK/failed
                 response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
             else:   # I2C read response: data/failed
-                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[2]:
+                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[12]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
                     response = "I2C read: " + str(message_data.response.responseRead)
@@ -999,7 +999,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if test_object.spi.operatingMode == list(sequence.dict_spi_operating_mode.values())[2]: # SPI Transmit-only response: OK/failed
                 response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
             else:   # SPI transmit/receive response: data/failed
-                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[4]:
+                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[21]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
                     response = "SPI transmit/receive: " + str(message_data.response.responseRead)
@@ -1008,27 +1008,33 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if test_object.usart.direction == list(sequence.dict_usart_direction.values())[0]:      # USART TX-only response: OK/failed
                 response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
             elif test_object.usart.direction == list(sequence.dict_usart_direction.values())[1]:    # USART RX-only response: data/failed
-                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[7]:
+                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[32]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
                     response = "USART/UART receive: " + str(message_data.response.responseRead)
             else:                                                                                   # USART TX+RX response: data/failed
-                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[8]:
+                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[33]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
                     response = "USART/UART receive: " + str(message_data.response.responseRead)
 
         elif cmdType == functional_test_pb2.GPIO_digital:
-            if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:
-                response = "GPIO state: " + list(sequence.dict_gpio_state.keys())[list(sequence.dict_gpio_state.values()).index(message_data.response.responseRead)] # Search key by value (GPIO state)
-            else:
+            if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:          # GPIO read: state/failed
+                if message_data.response.responseEnum == list(sequence.dict_response_write.values())[43]:
+                    response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
+                else:
+                    response = "GPIO state: " + list(sequence.dict_gpio_state.keys())[list(sequence.dict_gpio_state.values()).index(message_data.response.responseRead)] # Search key by value (GPIO state)
+            else:                                                                                   # GPIO set: OK/failed
                 response =  list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)] # Search key by value (responseWrite enum)
                 response += ": " + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.gpio.pin)]
 
-        elif cmdType == functional_test_pb2.Analog_read:
-            response = "Voltage: " + str(message_data.response.responseRead) + " mV"
+        elif cmdType == functional_test_pb2.Analog_read:    # ADC read: data/failed
+            if message_data.response.responseEnum == list(sequence.dict_response_write.values())[50]:
+                response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
+            else:
+                response = "Voltage: " + str(message_data.response.responseRead) + " mV"
 
-        elif cmdType == functional_test_pb2.Analog_write:
+        elif cmdType == functional_test_pb2.Analog_write:   # PWM set: OK/failed
             response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)] # Search key by value (responseWrite enum)
             response += ": " + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.analog_out.pin)]
 

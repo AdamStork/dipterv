@@ -290,21 +290,23 @@ dict_pwm_time_dependency = {
 
 # Response dictionaries
 dict_response_write = {
-    "I2C write successful": 0,
-    "I2C write failed": 1,
-    "I2C read failed": 2,
-    "SPI transmission successful": 3,
-    "SPI transmission failed": 4,
-    "USART TX successful": 5,
-    "USART TX failed": 6,
-    "USART RX failed": 7,
-    "USART TX+RX failed": 8,
-    "GPIO set High": 9,
-    "GPIO set Low": 10,
-    "GPIO set failed": 11,
-    "PWM set": 12,
-    "PWM reset": 13,
-    "PWM set failed": 14,
+    "Invalid message": 0,
+    "I2C write successful": 10,
+    "I2C write failed": 11,
+    "I2C read failed": 12,
+    "SPI transmission successful": 20,
+    "SPI transmission failed": 21,
+    "USART TX successful": 30,
+    "USART TX failed": 31,
+    "USART RX failed": 32,
+    "USART TX+RX failed": 33,
+    "GPIO set High": 40,
+    "GPIO set Low": 41,
+    "GPIO set failed": 42,
+    "GPIO read failed": 43,
+    "Analog read failed": 50,
+    "PWM set successful": 60,
+    "PWM set failed": 61,
 }
 
 

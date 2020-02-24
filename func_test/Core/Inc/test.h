@@ -40,11 +40,11 @@ void usart_init(Command* message_in, USART_HandleTypeDef* husart);
 void usart_test(Command* message_in, Command* message_out);
 void usart_deinit(USART_TypeDef* husart);
 
-void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin);
+bool gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin);
 void gpio_test(Command* message_in, Command* message_out);
 void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin);
-GPIO_TypeDef* gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin);
-
+bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort);
+void gpio_error(Command* message_in, Command* message_out);
 
 void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_TypeDef* gpioPort, uint16_t gpioPin);
 void analog_read_test(Command* message_in, Command* message_out);
