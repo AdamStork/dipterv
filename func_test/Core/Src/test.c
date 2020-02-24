@@ -272,9 +272,14 @@ void i2c_test(Command* message_in, Command* message_out)
 	uint16_t deviceAddress = message_in->i2c.address;
 	uint8_t deviceRegister = message_in->i2c.reg;
 	HAL_StatusTypeDef status;
+	bool success;
 
 	// Init I2C peripheral
-	i2c_init(message_in, &hi2c);
+	success = i2c_init(message_in, &hi2c);
+	if(success == false){
+		i2c_error_handler(message_in, message_out);
+		return;
+	}
 
 	// Perform I2C test and set response
 	message_out->commandType = CommandTypeEnum_I2C_test;
@@ -339,7 +344,7 @@ void i2c_test(Command* message_in, Command* message_out)
 /** @brief	I2C init
  *  @param	message_in: pointer to received message
  *  @param	hi2c: pointer to I2C handler	**/
-void i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c)
+bool i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c)
 {
 	switch(message_in->i2c.bus){
 	case i2cBus_I2C1:
@@ -351,6 +356,8 @@ void i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c)
 	case i2cBus_I2C3:
 		hi2c->Instance = I2C3;
 		break;
+	default:
+		return false;
 	}
 
 	hi2c->Init.ClockSpeed = message_in->i2c.clockSpeed;
@@ -381,10 +388,27 @@ void i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c)
 	hi2c->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
 
 	if (HAL_I2C_Init(hi2c) != HAL_OK){
-		Error_Handler();
+		return false;
 	}
+
+	return true;
 }
 
+
+/** @brief	I2C error handler - set response
+ *  @param  message_out: pointer to output message **/
+void i2c_error_handler(Command* message_in, Command* message_out)
+{
+	message_out->commandType = CommandTypeEnum_I2C_test;
+	message_out->has_response = true;
+	message_out->response.has_responseEnum = true;
+	if(message_in->i2c.direction == i2cDirection_I2C_write){
+		message_out->response.responseEnum = responseEnum_t_I2C_WRITE_FAIL;
+	}
+	else{
+		message_out->response.responseEnum = responseEnum_t_I2C_READ_FAIL;
+	}
+}
 
 
 /**********************			SPI test				******************************/
@@ -401,7 +425,9 @@ void spi_test(Command* message_in, Command* message_out)
 	uint8_t slaveResponse = message_in->spi.slaveResponse;
 	HAL_StatusTypeDef status;
 	bool firstMSB = false;
+	bool success;
 
+	// Motorola frameFormat
 	if(message_in->spi.has_firstBit){
 		if(message_in->spi.firstBit == spiFirstBit_SPI_FIRST_BIT_MSB){
 			firstMSB = true;
@@ -411,6 +437,7 @@ void spi_test(Command* message_in, Command* message_out)
 		}
 	}
 
+	// Fill txBuffer
 	uint8_t tx_buffer[sizeof(command) + dummyClocks+ writeSize];
 	tx_buffer[0] = command;
 	if(dummyClocks > 0){
@@ -437,7 +464,11 @@ void spi_test(Command* message_in, Command* message_out)
 	}
 
 	// Init SPI peripheral
-	spi_init(message_in, &hspi);
+	success = spi_init(message_in, &hspi);
+	if(success == false){
+		spi_error_handler(message_out);
+		return;
+	}
 
 	// Perform SPI test and set response
 	message_out->commandType = CommandTypeEnum_SPI_test;
@@ -528,7 +559,7 @@ void spi_test(Command* message_in, Command* message_out)
 /** @brief	SPI init
  *  @param	message_in: pointer to received message
  *  @param	hspi: pointer to SPI handler	**/
-void spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
+bool spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
 {
 	switch(message_in->spi.bus){
 	case spiBus_SPI1:
@@ -540,6 +571,8 @@ void spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
 	case spiBus_SPI3:
 		hspi->Instance = SPI3;
 		break;
+	default:
+		return false;
 	}
 
 	// Master mode only
@@ -632,10 +665,22 @@ void spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
 	hspi->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
 	hspi->Init.CRCPolynomial = 10;
 	if (HAL_SPI_Init(hspi) != HAL_OK){
-		Error_Handler();
+		return false;
 	}
+
+	return true;
 }
 
+
+/** @brief	SPI error handler - set response
+ *  @param  message_out: pointer to output message **/
+void spi_error_handler(Command* message_out)
+{
+	message_out->commandType = CommandTypeEnum_SPI_test;
+	message_out->has_response = true;
+	message_out->response.has_responseEnum = true;
+	message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
+}
 
 
 /**********************			USART test				******************************/
@@ -650,13 +695,22 @@ void usart_test(Command* message_in, Command* message_out)
 	uint8_t rxSize = message_in->usart.rxSize;
 	uint32_t command = message_in->usart.command;
 	HAL_StatusTypeDef status;
+	bool success;
 
 	// Initialize UART/USART
 	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-		uart_init(message_in,&huart);
+		success = uart_init(message_in,&huart);
+		if(success == false){
+			usart_error_handler(message_in, message_out);
+			return;
+		}
 	}
 	else{
-		usart_init(message_in,&husart);
+		success = usart_init(message_in,&husart);
+		if(success == false){
+			usart_error_handler(message_in, message_out);
+			return;
+		}
 	}
 
 	// Perform test and set response
@@ -770,7 +824,7 @@ void usart_test(Command* message_in, Command* message_out)
 /** @brief	USART init
  *  @param	message_in: pointer to received message
  *  @param	husart: pointer to USART handler	**/
-void usart_init(Command* message_in, USART_HandleTypeDef* husart)
+bool usart_init(Command* message_in, USART_HandleTypeDef* husart)
 {
 	switch(message_in->usart.bus){
 	case usartBus_USART1:
@@ -783,6 +837,7 @@ void usart_init(Command* message_in, USART_HandleTypeDef* husart)
 		husart->Instance = USART6;
 		break;
 	default:
+		return false;
 		break;
 	}
 
@@ -866,20 +921,18 @@ void usart_init(Command* message_in, USART_HandleTypeDef* husart)
 
 
 
-	if (HAL_USART_Init(husart) != HAL_OK)
-	{
-	Error_Handler();
+	if (HAL_USART_Init(husart) != HAL_OK){
+		return false;
 	}
 
-	// Init pins: called automatically in HAL_USART_Init()
-//	HAL_USART_MspInit()
+	return true;
 }
 
 
 /** @brief	UART init
  *  @param	message_in: pointer to received message
  *  @param	huart: pointer to UART handler	**/
-void uart_init(Command* message_in, UART_HandleTypeDef* huart)
+bool uart_init(Command* message_in, UART_HandleTypeDef* huart)
 {
 	switch(message_in->usart.bus){
 	case usartBus_USART1:
@@ -892,6 +945,7 @@ void uart_init(Command* message_in, UART_HandleTypeDef* huart)
 		huart->Instance = USART6;
 		break;
 	default:
+		return false;
 		break;
 	}
 
@@ -964,16 +1018,35 @@ void uart_init(Command* message_in, UART_HandleTypeDef* huart)
 	huart->Init.OverSampling = UART_OVERSAMPLING_16;
 
 
-	if (HAL_UART_Init(huart) != HAL_OK)
-	{
-	Error_Handler();
+	if (HAL_UART_Init(huart) != HAL_OK){
+		return false;
 	}
 
-
-	// Init pins: called automatically in HAL_UART_Init()
-//	HAL_UART_MspInit()
+	return true;
 }
 
+
+/** @brief	USART/UART error handler - set response
+ *  @param	message_in: pointer to received message
+ *  @param  message_out: pointer to output message **/
+void usart_error_handler(Command* message_in, Command* message_out)
+{
+	message_out->commandType = CommandTypeEnum_USART_test;
+	message_out->has_response = true;
+	message_out->response.has_responseEnum = true;
+	switch(message_in->usart.direction){
+	case usartDirection_USART_RX:
+		message_out->response.responseEnum = responseEnum_t_USART_RX_FAIL;
+		break;
+	case usartDirection_USART_TX:
+		message_out->response.responseEnum = responseEnum_t_USART_TX_FAIL;
+		break;
+	case usartDirection_USART_TX_AND_RX:
+		message_out->response.responseEnum = responseEnum_t_USART_TX_RX_FAIL;
+		break;
+	}
+
+}
 
 
 /**********************			PWM test				******************************/
@@ -986,28 +1059,28 @@ void pwm_test(Command* message_in, Command* message_out)
 	// choose GPIO port and pin
 	success = gpio_port_pin(message_in->analog_out.pin, &gpioPinPWM, &gpioPortPWM);
 	if(success == false){
-		message_out->commandType = CommandTypeEnum_Analog_write;
-		message_out->has_response = true;
-		message_out->response.has_responseEnum = true;
-		message_out->response.responseEnum = responseEnum_t_PWM_SET_FAIL;
+		pwm_error_handler(message_out);
 		return;
 	}
 
 	// Initialize and start PWM (GPIO + Timer)
-	pwm_init(message_in);
+	success &= pwm_init(message_in);
+	if(success == false){
+		pwm_error_handler(message_out);
+		return;
+	}
 
 	// Set response commandType
 	message_out->commandType = CommandTypeEnum_Analog_write;
 	message_out->has_response = true;
 	message_out->response.has_responseEnum = true;
-	message_out->response.responseEnum = responseEnum_t_PWM_SET;
-
+	message_out->response.responseEnum = responseEnum_t_PWM_SET_OK;
 }
 
 
 /** @brief	Analog read (ADC) peripheral init
  *  @param	message_in: pointer to received message		**/
-void pwm_init(Command* message_in)
+bool pwm_init(Command* message_in)
 {
 	/* GPIO Ports Clock Enable */
 	__HAL_RCC_GPIOC_CLK_ENABLE();
@@ -1027,17 +1100,38 @@ void pwm_init(Command* message_in)
     pwmCounter = 0;
     pwmDuty = message_in->analog_out.dutyCycle;
     htim2.Init.Period = ((1000/(message_in->analog_out.frequency))/PWM_DUTY_MAX) - 1;
-    HAL_TIM_Base_Init(&htim2);
+    if(HAL_TIM_Base_Init(&htim2) != HAL_OK){
+    	return false;
+    }
 
     // Init and start Timer3 if PWM time dependency is enabled (active for given time only)
 	if((message_in->analog_out.has_time == true) && (message_in->analog_out.dependency == pwmTimeDependency_PWM_TIME_DEPENDENCY_ENABLED)){
 		htim3.Init.Period = (message_in->analog_out.time) - 1;
-	    HAL_TIM_Base_Init(&htim3);
-		HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
+	    if(HAL_TIM_Base_Init(&htim3) != HAL_OK){
+	    	return false;
+	    }
+
+		if(HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1)){
+			return false;
+		}
 	}
-	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
+
+	if(HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1) != HAL_OK){
+		return false;
+	}
+
+	return true;
 }
 
+/** @brief	PWM error handler - set response
+ *  @param  message_out: pointer to output message **/
+void pwm_error_handler(Command* message_out)
+{
+	message_out->commandType = CommandTypeEnum_Analog_write;
+	message_out->has_response = true;
+	message_out->response.has_responseEnum = true;
+	message_out->response.responseEnum = responseEnum_t_PWM_SET_FAIL;
+}
 
 
 /**********************			Analog read 			******************************/
@@ -1054,19 +1148,25 @@ void analog_read_test(Command* message_in, Command* message_out)
 	// choose GPIO port and pin
 	success = gpio_port_pin(message_in->analog_in.pin, &gpioPin, &gpioPort);
 	if(success == false){
-		message_out->commandType = CommandTypeEnum_Analog_read;
-		message_out->has_response = true;
-		message_out->response.has_responseEnum = true;
-		message_out->response.responseEnum = responseEnum_t_ADC_READ_FAIL;
-		return;
+		analog_read_error_handler(message_out);
+    	return;
 	}
 
 	// Initialize ADC & GPIO if CubeMX config file is not available
-	analog_read_init(message_in, &adcHandle, gpioPort, gpioPin);
+	success &= analog_read_init(message_in, &adcHandle, gpioPort, gpioPin);
+	if(success == false){
+		analog_read_error_handler(message_out);
+    	return;
+	}
 
 	// ADC test
-	HAL_ADC_Start(&adcHandle);
+	if(HAL_ADC_Start(&adcHandle) != HAL_OK){
+		analog_read_error_handler(message_out);
+    	return;
+	}
+
 	uint32_t adcValue = HAL_ADC_GetValue(&adcHandle);
+
 	// Set response
 	message_out->commandType = CommandTypeEnum_Analog_read;
 	message_out->has_response = true;
@@ -1082,7 +1182,7 @@ void analog_read_test(Command* message_in, Command* message_out)
  *  @param	message_in: pointer to received message
  *  @param  gpioPort: pointer to GPIO port handler
  *  @param	gpioPin: GPIO pin number [0-15]				**/
-void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_TypeDef* gpioPort, uint16_t gpioPin)
+bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_TypeDef* gpioPort, uint16_t gpioPin)
 {
 	/* GPIO Ports Clock Enable */
 	__HAL_RCC_GPIOC_CLK_ENABLE();
@@ -1102,13 +1202,9 @@ void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 		adcHandle->Instance = ADC1;
 	    __HAL_RCC_ADC1_CLK_ENABLE();
 	}
-	else if(message_in->analog_in.instance == adcInstance_ADC2){
-//		adcHandle->Instance = ADC2;
-//	    __HAL_RCC_ADC2_CLK_ENABLE();
-	}
-	else if(message_in->analog_in.instance == adcInstance_ADC3){
-//		adcHandle->Instance = ADC3;
-//	    __HAL_RCC_ADC3_CLK_ENABLE();
+	else{
+		// Invalid ADC instance
+    	return false;
 	}
 
 	// Configure ADC clock prescaler
@@ -1120,6 +1216,9 @@ void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 	}
 	else if(message_in->analog_in.clockPrescaler == adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_8){
 		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
+	}
+	else{
+		// Empty
 	}
 
 	// Configure ADC resolution
@@ -1135,6 +1234,9 @@ void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 	else if(message_in->analog_in.resolution == adcResolution_ADC_6_BITS){
 		adcHandle->Init.Resolution = ADC_RESOLUTION_6B;
 	}
+	else{
+		// Empty
+	}
 
 	adcHandle->Init.ScanConvMode = DISABLE;
 	adcHandle->Init.ContinuousConvMode = DISABLE;
@@ -1146,7 +1248,7 @@ void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 	adcHandle->Init.DMAContinuousRequests = DISABLE;
 	adcHandle->Init.EOCSelection = ADC_EOC_SINGLE_CONV;
 	if (HAL_ADC_Init(adcHandle) != HAL_OK){
-		Error_Handler();
+		return false;
 	}
 
 
@@ -1158,10 +1260,23 @@ void analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 	sConfig.Rank = 1;
 	sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
 	if (HAL_ADC_ConfigChannel(adcHandle, &sConfig) != HAL_OK){
-		Error_Handler();
+		return false;
 	}
+
+	return true;
 }
 
+
+/** @brief	ADC error handler - set response
+ *  @param	message_in: pointer to received message
+ *  @param  message_out: pointer to output message **/
+void analog_read_error_handler(Command* message_out)
+{
+	message_out->commandType = CommandTypeEnum_Analog_read;
+	message_out->has_response = true;
+	message_out->response.has_responseEnum = true;
+	message_out->response.responseEnum = responseEnum_t_ADC_READ_FAIL;
+}
 
 
 /** @brief	ADC peripheral deinit
@@ -1176,6 +1291,8 @@ void analog_read_deinit(ADC_HandleTypeDef* adcHandle,GPIO_TypeDef* gpioPort, uin
 		HAL_ADC_DeInit(adcHandle);
 	}
 }
+
+
 
 /** @brief	choose ADC channel
  *  @param	message_in: pointer to received message
@@ -1260,7 +1377,6 @@ void gpio_test(Command* message_in, Command* message_out)
 	uint16_t gpioPin;
 	uint32_t gpioReadState = 0;		//message: responseRead is stored in uint32_t
 	bool success;
-	HAL_StatusTypeDef status;
 
 	// choose GPIO port and pin
 	success = gpio_port_pin(message_in->gpio.pin, &gpioPin, &gpioPort);
@@ -1271,11 +1387,7 @@ void gpio_test(Command* message_in, Command* message_out)
 
 
 	// Initialize GPIO
-	success &= gpio_init(message_in, gpioPort, gpioPin);
-	if(success == false){
-		gpio_error(message_in, message_out);
-		return;
-	}
+	gpio_init(message_in, gpioPort, gpioPin);
 
 	// Set response commandType
 	message_out->commandType = CommandTypeEnum_GPIO_digital;
@@ -1283,28 +1395,16 @@ void gpio_test(Command* message_in, Command* message_out)
 	// Read or write the pin depending on message
 	if(message_in->gpio.direction == gpioDirection_GPIO_OUTPUT){
 		if(message_in->gpio.state == gpioPinState_GPIO_HIGH){
-			status = HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_SET);
-			if(status == HAL_OK){
-				message_out->has_response = true;
-				message_out->response.has_responseEnum = true;
-				message_out->response.responseEnum = responseEnum_t_GPIO_SET_HIGH;
-			}
-			else{
-				gpio_error(message_in, message_out);
-				return;
-			}
+			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_SET);
+			message_out->has_response = true;
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_GPIO_SET_HIGH;
 		}
 		else if(message_in->gpio.state == gpioPinState_GPIO_LOW){
-			status = HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_RESET);
-			if(status == HAL_OK){
-				message_out->has_response = true;
-				message_out->response.has_responseEnum = true;
-				message_out->response.responseEnum = responseEnum_t_GPIO_SET_LOW;
-			}
-			else{
-				gpio_error(message_in, message_out);
-				return;
-			}
+			HAL_GPIO_WritePin(gpioPort, gpioPin, GPIO_PIN_RESET);
+			message_out->has_response = true;
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_GPIO_SET_LOW;
 		}
 	}
 	else if(message_in->gpio.direction == gpioDirection_GPIO_INPUT){
@@ -1346,9 +1446,8 @@ void gpio_error(Command* message_in, Command* message_out)
  *  @param  gpioPort: pointer to GPIO port handler
  *  @param	gpioPin: GPIO pin number [0-15]
  *  @return	true, if init is successful	**/
-bool gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
+void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 {
-	HAL_StatusTypeDef status;
 
 	/* GPIO Ports Clock Enable */
 	__HAL_RCC_GPIOC_CLK_ENABLE();
@@ -1388,13 +1487,7 @@ bool gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 	}
 
 	// Initialize GPIO
-	status = HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);
-	if(status == HAL_OK){
-		return true;
-	}
-	else{
-		return false;
-	}
+	HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);
 }
 
 
