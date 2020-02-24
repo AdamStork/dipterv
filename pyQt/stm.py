@@ -320,7 +320,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Called whenever a command is selected
     def on_changed_cmd_box(self):
-        print("CmdType:",self.cmd_box.currentData())
+#        print("CmdType:",self.cmd_box.currentData())
         self.delete_all_child_widget(self.options_layout)
         self.show_data_depending_on_cmd_type(self.cmd_box.currentData())
         self.show()
