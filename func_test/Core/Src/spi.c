@@ -24,30 +24,7 @@
 
 /* USER CODE END 0 */
 
-SPI_HandleTypeDef hspi2;
 
-/* SPI2 init function */
-void MX_SPI2_Init(void)
-{
-
-  hspi2.Instance = SPI2;
-  hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi2.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-}
 
 void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 {
@@ -203,6 +180,279 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
 } 
 
 /* USER CODE BEGIN 1 */
+
+
+/**********************			SPI test				******************************/
+/** @brief	SPI test
+ *  @param	message_in: pointer to received message
+ *  @param  message_out: pointer to transmit message	**/
+void spi_test(Command* message_in, Command* message_out)
+{
+	SPI_HandleTypeDef hspi;
+	uint8_t command = message_in->spi.command;
+	uint8_t dummyClocks = message_in->spi.dummyClocks;
+	uint16_t writeValue = message_in->spi.writeValue;
+	uint8_t writeSize = message_in->spi.writeSize;
+	uint8_t slaveResponse = message_in->spi.slaveResponse;
+	HAL_StatusTypeDef status;
+	bool firstMSB = false;
+	bool success;
+
+	// Motorola frameFormat
+	if(message_in->spi.has_firstBit){
+		if(message_in->spi.firstBit == spiFirstBit_SPI_FIRST_BIT_MSB){
+			firstMSB = true;
+		}
+		else{
+			firstMSB = false;
+		}
+	}
+
+	// Fill txBuffer
+	uint8_t tx_buffer[sizeof(command) + dummyClocks+ writeSize];
+	tx_buffer[0] = command;
+	if(dummyClocks > 0){
+		uint8_t i;
+		for(i = 0; i < dummyClocks; i++){
+			tx_buffer[1+i] = 0;
+		}
+	}
+	if(writeSize > 0){
+		uint8_t i;
+		// MSB first
+		if(firstMSB){
+			for(i = 0; i < writeSize; i++){
+				tx_buffer[1+dummyClocks+i] = (uint8_t)(writeValue >> ((writeSize-1-i)*8));
+			}
+		}
+		// LSB first
+		else{
+			for(i = 0; i < writeSize; i++){
+				tx_buffer[1+dummyClocks+i] = (uint8_t)(writeValue >> (i*8));
+			}
+		}
+
+	}
+
+	// Init SPI peripheral
+	success = spi_init(message_in, &hspi);
+	if(success == false){
+		spi_error_handler(message_out);
+		return;
+	}
+
+	// Perform SPI test and set response
+	message_out->commandType = CommandTypeEnum_SPI_test;
+
+	if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_FULL_DUPLEX_MASTER){
+		uint8_t rx_buffer[sizeof(tx_buffer) + slaveResponse];
+		status = HAL_SPI_TransmitReceive(&hspi,tx_buffer,rx_buffer,sizeof(rx_buffer), TEST_TIMEOUT_DURATION);
+		message_out->has_response = true;
+		if(status == HAL_OK){
+			uint8_t i;
+			uint32_t resp = 0;
+			// MSB first
+			if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
+				if(firstMSB){
+					for(i = 0; i<slaveResponse; i++){
+						resp |= (rx_buffer[sizeof(tx_buffer)+i] << ((slaveResponse-1-i)*8));
+					}
+				}
+				else{
+					for(i = 0; i<slaveResponse; i++){
+						resp |= (rx_buffer[sizeof(tx_buffer)+i] << (i*8));
+					}
+				}
+			}
+
+			message_out->response.has_responseRead = true;
+			message_out->response.responseRead = resp;
+		}
+		else{
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
+		}
+	}
+
+	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_HALF_DUPLEX_MASTER){
+		uint8_t rx_buffer[slaveResponse];
+		status = HAL_SPI_TransmitReceive(&hspi,tx_buffer,rx_buffer,sizeof(rx_buffer), TEST_TIMEOUT_DURATION);
+		message_out->has_response = true;
+		if(status == HAL_OK){
+			uint8_t i;
+			uint32_t resp = 0;
+			// MSB first
+			if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
+				if(firstMSB){
+					for(i = 0; i<slaveResponse; i++){
+						resp |= (rx_buffer[i] << ((slaveResponse-1-i)*8));
+					}
+				}
+				else{
+					for(i = 0; i<slaveResponse; i++){
+						resp |= (rx_buffer[i] << (i*8));
+					}
+				}
+			}
+			message_out->response.has_responseRead = true;
+			message_out->response.responseRead = resp;
+		}
+		else{
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
+		}
+
+	}
+
+	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER){
+		status = HAL_SPI_Transmit(&hspi, tx_buffer,sizeof(tx_buffer),TEST_TIMEOUT_DURATION);
+		message_out->has_response = true;
+		if(status == HAL_OK){
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_OK;
+		}
+		else{
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
+		}
+	}
+	else{
+		// empty
+	}
+
+
+	// Deinit SPI peripheral
+	HAL_SPI_MspDeInit(&hspi);
+}
+
+
+
+/** @brief	SPI init
+ *  @param	message_in: pointer to received message
+ *  @param	hspi: pointer to SPI handler	**/
+bool spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
+{
+	switch(message_in->spi.bus){
+	case spiBus_SPI1:
+		hspi->Instance = SPI1;
+		break;
+	case spiBus_SPI2:
+		hspi->Instance = SPI2;
+		break;
+	case spiBus_SPI3:
+		hspi->Instance = SPI3;
+		break;
+	default:
+		return false;
+	}
+
+	// Master mode only
+	switch(message_in->spi.operatingMode){
+	case spiOperatingMode_SPI_MODE_FULL_DUPLEX_MASTER:
+		hspi->Init.Mode = SPI_MODE_MASTER;
+		hspi->Init.Direction = SPI_DIRECTION_2LINES;
+		break;
+	case spiOperatingMode_SPI_MODE_HALF_DUPLEX_MASTER:
+		hspi->Init.Mode = SPI_MODE_MASTER;
+		hspi->Init.Direction = SPI_DIRECTION_1LINE;
+		break;
+	case spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER:
+		hspi->Init.Mode = SPI_MODE_MASTER;
+		hspi->Init.Direction = SPI_DIRECTION_2LINES;
+		break;
+	}
+
+
+	switch(message_in->spi.dataSize){
+	case spiDataSize_SPI_DATA_SIZE_8_BITS:
+		hspi->Init.DataSize = SPI_DATASIZE_8BIT;
+		break;
+	case spiDataSize_SPI_DATA_SIZE_16_BITS:
+		hspi->Init.DataSize = SPI_DATASIZE_16BIT;
+		break;
+	default:
+		break;
+	}
+
+	switch(message_in->spi.hardwareNSS){
+	case spiHardwareNSS_DISABLE:
+		hspi->Init.NSS = SPI_NSS_SOFT;
+		break;
+	case spiHardwareNSS_NSS_INPUT:
+		hspi->Init.NSS = SPI_NSS_HARD_INPUT;
+		break;
+	case spiHardwareNSS_NSS_OUTPUT:
+		hspi->Init.NSS = SPI_NSS_HARD_OUTPUT;
+		break;
+	}
+
+	// Motorola frame format
+	if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
+		hspi->Init.TIMode = SPI_TIMODE_DISABLED;
+
+		switch(message_in->spi.firstBit){
+		case spiFirstBit_SPI_FIRST_BIT_MSB:
+			hspi->Init.FirstBit = SPI_FIRSTBIT_MSB;
+			break;
+		case spiFirstBit_SPI_FIRST_BIT_LSB:
+			hspi->Init.FirstBit = SPI_FIRSTBIT_LSB;
+			break;
+		default:
+			break;
+		}
+
+		switch(message_in->spi.clockMode){
+		case clockMode_SPI_MODE_0:
+			hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+			hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
+			break;
+		case clockMode_SPI_MODE_1:
+			hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+			hspi->Init.CLKPhase = SPI_PHASE_2EDGE;
+			break;
+		case clockMode_SPI_MODE_2:
+			hspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
+			hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
+			break;
+		case clockMode_SPI_MODE_3:
+			hspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
+			hspi->Init.CLKPhase = SPI_PHASE_2EDGE;
+			break;
+		default:
+			break;
+		}
+
+
+	}
+	// TI frame forat
+	else{
+		hspi->Init.TIMode = SPI_TIMODE_ENABLED;
+
+
+	}
+
+	// Default settings
+	hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+	hspi->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+	hspi->Init.CRCPolynomial = 10;
+	if (HAL_SPI_Init(hspi) != HAL_OK){
+		return false;
+	}
+
+	return true;
+}
+
+
+/** @brief	SPI error handler - set response
+ *  @param  message_out: pointer to output message **/
+void spi_error_handler(Command* message_out)
+{
+	message_out->commandType = CommandTypeEnum_SPI_test;
+	message_out->has_response = true;
+	message_out->response.has_responseEnum = true;
+	message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
+}
+
 
 /* USER CODE END 1 */
 

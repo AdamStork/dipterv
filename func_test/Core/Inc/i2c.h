@@ -27,19 +27,19 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "functional_test.pb.h"
 /* USER CODE END Includes */
 
-extern I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_I2C1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+ bool i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c);
+ void i2c_test(Command* message_in, Command* message_out);
+ void i2c_error_handler(Command* message_in, Command* message_out);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

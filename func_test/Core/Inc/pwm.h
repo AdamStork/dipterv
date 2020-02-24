@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : SPI.h
-  * Description        : This file provides code for the configuration
-  *                      of the SPI instances.
+  * File Name          : gpio.h
+  * Description        : This file contains all the functions prototypes for 
+  *                      the gpio  
   ******************************************************************************
   * @attention
   *
@@ -16,36 +16,30 @@
   *
   ******************************************************************************
   */
+
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __spi_H
-#define __spi_H
+#ifndef __pwm_H
+#define __pwm_H
 #ifdef __cplusplus
  extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
-/* USER CODE BEGIN Includes */
 #include "functional_test.pb.h"
-/* USER CODE END Includes */
+#include "gpio.h"
+
+#define PWM_DUTY_MAX 100
 
 
-/* USER CODE BEGIN Private defines */
-
-/* USER CODE END Private defines */
-
-
-/* USER CODE BEGIN Prototypes */
- bool spi_init(Command* message_in, SPI_HandleTypeDef* hspi);
- void spi_test(Command* message_in, Command* message_out);
- void spi_error_handler(Command* message_out);
-/* USER CODE END Prototypes */
+ bool pwm_init(Command* message_in);
+ void pwm_test(Command* message_in, Command* message_out);
+ void pwm_error_handler(Command* message_out);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ spi_H */
+#endif /*__ pwm_H */
 
 /**
   * @}

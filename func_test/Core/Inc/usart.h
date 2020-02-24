@@ -26,22 +26,26 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-/* USER CODE BEGIN Includes */
 
+/* USER CODE BEGIN Includes */
+#include "functional_test.pb.h"
 /* USER CODE END Includes */
 
-extern USART_HandleTypeDef husart1;
 extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_USART1_Init(void);
+
 void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+bool uart_init(Command* message_in, UART_HandleTypeDef* huart);
+bool usart_init(Command* message_in, USART_HandleTypeDef* husart);
+void usart_test(Command* message_in, Command* message_out);
+void usart_deinit(USART_TypeDef* husart);
+void usart_error_handler(Command* message_in, Command* message_out);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
