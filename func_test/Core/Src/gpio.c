@@ -135,29 +135,33 @@ void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 	GPIO_InitStruct.Pin = gpioPin;
 
 	// Configure GPIO pin direction
-	if(message_in->gpio.direction == gpioDirection_GPIO_OUTPUT){
+	switch(message_in->gpio.direction){
+	case gpioDirection_GPIO_OUTPUT:
 		GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	}
-	else if(message_in->gpio.direction == gpioDirection_GPIO_INPUT){
+		break;
+	case gpioDirection_GPIO_INPUT:
 		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	}
-	else{
-		// empty
+		break;
+	default:
+		break;
 	}
 
+
 	// Configure GPIO pin Pull
-	if(message_in->gpio.pull == gpioPull_GPIO_NO_PULL){
+	switch(message_in->gpio.pull){
+	case gpioPull_GPIO_NO_PULL:
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
-	}
-	else if(message_in->gpio.pull == gpioPull_GPIO_PULL_UP){
+		break;
+	case gpioPull_GPIO_PULL_UP:
 		GPIO_InitStruct.Mode = GPIO_PULLUP;
-	}
-	else if(message_in->gpio.pull == gpioPull_GPIO_PULL_DOWN){
+		break;
+	case gpioPull_GPIO_PULL_DOWN:
 		GPIO_InitStruct.Mode = GPIO_PULLDOWN;
+		break;
+	default:
+		break;
 	}
-	else{
-		// empty
-	}
+
 
 	// Initialize GPIO
 	HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);

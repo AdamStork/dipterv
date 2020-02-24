@@ -133,35 +133,39 @@ bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 	}
 
 	// Configure ADC clock prescaler
-	if(message_in->analog_in.clockPrescaler == adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_4){
+	switch(message_in->analog_in.clockPrescaler){
+	case adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_4:
 		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
-	}
-	else if(message_in->analog_in.clockPrescaler == adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_6){
+		break;
+	case adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_6:
 		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV6;
-	}
-	else if(message_in->analog_in.clockPrescaler == adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_8){
+		break;
+	case adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_8:
 		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
-	}
-	else{
-		// Empty
+		break;
+	default:
+		break;
 	}
 
+
 	// Configure ADC resolution
-	if(message_in->analog_in.resolution == adcResolution_ADC_12_BITS){
+	switch(message_in->analog_in.resolution){
+	case adcResolution_ADC_12_BITS:
 		adcHandle->Init.Resolution = ADC_RESOLUTION_12B;
-	}
-	else if(message_in->analog_in.resolution == adcResolution_ADC_10_BITS){
+		break;
+	case adcResolution_ADC_10_BITS:
 		adcHandle->Init.Resolution = ADC_RESOLUTION_10B;
-	}
-	else if(message_in->analog_in.resolution == adcResolution_ADC_8_BITS){
+		break;
+	case adcResolution_ADC_8_BITS:
 		adcHandle->Init.Resolution = ADC_RESOLUTION_8B;
-	}
-	else if(message_in->analog_in.resolution == adcResolution_ADC_6_BITS){
+		break;
+	case adcResolution_ADC_6_BITS:
 		adcHandle->Init.Resolution = ADC_RESOLUTION_6B;
+		break;
+	default:
+		break;
 	}
-	else{
-		// Empty
-	}
+
 
 	adcHandle->Init.ScanConvMode = DISABLE;
 	adcHandle->Init.ContinuousConvMode = DISABLE;
