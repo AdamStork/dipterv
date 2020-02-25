@@ -7,7 +7,7 @@
 #ifndef __slave_H
 #define __slave_H
 
-#define TEST_TIMEOUT_DURATION 100
+#define TEST_TIMEOUT_DURATION 10000
 /**
  * Read only: turn on LED
  * Read & Write: send back value

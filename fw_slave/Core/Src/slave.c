@@ -14,7 +14,12 @@ uint32_t expectedWord = 0xDEADBEEF;
 uint32_t responseWord = 0x11AA22BB;
 
 #define USART_UART_RX_SIZE	4
-#define USART_UART_TX_SIZE 4
+#define USART_UART_TX_SIZE 	4
+#define I2C_RECEIVE_SIZE	2
+#define I2C_TRANSMIT_SIZE	4
+#define SPI_RECEIVE_SIZE	2
+#define SPI_TRANSMIT_SIZE	2
+
 
 /** @brief	Enter slave test mode. Tests can be executed by giving TestType	**/
 void enter_slave_test_mode(void)
@@ -62,35 +67,125 @@ void enter_slave_test_mode(void)
 
 
 
-
+/**********************			I2C test				******************************/
 void test_i2c_slave_read(void)
 {
-	// todo
+	uint8_t* rxBuffer;
+	uint8_t rxSize = I2C_RECEIVE_SIZE;
+
+
+	HAL_I2C_Slave_Receive(&hi2c1, rxBuffer, rxSize,TEST_TIMEOUT_DURATION);
+
+	uint32_t resp = 0;
+	// decode rxBuffer
+	for(uint8_t i = 0; i<rxSize; i++){
+		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+	}
+
+	if(resp == expectedWord){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	}
+
 }
 
 
 void test_i2c_slave_read_and_write(void)
 {
-	//todo
+	uint8_t* rxBuffer;
+	uint8_t rxSize = I2C_RECEIVE_SIZE;
+	uint8_t* txBuffer;
+	uint8_t txSize = I2C_TRANSMIT_SIZE;
+
+	HAL_I2C_Slave_Receive(&hi2c1, rxBuffer, rxSize,TEST_TIMEOUT_DURATION);
+
+	// Read message
+	uint32_t resp = 0;
+	for(uint8_t i = 0; i<rxSize; i++){
+		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+	}
+
+	// Send message
+	if(resp == expectedWord){
+		for(uint8_t i = 0; i<txSize; i++){
+			txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
+		}
+
+		HAL_I2C_Slave_Transmit(&hi2c1,txBuffer, txSize, TEST_TIMEOUT_DURATION);
+	}
 }
 
 
 
+/**********************			SPI test				******************************/
 void test_spi_slave_full_duplex(void)
 {
-	//todo
+	uint8_t* rxBuffer;
+	uint8_t rxSize = I2C_RECEIVE_SIZE;
+	uint8_t* txBuffer;
+	uint8_t txSize = I2C_TRANSMIT_SIZE;
+
+	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+
+	// Read message
+	uint32_t resp = 0;
+	for(uint8_t i = 0; i<rxSize; i++){
+		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+	}
+
+	// Send message
+	if(resp == expectedWord){
+		for(uint8_t i = 0; i<txSize; i++){
+			txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
+		}
+
+		HAL_SPI_Transmit(&hspi2,txBuffer, txSize, TEST_TIMEOUT_DURATION);
+	}
 }
 
 
 void test_spi_slave_half_duplex(void)
 {
-	//todo
+	uint8_t* rxBuffer;
+	uint8_t rxSize = I2C_RECEIVE_SIZE;
+	uint8_t* txBuffer;
+	uint8_t txSize = I2C_TRANSMIT_SIZE;
+
+	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+
+	// Read message
+	uint32_t resp = 0;
+	for(uint8_t i = 0; i<rxSize; i++){
+		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+	}
+
+	// Send message
+	if(resp == expectedWord){
+		for(uint8_t i = 0; i<txSize; i++){
+			txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
+		}
+
+		HAL_SPI_Transmit(&hspi2,txBuffer, txSize, TEST_TIMEOUT_DURATION);
+	}
 }
 
 
 void test_spi_slave_receive_only(void)
 {
-	//todo
+	uint8_t* rxBuffer;
+	uint8_t rxSize = I2C_RECEIVE_SIZE;
+
+	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+
+	// Read message
+	uint32_t resp = 0;
+	for(uint8_t i = 0; i<rxSize; i++){
+		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+	}
+
+	// Send message
+	if(resp == expectedWord){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	}
 }
 
 
@@ -100,7 +195,7 @@ void test_spi_slave_receive_only(void)
 void test_usart_slave_rx_only(void)
 {
 	uint8_t* rxBuffer;
-	uint8_t rxSize = 1;
+	uint8_t rxSize = USART_UART_RX_SIZE;
 	HAL_USART_Receive(&husart1,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
 
 	uint32_t resp = 0;
@@ -157,6 +252,8 @@ void test_usart_slave_rx_and_tx(void)
 }
 
 
+
+/**********************			UART test				******************************/
 /** @brief Receive message **/
 void test_uart_slave_rx_only(void)
 {
