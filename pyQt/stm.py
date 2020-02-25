@@ -64,7 +64,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9]"))      # 5-digit decimal validator for input fields
         self.baudValidator  = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9][0-9]"))   # 6-digit decimal validator for input fields
         self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]"))                   # Max. 3 digit validator for duty cycle [0-100], limits checked
-        self.freqValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9]"))              # Max. 4 digit validator for freqency [0-1000], limits checked
+        self.freqValidator = QRegExpValidator(QRegExp("[0-9]{0,3}\.?[0-9]"))              # Max. 4 digit validator for freqency [0-1000], limits checked
         self.valueValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]")) # Max. 2 bytes validator for i2c/spi/usart write value
         self.test_list = []     # List filled with test objects
         self.helpLabel_list = []

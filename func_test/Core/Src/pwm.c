@@ -79,15 +79,17 @@ bool pwm_init(Command* message_in)
 
     // Timer2 set new period
     pwmCounter = 0;
+    uint32_t Fosc_DIV_by_Prescaler = 1000000;
     pwmDuty = message_in->analog_out.dutyCycle;
-    htim2.Init.Period = ((1000/(message_in->analog_out.frequency))/PWM_DUTY_MAX) - 1;
+    htim2.Init.Period = ((Fosc_DIV_by_Prescaler/(message_in->analog_out.frequency))/PWM_DUTY_MAX) - 1;
+
     if(HAL_TIM_Base_Init(&htim2) != HAL_OK){
     	return false;
     }
 
     // Init and start Timer3 if PWM time dependency is enabled (active for given time only)
 	if((message_in->analog_out.has_time == true) && (message_in->analog_out.dependency == pwmTimeDependency_PWM_TIME_DEPENDENCY_ENABLED)){
-		htim3.Init.Period = (message_in->analog_out.time) - 1;
+		htim3.Init.Period = (message_in->analog_out.time) - 1; // Fosc_div_by_prescaler:1000;  Period 1000*[ms] - 1;
 	    if(HAL_TIM_Base_Init(&htim3) != HAL_OK){
 	    	return false;
 	    }

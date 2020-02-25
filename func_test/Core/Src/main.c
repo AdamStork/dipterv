@@ -99,8 +99,8 @@ int main(void)
 //  MX_ADC1_Init();
 //  MX_I2C1_Init();
 //  MX_SPI2_Init();
-//  MX_TIM2_Init();
-//  MX_TIM3_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
 //  HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
   /* USER CODE BEGIN 2 */
 

@@ -436,7 +436,7 @@ def make_test_object_from_options(UI):
             cmd.analog_out.frequency = 0
             UI.pwm_freq_select.setText("0")
         else:
-            cmd.analog_out.frequency = int(UI.pwm_freq_select.text())
+            cmd.analog_out.frequency = float(UI.pwm_freq_select.text())
         if is_empty(UI.pwm_duty_select.text()):
             cmd.analog_out.dutyCycle = 0
             UI.pwm_duty_select.setText("0")
