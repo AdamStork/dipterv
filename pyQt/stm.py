@@ -578,6 +578,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spi_first_bit_select = QComboBox(self)
                 self.spi_clockmode_select = QComboBox(self)
 
+                # Set tooltip for clock mode
+                self.spi_clockmode_select.setToolTip('Mode 0: CPOL=0 CPHA=0\nMode 1: CPOL=0 CPHA=1\nMode 2: CPOL=1 CPHA=0\nMode 3: CPOL=1 CPHA=1')
+
                 # Fill SPI bus combobox
                 if self.use_config_file == True:
                     for i in range(len(config.dict_available_spi_buses)):
