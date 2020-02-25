@@ -8,3 +8,9 @@ org.eclipse.cdt.core.prefs
 
 
 pyQt/pyqt.pyproject.user
+
+fw_slave/.settings/com.atollic.truestudio.debug.hardware_device.prefs
+
+fw_slave/.settings/org.eclipse.cdt.managedbuilder.core.prefs
+
+fw_slave/.settings/language.settings.xml
