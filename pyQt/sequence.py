@@ -330,12 +330,11 @@ def make_test_object_from_options(UI):
             UI.i2c_reg_select.setText("0x00")
         else:
             cmd.i2c.reg = int(UI.i2c_reg_select.text(),16)           # Convert to int
-        if UI.i2c_rw_select.currentData() == list(dict_i2c_rw.values())[0]: # If "Write" is selected, save write value as well
-            if is_empty(UI.i2c_write_value_select.text()):
-                cmd.i2c.writeValue = 0
-                UI.i2c_write_value_select.setText("0x00")
-            else:
-                cmd.i2c.writeValue = int(UI.i2c_write_value_select.text(),16)      # Convert to int
+        if is_empty(UI.i2c_write_value_select.text()):
+            cmd.i2c.writeValue = 0
+            UI.i2c_write_value_select.setText("0x00")
+        else:
+            cmd.i2c.writeValue = int(UI.i2c_write_value_select.text(),16)      # Convert to int
         if is_empty(UI.i2c_size_select.text()):
             cmd.i2c.size = 1
             UI.i2c_size_select.setText("1")

@@ -40,8 +40,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cfg_browse_button.clicked.connect(self.browse_cfg)
         self.cfg_load_button.clicked.connect(self.load_cfg)
         self.cfg_checkbox.stateChanged.connect(self.cfg_checkbox_state_changed)
+        # Fill command combo box
         self.fill_cmd_box()
-        # flags: avoid command reselection
+        # Flags: avoid command reselection
         self.I2C_active = False
         self.LED_active = False
         self.SPI_active = False
@@ -49,31 +50,32 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.GPIO_active = False
         self.AnalogRead_active = False
         self.AnalogWrite_active = False
-        self.LL = link_layer()
-        self.ser = serial.Serial()
-        self.close_button.setEnabled(False)
-        # Validators
-        self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f]"))          # Byte validator for input fields (0xhh format)
-        self.wordValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]")) # Word validator for input fields (0xhhhhhhhh format)
-        self.byteSizeValidatorI2CWrite  = QRegExpValidator(QRegExp("[1-2]"))                        # 1-digit decimal validator for input fields
-        self.byteSizeValidatorI2CRead  = QRegExpValidator(QRegExp("[1-4]"))                        # 1-digit decimal validator for input fields
-        self.byteSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-2]"))                        # 1-digit decimal validator for input fields
-        self.slaveSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-4]"))                        # 1-digit decimal validator for input fields
-        self.byteSizeValidatorUSART  = QRegExpValidator(QRegExp("[0-4]"))                        # 1-digit decimal validator for input fields
-        self.dummyValidator  = QRegExpValidator(QRegExp("[0-1][0-5]"))                        # 2-digit decimal validator for input fields
-        self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9]"))      # 5-digit decimal validator for input fields
-        self.baudValidator  = QRegExpValidator(QRegExp("[0-9][0-9][0-9][0-9][0-9][0-9]"))   # 6-digit decimal validator for input fields
-        self.dutyValidator = QRegExpValidator(QRegExp("[0-9][0-9][0-9]"))                   # Max. 3 digit validator for duty cycle [0-100], limits checked
-        self.freqValidator = QRegExpValidator(QRegExp("[0-9]{0,3}\.?[0-9]"))              # Max. 4 digit validator for freqency [0-1000], limits checked
-        self.valueValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]")) # Max. 2 bytes validator for i2c/spi/usart write value
-        self.test_list = []     # List filled with test objects
+        # Validators: in forms of regular expressions
+        self.byteValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f]{2}"))                      # Byte validator for input fields (0xhh format): i2c address, register; spi command
+        self.wordValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f]{2,8}"))                    # Word validator for usart command field
+        self.byteSizeValidatorI2CWrite  = QRegExpValidator(QRegExp("[1-2]"))                    # 1-digit decimal validator for I2C write size
+        self.byteSizeValidatorI2CRead  = QRegExpValidator(QRegExp("[1-4]"))                     # 1-digit decimal validator for I2C read size
+        self.byteSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-2]"))                         # 1-digit decimal validator for SPI write size
+        self.slaveSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-4]"))                        # 1-digit decimal validator for SPI slave response size
+        self.byteSizeValidatorUSART  = QRegExpValidator(QRegExp("[0-4]"))                       # 1-digit decimal validator for USART tx/rx size
+        self.dummyValidator  = QRegExpValidator(QRegExp("[0-1][0-5]"))                          # 2-digit decimal validator for SPI dummy clocks
+        self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9]{1,5}"))                         # Max 5-digit decimal validator for PWM time dependency field
+        self.baudValidator  = QRegExpValidator(QRegExp("[0-9]{4,6}"))                           # Max 6-digit decimal validator for USART baudrate
+        self.dutyValidator = QRegExpValidator(QRegExp("0|100|[1-9][0-9]?"))                     # Max. 3-digit validator for PWM duty cycle [0-100]
+        self.freqValidator = QRegExpValidator(QRegExp("0|0\.[0-9]|[1-9][0-9]{0,2}\.?[0-9]"))    # Max. 4-digit validator for freqency [0-1000], limits checked
+        self.valueValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f]{2,4}"))                   # Max. 2 bytes validator for I2C/SPI write value
+        # Miscellaneous
+        self.test_list = []                                     # List filled with test objects
         self.helpLabel_list = []
-        self.scroll_layout.addStretch()                            # Add stretch for scroll area
-        self.container_widget.setLayout(self.scroll_layout)        # Set layout for scrollArea container widget
+        self.scroll_layout.addStretch()                         # Add stretch for scroll area
+        self.container_widget.setLayout(self.scroll_layout)     # Set layout for scrollArea container widget
         self.cfg_browse_button.setEnabled(False)
         self.cfg_load_button.setEnabled(False)
         self.cfg_file_path.setEnabled(False)
         self.use_config_file = False
+        self.LL = link_layer()
+        self.ser = serial.Serial()
+        self.close_button.setEnabled(False)
         # Create own font style
         self.italicFont = QFont()
         self.italicFont.setItalic(True)
@@ -994,6 +996,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
                     response = "I2C read: " + str(message_data.response.responseRead)
+                    print(message_data.response.responseEnum)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             if test_object.spi.operatingMode == list(sequence.dict_spi_operating_mode.values())[2]: # SPI Transmit-only response: OK/failed
@@ -1064,7 +1067,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 speed = 115200
             else:
                 speed = self.speed_field.text()
-            self.ser = serial.Serial(port=port_field, baudrate=speed, bytesize=8, parity='N', stopbits=1, timeout=0.2)
+            self.ser = serial.Serial(port=port_field, baudrate=speed, bytesize=8, parity='N', stopbits=1, timeout=0.4)
             self.ser.setDTR(1)
             is_port_open = 'Port open'
             self.connect_button.setEnabled(False)
