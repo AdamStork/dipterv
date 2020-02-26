@@ -385,8 +385,8 @@ def make_test_object_from_options(UI):
         cmd.usart.bus = UI.usart_bus_select.currentData()
         cmd.usart.mode = UI.usart_mode_select.currentData()
         if is_empty(UI.usart_baudrate_select.text()):
-            cmd.usart.baudRate = 0
-            UI.usart_baudrate_select.setText("0")
+            cmd.usart.baudRate = 115200
+            UI.usart_baudrate_select.setText("115200")
         else:
             cmd.usart.baudRate = int(UI.usart_baudrate_select.text())
         cmd.usart.wordLength = UI.usart_word_length_select.currentData()
@@ -399,13 +399,13 @@ def make_test_object_from_options(UI):
         else:
             cmd.usart.command = int(UI.usart_command_select.text(),16)
         if is_empty(UI.usart_tx_size_select.text()):
-            cmd.usart.txSize = 0
-            UI.usart_tx_size_select.setText("0")
+            cmd.usart.txSize = 1
+            UI.usart_tx_size_select.setText("1")
         else:
             cmd.usart.txSize = int(UI.usart_tx_size_select.text())
         if is_empty(UI.usart_rx_size_select.text()):
-            cmd.usart.rxSize = 0
-            UI.usart_rx_size_select.setText("0")
+            cmd.usart.rxSize = 1
+            UI.usart_rx_size_select.setText("1")
         else:
             cmd.usart.rxSize = int(UI.usart_rx_size_select.text())
         if UI.usart_mode_select.currentData() == list(dict_usart_mode.values())[0]:     # If 'Asynchronous' mode is selected, save HW flow control settings

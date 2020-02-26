@@ -57,7 +57,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.byteSizeValidatorI2CRead  = QRegExpValidator(QRegExp("[1-4]"))                     # 1-digit decimal validator for I2C read size
         self.byteSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-2]"))                         # 1-digit decimal validator for SPI write size
         self.slaveSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-4]"))                        # 1-digit decimal validator for SPI slave response size
-        self.byteSizeValidatorUSART  = QRegExpValidator(QRegExp("[0-4]"))                       # 1-digit decimal validator for USART tx/rx size
+        self.byteSizeValidatorUSART  = QRegExpValidator(QRegExp("[1-4]"))                       # 1-digit decimal validator for USART tx/rx size
         self.dummyValidator  = QRegExpValidator(QRegExp("[0-1][0-5]"))                          # 2-digit decimal validator for SPI dummy clocks
         self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9]{1,5}"))                         # Max 5-digit decimal validator for PWM time dependency field
         self.baudValidator  = QRegExpValidator(QRegExp("[0-9]{4,6}"))                           # Max 6-digit decimal validator for USART baudrate
@@ -918,10 +918,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_command_select.setPlaceholderText("0x00000000")
 
                 self.usart_tx_size_select.setValidator(self.byteSizeValidatorUSART)
-                self.usart_tx_size_select.setPlaceholderText("0..4")
+                self.usart_tx_size_select.setPlaceholderText("1..4")
 
                 self.usart_rx_size_select.setValidator(self.byteSizeValidatorUSART)
-                self.usart_rx_size_select.setPlaceholderText("0..4")
+                self.usart_rx_size_select.setPlaceholderText("1..4")
 
                 # Connect signal and call function explicitly
                 self.usart_mode_select.activated[str].connect(self.on_changed_usart_mode)

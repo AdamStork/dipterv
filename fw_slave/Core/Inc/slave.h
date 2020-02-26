@@ -7,7 +7,9 @@
 #ifndef __slave_H
 #define __slave_H
 
-#define TEST_TIMEOUT_DURATION 10000
+#include <stdint.h>
+
+#define TEST_TIMEOUT_DURATION 3000
 /**
  * Read only: turn on LED
  * Read & Write: send back value
@@ -45,5 +47,8 @@ void test_usart_slave_rx_and_tx(void);
 void test_uart_slave_rx_only(void);
 void test_uart_slave_tx_only(void);
 void test_uart_slave_rx_and_tx(void);
+
+
+void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize);
 
 #endif /*__ slave_H */

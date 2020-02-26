@@ -9,9 +9,10 @@
 #include "spi.h"
 #include "i2c.h"
 
-TestType testType =  TEST_I2C_SLAVE_READ;
+TestType testType =  TEST_UART_SLAVE_RX_ONLY;
 uint32_t expectedWord = 0xDEADBEEF;
-uint32_t responseWord = 0x11AA22BB;
+//uint32_t expectedWord = 0x66;
+uint32_t responseWord = 0xDEADBEEF;
 
 #define USART_UART_RX_SIZE	4
 #define USART_UART_TX_SIZE 	4
@@ -61,11 +62,23 @@ void enter_slave_test_mode(void)
 			break;
 		}
 
-		HAL_Delay(1000);
+		HAL_Delay(200);
 	}
 }
 
 
+
+/** @brief 	Init buffer with zeros
+ *  @param	pBuffer: pointer to buffer
+ *  @param 	pSize: size of pBuffer
+ */
+void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize)
+{
+	for(int i = 0; i<pSize; i++){
+		pBuffer[i] = 0;
+	}
+
+}
 
 /**********************			I2C test				******************************/
 void test_i2c_slave_read(void)
@@ -194,61 +207,67 @@ void test_spi_slave_receive_only(void)
 /** @brief Receive message **/
 void test_usart_slave_rx_only(void)
 {
-	uint8_t* rxBuffer;
 	uint8_t rxSize = USART_UART_RX_SIZE;
-	HAL_USART_Receive(&husart1,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+	uint8_t rxBuffer[rxSize];
+	buffer_init_zero(rxBuffer, rxSize);
 
-	uint32_t resp = 0;
-	// decode rxBuffer
-	for(uint8_t i = 0; i<rxSize; i++){
-		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
-	}
-
-	if(resp == expectedWord){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	}
+//	HAL_USART_Receive(&husart1,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+//
+//	uint32_t resp = 0;
+//	// decode rxBuffer
+//	for(uint8_t i = 0; i<rxSize; i++){
+//		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+//	}
+//
+//	if(resp == expectedWord){
+//		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+//	}
 
 }
 
 /** @brief Send message **/
 void test_usart_slave_tx_only(void)
 {
-	uint8_t* txBuffer;
 	uint8_t txSize = USART_UART_TX_SIZE;
+	uint8_t txBuffer[txSize];
+	buffer_init_zero(txBuffer, txSize);
 
-	// Send message
-	for(uint8_t i = 0; i<txSize; i++){
-		txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
-	}
-
-	HAL_USART_Transmit(&husart1,txBuffer,txSize, TEST_TIMEOUT_DURATION);
+//	// Send message
+//	for(uint8_t i = 0; i<txSize; i++){
+//		txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
+//	}
+//
+//	HAL_USART_Transmit(&husart1,txBuffer,txSize, TEST_TIMEOUT_DURATION);
 }
 
 
 /** @brief Receive and send message **/
 void test_usart_slave_rx_and_tx(void)
 {
-	uint8_t* rxBuffer;
 	uint8_t rxSize = USART_UART_RX_SIZE;
-	uint8_t* txBuffer;
 	uint8_t txSize = USART_UART_TX_SIZE;
+	uint8_t rxBuffer[rxSize];
+	uint8_t txBuffer[txSize];
 
-	HAL_USART_Receive(&husart1,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+	buffer_init_zero(rxBuffer, rxSize);
+	buffer_init_zero(txBuffer, txSize);
 
-	// Read message
-	uint32_t resp = 0;
-	for(uint8_t i = 0; i<rxSize; i++){
-		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
-	}
-
-	// Send message
-	if(resp == expectedWord){
-		for(uint8_t i = 0; i<txSize; i++){
-			txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
-		}
-
-		HAL_USART_Transmit(&husart1,txBuffer,txSize, TEST_TIMEOUT_DURATION);
-	}
+//	HAL_USART_Receive(&husart1,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+//
+//	// Read message
+//	uint32_t resp = 0;
+//	for(uint8_t i = 0; i<rxSize; i++){
+//		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+//	}
+//
+//	// Send message
+//	if(resp == expectedWord){
+//		for(uint8_t i = 0; i<txSize; i++){
+//			txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
+//		}
+//
+//		HAL_USART_Transmit(&husart1,txBuffer,txSize, TEST_TIMEOUT_DURATION);
+//	}
 }
 
 
@@ -257,19 +276,25 @@ void test_usart_slave_rx_and_tx(void)
 /** @brief Receive message **/
 void test_uart_slave_rx_only(void)
 {
-	uint8_t* rxBuffer;
-	uint8_t rxSize = 1;
-	HAL_UART_Receive(&huart2,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+	uint8_t rxSize = USART_UART_RX_SIZE;
+	uint8_t rxBuffer[USART_UART_RX_SIZE];
+	buffer_init_zero(rxBuffer, rxSize);
+	HAL_StatusTypeDef status;
 
-	uint32_t resp = 0;
-	// decode rxBuffer
-	for(uint8_t i = 0; i<rxSize; i++){
-		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+	status = HAL_UART_Receive(&huart1,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+
+	if(status == HAL_OK){
+		uint32_t resp = 0;
+		// decode rxBuffer
+		for(uint8_t i = 0; i<rxSize; i++){
+			resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
+		}
+
+		if(resp == expectedWord){
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		}
 	}
 
-	if(resp == expectedWord){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	}
 
 }
 
@@ -277,8 +302,9 @@ void test_uart_slave_rx_only(void)
 /** @brief Send message **/
 void test_uart_slave_tx_only(void)
 {
-	uint8_t* txBuffer;
 	uint8_t txSize = USART_UART_TX_SIZE;
+	uint8_t txBuffer[txSize];
+	buffer_init_zero(txBuffer, txSize);
 
 	// Send message
 	for(uint8_t i = 0; i<txSize; i++){
@@ -293,27 +319,33 @@ void test_uart_slave_tx_only(void)
 /** @brief Receive and send message **/
 void test_uart_slave_rx_and_tx(void)
 {
-	uint8_t* rxBuffer;
 	uint8_t rxSize = USART_UART_RX_SIZE;
-	uint8_t* txBuffer;
 	uint8_t txSize = USART_UART_TX_SIZE;
+	uint8_t rxBuffer[rxSize];
+	uint8_t txBuffer[txSize];
+	HAL_StatusTypeDef status;
 
-	HAL_UART_Receive(&huart2,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+	buffer_init_zero(rxBuffer, rxSize);
+	buffer_init_zero(txBuffer, txSize);
 
-	// Read message
-	uint32_t resp = 0;
-	for(uint8_t i = 0; i<rxSize; i++){
-		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
-	}
-
-	// Send message
-	if(resp == expectedWord){
-		for(uint8_t i = 0; i<txSize; i++){
-			txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
+	status = HAL_UART_Receive(&huart2,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+	if(status == HAL_OK){
+		// Read message
+		uint32_t resp = 0;
+		for(uint8_t i = 0; i<rxSize; i++){
+			resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
 		}
 
-		HAL_UART_Transmit(&huart2,txBuffer,txSize, TEST_TIMEOUT_DURATION);
+		// Send message
+		if(resp == expectedWord){
+			for(uint8_t i = 0; i<txSize; i++){
+				txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
+			}
+
+			HAL_UART_Transmit(&huart2,txBuffer,txSize, TEST_TIMEOUT_DURATION);
+		}
 	}
+
 }
 
 

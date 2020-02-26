@@ -368,7 +368,13 @@ void usart_test(Command* message_in, Command* message_out)
 	message_out->commandType = CommandTypeEnum_USART_test;
 	// USART/UART TX
 	if(message_in->usart.direction == usartDirection_USART_TX){
-		uint8_t* txBuffer;
+		if(txSize == 0){
+			usart_error_handler(message_in, message_out);
+			return;
+		}
+
+		uint8_t txBuffer[USART_RX_TX_SIZE_MAX];
+//		buffer_init_zero(txBuffer, USART_RX_TX_SIZE_MAX);
 
 		// Fill txBuffer
 		for(uint8_t i = 0; i<txSize; i++){
@@ -396,7 +402,12 @@ void usart_test(Command* message_in, Command* message_out)
 
 	// USART/UART RX
 	else if(message_in->usart.direction == usartDirection_USART_RX){
-		uint8_t* rxBuffer;
+		if(rxSize == 0){
+			usart_error_handler(message_in, message_out);
+			return;
+		}
+
+		uint8_t rxBuffer[USART_RX_TX_SIZE_MAX];
 
 		// UART
 		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
@@ -425,17 +436,21 @@ void usart_test(Command* message_in, Command* message_out)
 
 	// USART/UART TX + RX
 	else{
-		uint8_t* rxBuffer;
-		uint8_t* txBuffer;
+		if((rxSize == 0) || (txSize == 0) ){
+			usart_error_handler(message_in, message_out);
+			return;
+		}
+		uint8_t rxBuffer[USART_RX_TX_SIZE_MAX];
+		uint8_t txBuffer[USART_RX_TX_SIZE_MAX];
 
 		// Fill txBuffer
 		for(uint8_t i = 0; i<txSize; i++){
 			txBuffer[i] = (uint8_t)(command >> (i*8)); // Byte: LSB first
 		}
-
+		uint8_t txByte2 = 0x66;
 		// UART
 		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-			status = HAL_UART_Transmit(&huart, txBuffer, txSize, TEST_TIMEOUT_DURATION);
+			status = HAL_UART_Transmit(&huart, &txByte2, txSize, TEST_TIMEOUT_DURATION);
 			status &= HAL_UART_Receive(&huart, rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
 		}
 		// USART
@@ -642,7 +657,7 @@ bool uart_init(Command* message_in, UART_HandleTypeDef* huart)
 
 	switch(message_in->usart.direction){
 	case usartDirection_USART_TX:
-		huart->Init.Mode = UART_MODE_RX;
+		huart->Init.Mode = UART_MODE_TX;
 		break;
 	case usartDirection_USART_TX_AND_RX:
 		huart->Init.Mode = UART_MODE_TX_RX;
@@ -668,7 +683,7 @@ bool uart_init(Command* message_in, UART_HandleTypeDef* huart)
 
 	huart->Init.OverSampling = UART_OVERSAMPLING_16;
 
-
+	HAL_UART_MspInit(huart);
 	if (HAL_UART_Init(huart) != HAL_OK){
 		return false;
 	}
