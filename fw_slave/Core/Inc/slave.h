@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #define TEST_TIMEOUT_DURATION 1000
+#define INVALID_FRAME_CNTR_MAX 20
 /**
  * Read only: turn on LED
  * Read & Write: send back value

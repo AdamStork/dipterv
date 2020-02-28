@@ -357,9 +357,6 @@ void usart_test(Command* message_in, Command* message_out)
 {
 	UART_HandleTypeDef huart;
 	USART_HandleTypeDef husart;
-	uint8_t txSize = message_in->usart.txSize;
-	uint8_t rxSize = message_in->usart.rxSize;
-	uint32_t command = message_in->usart.command;
 	HAL_StatusTypeDef status;
 	bool success;
 

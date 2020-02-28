@@ -40,7 +40,7 @@ void MX_USART1_UART_Init(void)
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX;
+  huart1.Init.Mode = UART_MODE_TX_RX;
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
   if (HAL_UART_Init(&huart1) != HAL_OK)
@@ -77,7 +77,7 @@ void MX_USART6_Init(void)
   husart6.Init.WordLength = USART_WORDLENGTH_8B;
   husart6.Init.StopBits = USART_STOPBITS_1;
   husart6.Init.Parity = USART_PARITY_NONE;
-  husart6.Init.Mode = USART_MODE_TX;
+  husart6.Init.Mode = UART_MODE_TX_RX;
   husart6.Init.CLKPolarity = USART_POLARITY_LOW;
   husart6.Init.CLKPhase = USART_PHASE_1EDGE;
   husart6.Init.CLKLastBit = USART_LASTBIT_DISABLE;
