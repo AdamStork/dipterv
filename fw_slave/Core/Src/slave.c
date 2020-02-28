@@ -371,17 +371,19 @@ void test_uart_slave_rx_and_tx(void)
 	}
 
 	if(messageDecodeSuccessful == true){
-		SimpleMessage message_out = SimpleMessage_init_zero;
-		uint8_t bytesWritten = 0;
+		if(simplMsgIn.msg == expectedWord){
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+			SimpleMessage message_out = SimpleMessage_init_zero;
+			uint8_t bytesWritten = 0;
 
-		buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
-		message_out.msg = responseWord;
+			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
+			message_out.msg = responseWord;
 
-		encode_simplemessage(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
-		link_write(&linkLayer,transmitBuffer,bytesWritten);
-		HAL_UART_Transmit(&huart1,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
+			encode_simplemessage(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
+			link_write(&linkLayer,transmitBuffer,bytesWritten);
+			HAL_UART_Transmit(&huart1,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
+		}
 	}
-
 }
 
 

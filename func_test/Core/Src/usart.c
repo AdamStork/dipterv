@@ -498,11 +498,7 @@ void usart_test(Command* message_in, Command* message_out)
 		}
 
 		message_out->has_response = true;
-		if(status == HAL_OK){
-			message_out->response.has_responseEnum = true;
-			message_out->response.responseEnum = responseEnum_t_USART_TX_RX_FAIL;
-		}
-		else{
+		if(status != HAL_OK){
 			message_out->response.has_responseEnum = true;
 			message_out->response.responseEnum = responseEnum_t_USART_TX_RX_FAIL;
 		}
