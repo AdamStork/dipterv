@@ -1016,15 +1016,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if message_data.response.responseEnum == list(sequence.dict_response_write.values())[list(sequence.dict_response_write.keys()).index("USART RX failed")]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
-                    if(test_object.usart.rxSize == 1):
-                        response = "USART/UART receive: " + "0x{:02X}".format(message_data.response.responseRead)
-                        print("1")
-                    elif(test_object.usart.rxSize == 2):
-                        response = "USART/UART receive: " + "0x{:04X}".format(message_data.response.responseRead)
-                        print("2")
-                    else:
-                        response = "USART/UART receive: " + "0x{:08X}".format(message_data.response.responseRead)
-                        print("3")
+                    response = "USART/UART receive: " + "0x{:08X}".format(message_data.response.responseRead)
+
 
             else:                                                                                   # USART TX+RX response: data/failed
                 if message_data.response.responseEnum == list(sequence.dict_response_write.values())[list(sequence.dict_response_write.keys()).index("USART TX+RX failed")]:

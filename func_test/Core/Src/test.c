@@ -97,8 +97,8 @@ void enter_processing_state(void)
 				break;
 			} /* switch(message_in.commandType) */
 			encode_message(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
-			link_set_phy_write_fn(&linkLayer,&buffer_send);
-			link_write(&linkLayer,transmitBuffer,bytesWritten, &huart2);
+			link_write(&linkLayer,transmitBuffer,bytesWritten);
+			HAL_UART_Transmit(&huart2, linkLayer.tx_buffer,linkLayer.tx_buffer_size, HAL_MAX_DELAY);
 
 			// reset buffers and messages
 			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));

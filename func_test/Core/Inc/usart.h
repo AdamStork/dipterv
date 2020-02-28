@@ -34,7 +34,7 @@
 extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN Private defines */
-
+#define INVALID_FRAME_CNTR_MAX	20
 /* USER CODE END Private defines */
 
 

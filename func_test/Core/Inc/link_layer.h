@@ -22,9 +22,9 @@ typedef struct link_layer
     uint8_t receive_buffer_index;
     uint8_t tx_buffer[MSG_LENGTH_MAX];
     volatile sig_atomic_t frame_ready;
-    void (*write_phy) (uint8_t *data, uint8_t length);
+//    void (*write_phy) (uint8_t *data, uint8_t length);
     UnEscapingState state;
-
+    uint8_t tx_buffer_size;
 } link_layer_t;
 
 void link_parse_byte(link_layer_t * handler, uint8_t byte);

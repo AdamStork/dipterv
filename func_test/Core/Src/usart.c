@@ -399,18 +399,25 @@ void usart_test(Command* message_in, Command* message_out)
 			return;
 		}
 
-		// Set function pointer according to usart/uart mode
+		// Frame data
+		link_write(&linkLayerInner,txBufferUART,txBytesWritten);
+
+		// Send data
 		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-			link_set_phy_write_fn(&linkLayerInner,&buffer_send);
-			link_write(&linkLayerInner,txBufferUART,txBytesWritten, &huart);
+			status = HAL_UART_Transmit(&huart, linkLayerInner.tx_buffer,linkLayerInner.tx_buffer_size, TEST_TIMEOUT_DURATION);
 		}
 		else{
-//			link_set_phy_write_fn(&linkLayerInner,&buffer_send_usart);
+			status = HAL_USART_Transmit(&husart, linkLayerInner.tx_buffer,linkLayerInner.tx_buffer_size, TEST_TIMEOUT_DURATION);
 		}
 
 		// Frame and send data and set response
+		if(status == HAL_OK){
+			message_out->response.responseEnum = responseEnum_t_USART_TX_OK;
+		}
+		else{
+			message_out->response.responseEnum = responseEnum_t_USART_TX_FAIL;
+		}
 
-		message_out->response.responseEnum = responseEnum_t_USART_TX_OK;
 	}
 
 	// USART/UART RX
@@ -437,7 +444,7 @@ void usart_test(Command* message_in, Command* message_out)
 			}
 			else{
 				invalidFrameCounter++;
-				if(invalidFrameCounter == 2){
+				if(invalidFrameCounter == INVALID_FRAME_CNTR_MAX){
 					break;
 				}
 			}
@@ -482,17 +489,26 @@ void usart_test(Command* message_in, Command* message_out)
 			return;
 		}
 
-		// Set function pointer according to usart/uart mode
+		// Frame data
+		link_write(&linkLayerInner,txBufferUART,txBytesWritten);
+
+		// Send data
 		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-			link_set_phy_write_fn(&linkLayerInner,&buffer_send_uart);
-			link_write(&linkLayerInner,txBufferUART,txBytesWritten, &huart);
+			status = HAL_UART_Transmit(&huart, linkLayerInner.tx_buffer,linkLayerInner.tx_buffer_size, TEST_TIMEOUT_DURATION);
 		}
 		else{
-//			link_set_phy_write_fn(&linkLayerInner,&buffer_send_usart);
+			status = HAL_USART_Transmit(&husart, linkLayerInner.tx_buffer,linkLayerInner.tx_buffer_size, TEST_TIMEOUT_DURATION);
 		}
 
-		// Frame and send data
-
+		message_out->has_response = true;
+		if(status == HAL_OK){
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_USART_TX_RX_FAIL;
+		}
+		else{
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_USART_TX_RX_FAIL;
+		}
 
 
 		// Read back response
@@ -513,7 +529,7 @@ void usart_test(Command* message_in, Command* message_out)
 			}
 			else{
 				invalidFrameCounter++;
-				if(invalidFrameCounter == 2){
+				if(invalidFrameCounter == INVALID_FRAME_CNTR_MAX){
 					break;
 				}
 			}
