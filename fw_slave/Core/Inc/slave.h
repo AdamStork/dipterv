@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#define TEST_TIMEOUT_DURATION 3000
+#define TEST_TIMEOUT_DURATION 1000
 /**
  * Read only: turn on LED
  * Read & Write: send back value

@@ -21,7 +21,22 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+#include "test.h"
+#include "link_layer.h"
+#include "simple_message.pb.h"
+#include "pb_encode.h"
+#include "pb_decode.h"
 
+bool decode_simplemessage(uint8_t* pBuffer, uint8_t pBufferLen, SimpleMessage* message_in);
+bool encode_simplemessage(uint8_t* pBuffer, uint8_t pBufferLen, SimpleMessage* message_out, uint8_t* bytesWritten);
+void buffer_send_uart(uint8_t* pBuffer, uint8_t pSize, UART_HandleTypeDef* huart);
+void buffer_send_usart(uint8_t* pBuffer, uint8_t pSize, USART_HandleTypeDef* husart);
+
+uint8_t rxBufferUART[50];
+uint8_t rxBufferUARTLen;
+uint8_t rxByteUART;
+uint8_t txBufferUART[50];
+link_layer_t linkLayerInner;
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart2;
@@ -366,67 +381,78 @@ void usart_test(Command* message_in, Command* message_out)
 
 	// Perform test and set response
 	message_out->commandType = CommandTypeEnum_USART_test;
+
 	// USART/UART TX
 	if(message_in->usart.direction == usartDirection_USART_TX){
-		if(txSize == 0){
-			usart_error_handler(message_in, message_out);
+		SimpleMessage simplMsgOut = SimpleMessage_init_zero;
+		uint8_t txBytesWritten = 0;
+
+		buffer_init_zero(txBufferUART, sizeof(txBufferUART));
+		message_out->has_response = true;
+		message_out->response.has_responseEnum = true;
+
+		// Encode message - set reseponse to fail if not successful
+		simplMsgOut.msg = message_in->usart.command;
+		bool success = encode_simplemessage(txBufferUART,sizeof(txBufferUART), &simplMsgOut, &txBytesWritten);
+		if(success == false){
+			message_out->response.responseEnum = responseEnum_t_USART_TX_FAIL;
 			return;
 		}
 
-		uint8_t txBuffer[USART_RX_TX_SIZE_MAX];
-//		buffer_init_zero(txBuffer, USART_RX_TX_SIZE_MAX);
-
-		// Fill txBuffer
-		for(uint8_t i = 0; i<txSize; i++){
-			txBuffer[i] = (uint8_t)(command >> (i*8)); // Byte: LSB first
-		}
-
-		// UART
+		// Set function pointer according to usart/uart mode
 		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-			status = HAL_UART_Transmit(&huart, txBuffer, txSize,TEST_TIMEOUT_DURATION);
+			link_set_phy_write_fn(&linkLayerInner,&buffer_send);
+			link_write(&linkLayerInner,txBufferUART,txBytesWritten, &huart);
 		}
-		// USART
 		else{
-			status = HAL_USART_Transmit(&husart,txBuffer,txSize,TEST_TIMEOUT_DURATION);
+//			link_set_phy_write_fn(&linkLayerInner,&buffer_send_usart);
 		}
 
-		message_out->has_response = true;
-		message_out->response.has_responseEnum = true;
-		if(status == HAL_OK){
-			message_out->response.responseEnum = responseEnum_t_USART_TX_OK;
-		}
-		else{
-			message_out->response.responseEnum = responseEnum_t_USART_TX_FAIL;
-		}
+		// Frame and send data and set response
+
+		message_out->response.responseEnum = responseEnum_t_USART_TX_OK;
 	}
 
 	// USART/UART RX
 	else if(message_in->usart.direction == usartDirection_USART_RX){
-		if(rxSize == 0){
-			usart_error_handler(message_in, message_out);
-			return;
-		}
+		bool messageDecodeSuccessful = false;
+		SimpleMessage simplMsgIn = SimpleMessage_init_zero;
+		uint8_t invalidFrameCounter = 0;
+		buffer_init_zero(rxBufferUART, sizeof(rxBufferUART));
 
-		uint8_t rxBuffer[USART_RX_TX_SIZE_MAX];
+		while(messageDecodeSuccessful != true){
+			// Receive frame byte-by-byte
+			if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+				status = HAL_UART_Receive(&huart,(uint8_t*)&rxByteUART, 1,TEST_TIMEOUT_DURATION);
+			}
+			else{
+				status = HAL_USART_Receive(&husart,(uint8_t*)&rxByteUART, 1,TEST_TIMEOUT_DURATION);
+			}
 
-		// UART
-		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-			status = HAL_UART_Receive(&huart, rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
-		}
-		// USART
-		else{
-			status = HAL_USART_Receive(&husart, rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+			// Get frame and decode message
+			link_parse_byte(&linkLayerInner, rxByteUART);
+			if(link_get_valid_frame(&linkLayerInner,rxBufferUART, &rxBufferUARTLen)){
+				messageDecodeSuccessful = decode_simplemessage(rxBufferUART, sizeof(rxBufferUART), &simplMsgIn);
+				buffer_init_zero(rxBufferUART, sizeof(rxBufferUART));
+			}
+			else{
+				invalidFrameCounter++;
+				if(invalidFrameCounter == 2){
+					break;
+				}
+			}
+
+			// If status NOT OK: send fail response
+			if(status != HAL_OK){
+				break;
+			}
+
 		}
 
 		message_out->has_response = true;
 		if(status == HAL_OK){
-			uint32_t resp;
-			// decode rxBuffer
-			for(uint8_t i = 0; i<rxSize; i++){
-				resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
-			}
 			message_out->response.has_responseRead = true;
-			message_out->response.responseRead = resp;
+			message_out->response.responseRead = simplMsgIn.msg;
 		}
 		else{
 			message_out->response.has_responseEnum = true;
@@ -436,56 +462,131 @@ void usart_test(Command* message_in, Command* message_out)
 
 	// USART/UART TX + RX
 	else{
-		if((rxSize == 0) || (txSize == 0) ){
-			usart_error_handler(message_in, message_out);
+		bool messageDecodeSuccessful = false;
+		SimpleMessage simplMsgIn = SimpleMessage_init_zero;
+		SimpleMessage simplMsgOut = SimpleMessage_init_zero;
+		uint8_t invalidFrameCounter = 0;
+		uint8_t txBytesWritten = 0;
+
+		buffer_init_zero(rxBufferUART, sizeof(rxBufferUART));
+		buffer_init_zero(txBufferUART, sizeof(txBufferUART));
+
+
+		// Encode message - set reseponse to fail if not successful
+		simplMsgOut.msg = message_in->usart.command;
+		bool success = encode_simplemessage(txBufferUART,sizeof(txBufferUART), &simplMsgOut, &txBytesWritten);
+		if(success == false){
+			message_out->has_response = true;
+			message_out->response.has_responseEnum = true;
+			message_out->response.responseEnum = responseEnum_t_USART_TX_RX_FAIL;
 			return;
 		}
-		uint8_t rxBuffer[USART_RX_TX_SIZE_MAX];
-		uint8_t txBuffer[USART_RX_TX_SIZE_MAX];
 
-		// Fill txBuffer
-		for(uint8_t i = 0; i<txSize; i++){
-			txBuffer[i] = (uint8_t)(command >> (i*8)); // Byte: LSB first
-		}
-		uint8_t txByte2 = 0x66;
-		// UART
+		// Set function pointer according to usart/uart mode
 		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-			status = HAL_UART_Transmit(&huart, &txByte2, txSize, TEST_TIMEOUT_DURATION);
-			status &= HAL_UART_Receive(&huart, rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
+			link_set_phy_write_fn(&linkLayerInner,&buffer_send_uart);
+			link_write(&linkLayerInner,txBufferUART,txBytesWritten, &huart);
 		}
-		// USART
 		else{
-			status = HAL_USART_TransmitReceive(&husart, txBuffer, rxBuffer, txSize, TEST_TIMEOUT_DURATION);
+//			link_set_phy_write_fn(&linkLayerInner,&buffer_send_usart);
+		}
+
+		// Frame and send data
+
+
+
+		// Read back response
+		while(messageDecodeSuccessful != true){
+			// Receive frame byte-by-byte
+			if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+				status = HAL_UART_Receive(&huart,(uint8_t*)&rxByteUART, 1,TEST_TIMEOUT_DURATION);
+			}
+			else{
+				status = HAL_USART_Receive(&husart,(uint8_t*)&rxByteUART, 1,TEST_TIMEOUT_DURATION);
+			}
+
+			// Get frame and decode message
+			link_parse_byte(&linkLayerInner, rxByteUART);
+			if(link_get_valid_frame(&linkLayerInner,rxBufferUART, &rxBufferUARTLen)){
+				messageDecodeSuccessful = decode_simplemessage(rxBufferUART, sizeof(rxBufferUART), &simplMsgIn);
+				buffer_init_zero(rxBufferUART, sizeof(rxBufferUART));
+			}
+			else{
+				invalidFrameCounter++;
+				if(invalidFrameCounter == 2){
+					break;
+				}
+			}
+
+			// If status NOT OK: send fail response
+			if(status != HAL_OK){
+				break;
+			}
+
 		}
 
 		message_out->has_response = true;
 		if(status == HAL_OK){
-			uint32_t resp;
-			// decode rxBuffer
-			for(uint8_t i = 0; i<rxSize; i++){
-				resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
-			}
 			message_out->response.has_responseRead = true;
-			message_out->response.responseRead = resp;
+			message_out->response.responseRead = simplMsgIn.msg;
 		}
 		else{
 			message_out->response.has_responseEnum = true;
 			message_out->response.responseEnum = responseEnum_t_USART_TX_RX_FAIL;
 		}
+
 	}
 
 
 	// Deinit UART/USART
-	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-		HAL_UART_MspDeInit(&huart);
-	}
-	else{
-		HAL_USART_MspDeInit(&husart);
-	}
+//	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+//		HAL_UART_MspDeInit(&huart);
+//	}
+//	else{
+//		HAL_USART_MspDeInit(&husart);
+//	}
 
 }
 
+/** @brief 	Decode message
+ * @param[in]	pBuffer: pointer to buffer to decode
+ * @param[in]	pBufferLen: length of buffer (max length of stream)
+ * @param[out]	message_in: decoded message
+ * @return	status: true, if encoding was successful
+ */
+bool decode_simplemessage(uint8_t* pBuffer, uint8_t pBufferLen, SimpleMessage* message_in)
+{
+	bool status;
+	pb_istream_t stream_in = pb_istream_from_buffer(pBuffer, pBufferLen);
+	status = pb_decode(&stream_in, SimpleMessage_fields,message_in);
+	return status;
+}
 
+
+/** @brief 	Encode message
+ * @param[out]	pBuffer: pointer to encoded buffer
+ * @param[in]	pBufferLen: length of buffer (max length of stream)
+ * @param[in]	message_out: pointer to message to encode
+ * @return	status: true, if encoding was successful
+ */
+bool encode_simplemessage(uint8_t* pBuffer, uint8_t pBufferLen, SimpleMessage* message_out, uint8_t* bytesWritten)
+{
+	bool status;
+	pb_ostream_t stream_out = pb_ostream_from_buffer(pBuffer, pBufferLen);
+	status = pb_encode(&stream_out,SimpleMessage_fields,message_out);
+	*bytesWritten = (uint8_t)stream_out.bytes_written;
+	return status;
+}
+
+
+
+/** @brief 	Send out buffer via UART
+ *  @param	pBuffer: pointer to buffer
+ *  @param	pSize: size of buffer**/
+void buffer_send_usart(uint8_t* pBuffer, uint8_t pSize, USART_HandleTypeDef* husart)
+{
+	HAL_USART_Transmit(husart,pBuffer, pSize, TEST_TIMEOUT_DURATION);
+}
 
 /** @brief	USART init
  *  @param	message_in: pointer to received message
@@ -549,6 +650,9 @@ bool usart_init(Command* message_in, USART_HandleTypeDef* husart)
 
 	switch(message_in->usart.direction){
 	case usartDirection_USART_TX:
+		husart->Init.Mode = USART_MODE_TX;
+		break;
+	case usartDirection_USART_RX:
 		husart->Init.Mode = USART_MODE_RX;
 		break;
 	case usartDirection_USART_TX_AND_RX:
@@ -658,6 +762,9 @@ bool uart_init(Command* message_in, UART_HandleTypeDef* huart)
 	switch(message_in->usart.direction){
 	case usartDirection_USART_TX:
 		huart->Init.Mode = UART_MODE_TX;
+		break;
+	case usartDirection_USART_RX:
+		huart->Init.Mode = UART_MODE_RX;
 		break;
 	case usartDirection_USART_TX_AND_RX:
 		huart->Init.Mode = UART_MODE_TX_RX;

@@ -706,3 +706,5 @@ def is_empty(field):
 def select_pin_for_adc_channel(adcChannelValue):
     pin = list(dict_gpio_analog_pins.keys())[list(dict_gpio_analog_pins.values()).index(adcChannelValue)]
     return pin
+
+

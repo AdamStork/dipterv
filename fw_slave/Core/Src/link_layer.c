@@ -10,7 +10,6 @@ void buffer_reset(link_layer_t *handler)
 {
     handler->frame_ready = 0;
     handler->receive_buffer_index = 0;
-    handler->tx_buffer_size = 0;
 }
 
 /** @brief Add one byte to receive buffer **/
@@ -120,6 +119,5 @@ void link_write(link_layer_t *handler, uint8_t *data, uint8_t length)
     ++tx_buffer_i;
 
     // Send the message to the physical layer
-//    handler->write_phy(handler->tx_buffer, tx_buffer_i,huart);
-    handler->tx_buffer_size = tx_buffer_i;
+    handler->write_phy(handler->tx_buffer, tx_buffer_i);
 }

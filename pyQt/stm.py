@@ -1016,12 +1016,21 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if message_data.response.responseEnum == list(sequence.dict_response_write.values())[list(sequence.dict_response_write.keys()).index("USART RX failed")]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
-                    response = "USART/UART receive: " + str(message_data.response.responseRead)
+                    if(test_object.usart.rxSize == 1):
+                        response = "USART/UART receive: " + "0x{:02X}".format(message_data.response.responseRead)
+                        print("1")
+                    elif(test_object.usart.rxSize == 2):
+                        response = "USART/UART receive: " + "0x{:04X}".format(message_data.response.responseRead)
+                        print("2")
+                    else:
+                        response = "USART/UART receive: " + "0x{:08X}".format(message_data.response.responseRead)
+                        print("3")
+
             else:                                                                                   # USART TX+RX response: data/failed
                 if message_data.response.responseEnum == list(sequence.dict_response_write.values())[list(sequence.dict_response_write.keys()).index("USART TX+RX failed")]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
-                    response = "USART/UART receive: " + str(message_data.response.responseRead)
+                    response = "USART/UART receive: " + "0x{:08X}".format(message_data.response.responseRead)
 
         elif cmdType == functional_test_pb2.GPIO_digital:
             if test_object.gpio.direction == functional_test_pb2.gpioDirection.GPIO_INPUT:          # GPIO read: state/failed
@@ -1043,6 +1052,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)] # Search key by value (responseWrite enum)
             response += ": " + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.analog_out.pin)]
 
+        del message_data
         return response
 
 

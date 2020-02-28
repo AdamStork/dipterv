@@ -20,12 +20,95 @@
 
 bool frameReady = false;
 uint8_t receiveByte;
-uint8_t transmitByte;
+//uint8_t transmitByte;
 uint8_t receiveBuffer[50];
 uint8_t transmitBuffer[50];
 uint8_t receiveBufferLen;
 link_layer_t linkLayer;
 StateType deviceState;
+
+
+
+
+
+/** @brief Receive command via UART, and perform chosen test **/
+void enter_processing_state(void)
+{
+	Command message_in = Command_init_zero;
+	Command message_out = Command_init_zero;
+	uint8_t bytesWritten = 0;
+	buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+	bool messageDecodeSuccessful = false;
+	deviceState = STATE_WAIT;
+
+	while (1){
+		switch(deviceState){
+		case STATE_WAIT:
+			HAL_UART_Receive(&huart2,(uint8_t*)&receiveByte, 1,HAL_MAX_DELAY);
+			deviceState = STATE_PROCESS;
+			break;
+		case STATE_PROCESS:
+			link_parse_byte(&linkLayer, receiveByte);
+			if(link_get_valid_frame(&linkLayer,receiveBuffer, &receiveBufferLen)){
+				deviceState = STATE_DECODE;
+			}
+			else{
+				deviceState = STATE_WAIT;
+			}
+			break;
+		case STATE_DECODE:
+			messageDecodeSuccessful = decode_message(receiveBuffer, sizeof(receiveBuffer), &message_in);
+			buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+			if(messageDecodeSuccessful){
+				deviceState = STATE_TEST;
+			}
+			else{
+				deviceState = STATE_WAIT;
+			}
+			break;
+		case STATE_TEST:
+			switch(message_in.commandType){
+
+			case CommandTypeEnum_I2C_test:
+				i2c_test(&message_in, &message_out);
+				break;
+
+			case CommandTypeEnum_SPI_test:
+				spi_test(&message_in, &message_out);
+				break;
+
+			case CommandTypeEnum_USART_test:
+				usart_test(&message_in, &message_out);
+				break;
+
+			case CommandTypeEnum_GPIO_digital:
+				gpio_test(&message_in, &message_out);
+				break;
+
+			case CommandTypeEnum_Analog_read:
+				analog_read_test(&message_in, &message_out);
+				break;
+
+			case CommandTypeEnum_Analog_write:
+				pwm_test(&message_in, &message_out);
+				break;
+
+			default:
+				break;
+			} /* switch(message_in.commandType) */
+			encode_message(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
+			link_set_phy_write_fn(&linkLayer,&buffer_send);
+			link_write(&linkLayer,transmitBuffer,bytesWritten, &huart2);
+
+			// reset buffers and messages
+			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
+			command_reset(&message_out);
+			// progress state machine
+			deviceState = STATE_WAIT;
+			break;
+		}  /* switch(deviceState) */
+	} /* while(1) */
+}
 
 
 
@@ -172,83 +255,4 @@ void command_reset(Command* message)
 	message->autoConfig = false;
 
 
-}
-
-/** @brief Receive command via UART, and perform chosen test **/
-void enter_processing_state(void)
-{
-	Command message_in = Command_init_zero;
-	Command message_out = Command_init_zero;
-	uint8_t bytesWritten = 0;
-	buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
-	bool messageDecodeSuccessful = false;
-	deviceState = STATE_WAIT;
-
-	while (1){
-		switch(deviceState){
-		case STATE_WAIT:
-			HAL_UART_Receive(&huart2,(uint8_t*)&receiveByte, 1,HAL_MAX_DELAY);
-			deviceState = STATE_PROCESS;
-			break;
-		case STATE_PROCESS:
-			link_parse_byte(&linkLayer, receiveByte);
-			if(link_get_valid_frame(&linkLayer,receiveBuffer, &receiveBufferLen)){
-				deviceState = STATE_DECODE;
-			}
-			else{
-				deviceState = STATE_WAIT;
-			}
-			break;
-		case STATE_DECODE:
-			messageDecodeSuccessful = decode_message(receiveBuffer, sizeof(receiveBuffer), &message_in);
-			buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
-			if(messageDecodeSuccessful){
-				deviceState = STATE_TEST;
-			}
-			else{
-				deviceState = STATE_WAIT;
-			}
-			break;
-		case STATE_TEST:
-			switch(message_in.commandType){
-
-			case CommandTypeEnum_I2C_test:
-				i2c_test(&message_in, &message_out);
-				break;
-
-			case CommandTypeEnum_SPI_test:
-				spi_test(&message_in, &message_out);
-				break;
-
-			case CommandTypeEnum_USART_test:
-				usart_test(&message_in, &message_out);
-				break;
-
-			case CommandTypeEnum_GPIO_digital:
-				gpio_test(&message_in, &message_out);
-				break;
-
-			case CommandTypeEnum_Analog_read:
-				analog_read_test(&message_in, &message_out);
-				break;
-
-			case CommandTypeEnum_Analog_write:
-				pwm_test(&message_in, &message_out);
-				break;
-
-			default:
-				break;
-			} /* switch(message_in.commandType) */
-			encode_message(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
-			link_set_phy_write_fn(&linkLayer,&buffer_send);
-			link_write(&linkLayer,transmitBuffer,bytesWritten);
-
-			// reset buffers and messages
-			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
-			command_reset(&message_out);
-			// progress state machine
-			deviceState = STATE_WAIT;
-			break;
-		}  /* switch(deviceState) */
-	} /* while(1) */
 }
