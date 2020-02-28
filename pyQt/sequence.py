@@ -290,7 +290,7 @@ dict_pwm_time_dependency = {
 
 # Response dictionaries
 dict_response_write = {
-    "Invalid message": 0,
+    "Invalid message. Check serial connections.": 0,
     "I2C write successful": 10,
     "I2C write failed": 11,
     "I2C read failed": 12,
@@ -398,16 +398,6 @@ def make_test_object_from_options(UI):
             UI.usart_command_select.setText("0x00000000")
         else:
             cmd.usart.command = int(UI.usart_command_select.text(),16)
-        if is_empty(UI.usart_tx_size_select.text()):
-            cmd.usart.txSize = 1
-            UI.usart_tx_size_select.setText("1")
-        else:
-            cmd.usart.txSize = int(UI.usart_tx_size_select.text())
-        if is_empty(UI.usart_rx_size_select.text()):
-            cmd.usart.rxSize = 1
-            UI.usart_rx_size_select.setText("1")
-        else:
-            cmd.usart.rxSize = int(UI.usart_rx_size_select.text())
         if UI.usart_mode_select.currentData() == list(dict_usart_mode.values())[0]:     # If 'Asynchronous' mode is selected, save HW flow control settings
             cmd.usart.hwFlowControl = UI.usart_hw_flow_control_select.currentData()
         elif UI.usart_mode_select.currentData() == list(dict_usart_mode.values())[1]:   # If 'Synchronous' mode is selected, save clock settings
@@ -532,8 +522,6 @@ def make_string_from_test_object(test_object):
         string += "  Stop bits: " + list(dict_usart_stop_bits.keys())[list(dict_usart_stop_bits.values()).index(test_object.usart.stopBits)]
         string += "  Direction: " + list(dict_usart_direction.keys())[list(dict_usart_direction.values()).index(test_object.usart.direction)]
         string += "  Cmd: " + "0x{:02X}".format(test_object.usart.command)
-        string += "  txSize: " + str(test_object.usart.txSize)
-        string += "  rxSize: " + str(test_object.usart.rxSize)
         if test_object.usart.mode == list(dict_usart_mode.values())[0]:   # If 'Asynchronous' option is selected
             string += "  HW Flow control: " + list(dict_usart_hw_flow.keys())[list(dict_usart_hw_flow.values()).index(test_object.usart.hwFlowControl)]
         elif test_object.usart.mode == list(dict_usart_mode.values())[1]:   # If 'Synchronous' option is selected
@@ -634,14 +622,12 @@ def make_test_object_from_string(string):
         test_object.usart.stopBits = list(dict_usart_stop_bits.values())[list(dict_usart_stop_bits.keys()).index(optionValue[5])]
         test_object.usart.direction = list(dict_usart_direction.values())[list(dict_usart_direction.keys()).index(optionValue[6])]
         test_object.usart.command = int(optionValue[7],16)
-        test_object.usart.txSize = int(optionValue[8])
-        test_object.usart.rxSize = int(optionValue[9])
         if test_object.usart.mode == list(dict_usart_mode.values())[0]:   # If 'Asynchronous' option is selected
-            test_object.usart.hwFlowControl = list(dict_usart_hw_flow.values())[list(dict_usart_hw_flow.keys()).index(optionValue[10])]
+            test_object.usart.hwFlowControl = list(dict_usart_hw_flow.values())[list(dict_usart_hw_flow.keys()).index(optionValue[8])]
         elif test_object.usart.mode == list(dict_usart_mode.values())[1]:   # If 'Synchronous' option is selected
-            test_object.usart.clockPolarity = list(dict_usart_clock_polarity.values())[list(dict_usart_clock_polarity.keys()).index(optionValue[10])]
-            test_object.usart.clockPhase = list(dict_usart_clock_phase.values())[list(dict_usart_clock_phase.keys()).index(optionValue[11])]
-            test_object.usart.clockLastBit = list(dict_usart_clock_last_bit.values())[list(dict_usart_clock_last_bit.keys()).index(optionValue[12])]
+            test_object.usart.clockPolarity = list(dict_usart_clock_polarity.values())[list(dict_usart_clock_polarity.keys()).index(optionValue[8])]
+            test_object.usart.clockPhase = list(dict_usart_clock_phase.values())[list(dict_usart_clock_phase.keys()).index(optionValue[9])]
+            test_object.usart.clockLastBit = list(dict_usart_clock_last_bit.values())[list(dict_usart_clock_last_bit.keys()).index(optionValue[10])]
         return test_object
 
     elif words[0] == list_cmd_types[3]:

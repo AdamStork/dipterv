@@ -57,7 +57,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.byteSizeValidatorI2CRead  = QRegExpValidator(QRegExp("[1-4]"))                     # 1-digit decimal validator for I2C read size
         self.byteSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-2]"))                         # 1-digit decimal validator for SPI write size
         self.slaveSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-4]"))                        # 1-digit decimal validator for SPI slave response size
-        self.byteSizeValidatorUSART  = QRegExpValidator(QRegExp("[1-4]"))                       # 1-digit decimal validator for USART tx/rx size
         self.dummyValidator  = QRegExpValidator(QRegExp("[0-1][0-5]"))                          # 2-digit decimal validator for SPI dummy clocks
         self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9]{1,5}"))                         # Max 5-digit decimal validator for PWM time dependency field
         self.baudValidator  = QRegExpValidator(QRegExp("[0-9]{4,6}"))                           # Max 6-digit decimal validator for USART baudrate
@@ -408,41 +407,29 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_clock_phase_select.setParent(None)
                 self.usart_clock_last_bit_select.setParent(None)
 
-            self.options_layout.addWidget(self.usart_hw_flow_control_label,10,0)
-            self.options_layout.addWidget(self.usart_hw_flow_control_select,10,2)
+            self.options_layout.addWidget(self.usart_hw_flow_control_label,8,0)
+            self.options_layout.addWidget(self.usart_hw_flow_control_select,8,2)
         # If 'Synchronous' mode is selected: remove HW flow control settings if necessary, add clock settings
         else:
             self.options_layout.removeWidget(self.usart_hw_flow_control_label)
             self.options_layout.removeWidget(self.usart_hw_flow_control_select)
             self.usart_hw_flow_control_label.setParent(None)
             self.usart_hw_flow_control_select.setParent(None)
-            self.options_layout.addWidget(self.usart_clock_polarity_label,10,0)
-            self.options_layout.addWidget(self.usart_clock_phase_label,11,0)
-            self.options_layout.addWidget(self.usart_clock_last_bit_label,12,0)
-            self.options_layout.addWidget(self.usart_clock_polarity_select,10,2)
-            self.options_layout.addWidget(self.usart_clock_phase_select,11,2)
-            self.options_layout.addWidget(self.usart_clock_last_bit_select,12,2)
+            self.options_layout.addWidget(self.usart_clock_polarity_label,8,0)
+            self.options_layout.addWidget(self.usart_clock_phase_label,9,0)
+            self.options_layout.addWidget(self.usart_clock_last_bit_label,10,0)
+            self.options_layout.addWidget(self.usart_clock_polarity_select,8,2)
+            self.options_layout.addWidget(self.usart_clock_phase_select,9,2)
+            self.options_layout.addWidget(self.usart_clock_last_bit_select,10,2)
 
     def on_changed_usart_direction(self):
         if self.usart_direction_select.currentData() == list(sequence.dict_usart_direction.values())[0]: # If 'TX only' is selected
-            self.usart_rx_size_select.setEnabled(False)
-            self.usart_rx_size_select.setText("0")
-            self.usart_tx_size_select.setEnabled(True)
-            self.usart_tx_size_select.setText("")
             self.usart_command_select.setEnabled(True)
             self.usart_command_select.setText("")
         elif self.usart_direction_select.currentData() == list(sequence.dict_usart_direction.values())[1]: # If 'RX only' is selected
-            self.usart_rx_size_select.setEnabled(True)
-            self.usart_rx_size_select.setText("")
-            self.usart_tx_size_select.setEnabled(False)
-            self.usart_tx_size_select.setText("0")
             self.usart_command_select.setEnabled(False)
             self.usart_command_select.setText("0x00000000")
         else:
-            self.usart_rx_size_select.setEnabled(True)
-            self.usart_rx_size_select.setText("")
-            self.usart_tx_size_select.setEnabled(True)
-            self.usart_tx_size_select.setText("")
             self.usart_command_select.setEnabled(True)
             self.usart_command_select.setText("")
 
@@ -844,8 +831,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_stop_bits_label = QLabel("Stop Bits", self)
                 self.usart_direction_label = QLabel("Direction", self)
                 self.usart_command_label = QLabel("Command", self)
-                self.usart_tx_size_label = QLabel("TX size (bytes)", self)
-                self.usart_rx_size_label = QLabel("RX size (bytes)", self)
                 self.usart_clock_polarity_label = QLabel("Clock Polarity", self)
                 self.usart_clock_phase_label = QLabel("Clock Phase", self)
                 self.usart_clock_last_bit_label = QLabel("Clock Last Bit", self)
@@ -859,8 +844,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_stop_bits_select = QComboBox(self)
                 self.usart_direction_select = QComboBox(self)
                 self.usart_command_select = QLineEdit(self)
-                self.usart_tx_size_select = QLineEdit(self)
-                self.usart_rx_size_select = QLineEdit(self)
                 self.usart_clock_polarity_select = QComboBox(self)
                 self.usart_clock_phase_select = QComboBox(self)
                 self.usart_clock_last_bit_select = QComboBox(self)
@@ -917,12 +900,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.usart_command_select.setValidator(self.wordValidator)
                 self.usart_command_select.setPlaceholderText("0x00000000")
 
-                self.usart_tx_size_select.setValidator(self.byteSizeValidatorUSART)
-                self.usart_tx_size_select.setPlaceholderText("1..4")
-
-                self.usart_rx_size_select.setValidator(self.byteSizeValidatorUSART)
-                self.usart_rx_size_select.setPlaceholderText("1..4")
-
                 # Connect signal and call function explicitly
                 self.usart_mode_select.activated[str].connect(self.on_changed_usart_mode)
                 self.on_changed_usart_mode()
@@ -939,8 +916,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.usart_stop_bits_label,5,0)
                 self.options_layout.addWidget(self.usart_direction_label,6,0)
                 self.options_layout.addWidget(self.usart_command_label,7,0)
-                self.options_layout.addWidget(self.usart_tx_size_label,8,0)
-                self.options_layout.addWidget(self.usart_rx_size_label,9,0)
 
                 self.options_layout.addWidget(self.usart_bus_select,0,2)
                 self.options_layout.addWidget(self.usart_mode_select,1,2)
@@ -950,11 +925,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.usart_stop_bits_select,5,2)
                 self.options_layout.addWidget(self.usart_direction_select,6,2)
                 self.options_layout.addWidget(self.usart_command_select,7,2)
-                self.options_layout.addWidget(self.usart_tx_size_select,8,2)
-                self.options_layout.addWidget(self.usart_rx_size_select,9,2)
 
                 # Layout settings
-                self.options_layout.addItem(self.spacerItem,13,0)
+                self.options_layout.addItem(self.spacerItem,11,0)
                 self.options_layout.setColumnMinimumWidth(1,30)
 
 

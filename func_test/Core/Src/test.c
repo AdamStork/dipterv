@@ -208,8 +208,6 @@ void command_reset(Command* message)
 	message->usart.stopBits = _usartStopBits_MIN;
 	message->usart.direction = _usartDirection_MIN;
 	message->usart.command = 0;
-	message->usart.txSize = 0;
-	message->usart.rxSize = 0;
 	message->usart.has_clockPolarity = false;
 	message->usart.clockPolarity = _usartClockPolarity_MIN;
 	message->usart.has_clockPhase = false;
