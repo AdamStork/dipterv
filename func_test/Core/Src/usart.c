@@ -81,7 +81,7 @@ void HAL_USART_MspInit(USART_HandleTypeDef* usartHandle)
 	    */
 	    GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10;
 	    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	    GPIO_InitStruct.Pull = GPIO_NOPULL;
+	    GPIO_InitStruct.Pull = GPIO_PULLUP;
 	    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	    GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
 	    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -404,7 +404,7 @@ void usart_test(Command* message_in, Command* message_out)
 			status = HAL_UART_Transmit(&huart, linkLayerInner.tx_buffer,linkLayerInner.tx_buffer_size, TEST_TIMEOUT_DURATION);
 		}
 		else{
-			status = HAL_USART_Transmit(&husart, linkLayerInner.tx_buffer,linkLayerInner.tx_buffer_size, TEST_TIMEOUT_DURATION);
+			status = HAL_USART_Transmit(&husart, linkLayerInner.tx_buffer,linkLayerInner.tx_buffer_size, 500);
 		}
 
 		// Frame and send data and set response
@@ -620,7 +620,6 @@ bool usart_init(Command* message_in, USART_HandleTypeDef* husart)
 	husart->Init.BaudRate = message_in->usart.baudRate;
 
 
-
 	switch(message_in->usart.wordLength){
 	case usartWordLength_USART_8_BITS:
 		husart->Init.WordLength = USART_WORDLENGTH_8B;
@@ -674,8 +673,10 @@ bool usart_init(Command* message_in, USART_HandleTypeDef* husart)
 	switch(message_in->usart.clockPolarity){
 	case usartClockPolarity_USART_CLOCK_POLARITY_LOW:
 		husart->Init.CLKPolarity = USART_POLARITY_LOW;
+		break;
 	case usartClockPolarity_USART_CLOCK_POLARITY_HIGH:
 		husart->Init.CLKPolarity = USART_POLARITY_HIGH;
+		break;
 	default:
 		break;
 	}
@@ -683,8 +684,10 @@ bool usart_init(Command* message_in, USART_HandleTypeDef* husart)
 	switch(message_in->usart.clockPhase){
 	case usartClockPhase_USART_CLOCK_PHASE_ONE_EDGE:
 		husart->Init.CLKPhase = USART_PHASE_1EDGE;
+		break;
 	case usartClockPhase_USART_CLOCK_PHASE_TWO_EDGE:
 		husart->Init.CLKPhase = USART_PHASE_2EDGE;
+		break;
 	default:
 		break;
 	}
@@ -692,14 +695,16 @@ bool usart_init(Command* message_in, USART_HandleTypeDef* husart)
 	switch(message_in->usart.clockLastBit){
 	case usartClockLastBit_USART_CLOCK_LAST_BIT_DISABLE:
 		husart->Init.CLKLastBit = USART_LASTBIT_DISABLE;
+		break;
 	case usartClockLastBit_USART_CLOCK_LAST_BIT_ENABLE:
 		husart->Init.CLKLastBit = USART_LASTBIT_ENABLE;
+		break;
 	default:
 		break;
 	}
 
 
-
+	HAL_USART_MspInit(husart);
 	if (HAL_USART_Init(husart) != HAL_OK){
 		return false;
 	}

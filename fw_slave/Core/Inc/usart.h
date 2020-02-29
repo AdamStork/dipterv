@@ -32,6 +32,7 @@
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
+extern USART_HandleTypeDef husart1;
 extern USART_HandleTypeDef husart6;
 
 /* USER CODE BEGIN Private defines */
@@ -40,6 +41,7 @@ extern USART_HandleTypeDef husart6;
 
 void MX_USART1_UART_Init(void);
 void MX_USART2_UART_Init(void);
+void MX_USART1_Init(void);
 void MX_USART6_Init(void);
 
 /* USER CODE BEGIN Prototypes */

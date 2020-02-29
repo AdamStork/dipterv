@@ -1019,6 +1019,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             response += ": " + list(sequence.dict_gpio_digital_pins.keys())[list(sequence.dict_gpio_digital_pins.values()).index(test_object.analog_out.pin)]
 
         del message_data
+        self.ser.flush()
         return response
 
 
