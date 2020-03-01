@@ -81,7 +81,7 @@ void HAL_USART_MspInit(USART_HandleTypeDef* usartHandle)
 	    */
 	    GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10;
 	    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	    GPIO_InitStruct.Pull = GPIO_PULLUP;
+	    GPIO_InitStruct.Pull = GPIO_NOPULL;
 	    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	    GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
 	    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -138,7 +138,7 @@ void HAL_USART_MspInit(USART_HandleTypeDef* usartHandle)
 	    */
 	    GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8;
 	    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	    GPIO_InitStruct.Pull = GPIO_NOPULL;
+	    GPIO_InitStruct.Pull = GPIO_PULLUP;
 	    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	    GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
 	    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -404,7 +404,7 @@ void usart_test(Command* message_in, Command* message_out)
 			status = HAL_UART_Transmit(&huart, linkLayerInner.tx_buffer,linkLayerInner.tx_buffer_size, TEST_TIMEOUT_DURATION);
 		}
 		else{
-			status = HAL_USART_Transmit(&husart, linkLayerInner.tx_buffer,linkLayerInner.tx_buffer_size, 500);
+			status = HAL_USART_Transmit(&husart, linkLayerInner.tx_buffer,linkLayerInner.tx_buffer_size, TEST_TIMEOUT_DURATION);
 		}
 
 		// Frame and send data and set response

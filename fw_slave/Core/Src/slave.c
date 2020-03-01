@@ -263,7 +263,7 @@ void test_usart_slave_tx_only(void)
 
 	encode_simplemessage(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
 	link_write(&linkLayer,transmitBuffer,bytesWritten);
-	HAL_USART_Transmit(&husart1,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
+	HAL_USART_Transmit(&husart6,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
 }
 
 
@@ -278,7 +278,7 @@ void test_usart_slave_rx_and_tx(void)
 
 	while(messageDecodeSuccessful != true){
 		// Receive frame byte-by-byte
-		status = HAL_USART_Receive(&husart1,(uint8_t*)&receiveByte, 1,TEST_TIMEOUT_DURATION);
+		status = HAL_USART_Receive(&husart6,(uint8_t*)&receiveByte, 1,TEST_TIMEOUT_DURATION);
 
 		// Get frame and decode message
 		link_parse_byte(&linkLayer, receiveByte);
@@ -310,7 +310,7 @@ void test_usart_slave_rx_and_tx(void)
 
 			encode_simplemessage(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
 			link_write(&linkLayer,transmitBuffer,bytesWritten);
-			HAL_USART_Transmit(&husart1,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
+			HAL_USART_Transmit(&husart6,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
 		}
 	}
 }
