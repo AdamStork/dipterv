@@ -78,9 +78,10 @@ void MX_USART6_Init(void)
   husart6.Init.StopBits = USART_STOPBITS_1;
   husart6.Init.Parity = USART_PARITY_NONE;
   husart6.Init.Mode = USART_MODE_TX_RX;
-  husart6.Init.CLKPolarity = USART_POLARITY_HIGH;
+  husart6.Init.CLKPolarity = USART_POLARITY_LOW;
   husart6.Init.CLKPhase = USART_PHASE_1EDGE;
-  husart6.Init.CLKLastBit = USART_LASTBIT_ENABLE;
+  husart6.Init.CLKLastBit = USART_LASTBIT_DISABLE;
+  HAL_USART_MspInit(&husart6);
   if (HAL_USART_Init(&husart6) != HAL_OK)
   {
     Error_Handler();
@@ -162,7 +163,7 @@ void HAL_USART_MspInit(USART_HandleTypeDef* usartHandle)
     */
     GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);

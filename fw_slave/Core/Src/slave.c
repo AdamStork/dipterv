@@ -216,6 +216,8 @@ void test_spi_slave_receive_only(void)
 /** @brief Receive message **/
 void test_usart_slave_rx_only(void)
 {
+	MX_USART6_Init();
+
 	bool messageDecodeSuccessful = false;
 	SimpleMessage simplMsgIn = SimpleMessage_init_zero;
 	uint8_t invalidFrameCounter = 0;
@@ -224,7 +226,7 @@ void test_usart_slave_rx_only(void)
 
 	while(messageDecodeSuccessful != true){
 		// Receive frame byte-by-byte
-		status = HAL_USART_Receive(&husart1,(uint8_t*)&receiveByte, 1,HAL_MAX_DELAY);
+		status = HAL_USART_Receive(&husart6,&receiveByte, 1,HAL_MAX_DELAY);
 
 		// Get frame and decode message
 		link_parse_byte(&linkLayer, receiveByte);
@@ -234,9 +236,9 @@ void test_usart_slave_rx_only(void)
 		}
 		else{
 			invalidFrameCounter++;
-//			if(invalidFrameCounter == INVALID_FRAME_CNTR_MAX){
-//				break;
-//			}
+			if(invalidFrameCounter == INVALID_FRAME_CNTR_MAX){
+				break;
+			}
 		}
 
 		// If status NOT OK: send fail response
