@@ -16,8 +16,10 @@
 #include "simple_message.pb.h"
 #include "link_layer.h"
 
-TestType testType =  TEST_USART_SLAVE_RX_ONLY;
+TestType testType =  TEST_I2C_SLAVE_READ;
 uint32_t expectedWord = 0xDEADBEEF;
+uint32_t expectedHalfWord = 0xA55A;
+uint32_t expectedByte = 0xA5;
 uint32_t responseWord = 0xB00B1122;
 
 #define USART_UART_RX_SIZE	4
@@ -92,23 +94,21 @@ void enter_slave_test_mode(void)
 /**********************			I2C test				******************************/
 void test_i2c_slave_read(void)
 {
-//	uint8_t* rxBuffer;
-//	uint8_t rxSize = I2C_RECEIVE_SIZE;
-//
-//
-//	HAL_I2C_Slave_Receive(&hi2c1, rxBuffer, rxSize,TEST_TIMEOUT_DURATION);
-//
-//	uint32_t resp = 0;
-//	// decode rxBuffer
-//	for(uint8_t i = 0; i<rxSize; i++){
-//		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
-//	}
-//
-//	if(resp == expectedWord){
-//		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-//	}
+	uint8_t rxSize = 2;	// receiving 2 bytes
+	HAL_StatusTypeDef status;
 
+	status = HAL_I2C_Slave_Receive(&hi2c1, receiveBuffer, rxSize,HAL_MAX_DELAY);
+	/* receiveBuffer[0]: Register
+	 * receiveBuffer[1]: Write value
+	 */
+
+	if(status == HAL_OK){
+		if(receiveBuffer[1] == expectedByte){
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		}
+	}
 }
+
 
 
 void test_i2c_slave_read_and_write(void)

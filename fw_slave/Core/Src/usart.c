@@ -77,7 +77,7 @@ void MX_USART6_Init(void)
   husart6.Init.WordLength = USART_WORDLENGTH_8B;
   husart6.Init.StopBits = USART_STOPBITS_1;
   husart6.Init.Parity = USART_PARITY_NONE;
-  husart6.Init.Mode = USART_MODE_TX_RX;
+  husart6.Init.Mode = USART_MODE_RX;
   husart6.Init.CLKPolarity = USART_POLARITY_LOW;
   husart6.Init.CLKPhase = USART_PHASE_1EDGE;
   husart6.Init.CLKLastBit = USART_LASTBIT_DISABLE;

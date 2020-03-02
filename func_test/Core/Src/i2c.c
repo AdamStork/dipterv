@@ -21,7 +21,8 @@
 #include "i2c.h"
 
 /* USER CODE BEGIN 0 */
-
+I2C_HandleTypeDef hi2c;
+uint8_t writeBuff[5];
 /* USER CODE END 0 */
 
 
@@ -188,8 +189,7 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
  *  @param  message_out: pointer to transmit message	**/
 void i2c_test(Command* message_in, Command* message_out)
 {
-	I2C_HandleTypeDef hi2c;
-	uint16_t deviceAddress = message_in->i2c.address;
+	uint8_t deviceAddress = (message_in->i2c.address) << 1; // use 8-bit address
 	uint8_t deviceRegister = message_in->i2c.reg;
 	HAL_StatusTypeDef status;
 	bool success;
@@ -205,19 +205,17 @@ void i2c_test(Command* message_in, Command* message_out)
 	message_out->commandType = CommandTypeEnum_I2C_test;
 	// I2C write
 	if(message_in->i2c.direction == i2cDirection_I2C_write){
-		uint8_t writeSize = message_in->i2c.size;
-		uint8_t writeBuff[writeSize + 1];
-		uint8_t i;
+		uint8_t writeSize = message_in->i2c.size;	// WriteValue size (1 or 2 bytes)
 
 		// Place writeValue into buffer
 		uint32_t writeValue_32 = message_in->i2c.writeValue;
 		writeBuff[0] = deviceRegister;
-		for(i = 0; i<writeSize; i++){
+		for(uint8_t i = 0; i<writeSize; i++){
 			writeBuff[1+i] = (uint8_t)(writeValue_32 >> (i*8));
 		}
 
 		// Send out data via I2C
-		status = HAL_I2C_Master_Transmit(&hi2c,deviceAddress,writeBuff, sizeof(writeBuff), TEST_TIMEOUT_DURATION);
+		status = HAL_I2C_Master_Transmit(&hi2c,(uint16_t)deviceAddress,writeBuff, writeSize+1, TEST_TIMEOUT_DURATION);
 		message_out->has_response = true;
 		message_out->response.has_responseEnum = true;
 		if(status == HAL_OK){
@@ -233,8 +231,8 @@ void i2c_test(Command* message_in, Command* message_out)
 		uint8_t readSize = message_in->i2c.size;
 
 		// Read out data via I2C
-		status = HAL_I2C_Master_Transmit(&hi2c, deviceAddress, &deviceRegister, 1, TEST_TIMEOUT_DURATION);
-		status &= HAL_I2C_Master_Receive(&hi2c, deviceAddress, readBuff, readSize, TEST_TIMEOUT_DURATION);
+		status = HAL_I2C_Master_Transmit(&hi2c, (uint16_t)deviceAddress, &deviceRegister, 1, TEST_TIMEOUT_DURATION);
+		status &= HAL_I2C_Master_Receive(&hi2c, (uint16_t)deviceAddress, readBuff, readSize, TEST_TIMEOUT_DURATION);
 		message_out->has_response = true;
 
 		if(status == HAL_OK){
@@ -256,7 +254,7 @@ void i2c_test(Command* message_in, Command* message_out)
 
 
 	// Deinit I2C peripheral
-	HAL_I2C_MspDeInit(&hi2c);
+//	HAL_I2C_MspDeInit(&hi2c_2);
 }
 
 
