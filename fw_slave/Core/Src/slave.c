@@ -92,6 +92,9 @@ void enter_slave_test_mode(void)
 
 
 /**********************			I2C test				******************************/
+/** @brief	I2C write simulation for configuring a register
+ * @details	Master sends 2 bytes to slave: register and config (write) value.  Correct configuration is signaled with LED toggle.
+ * 		>> expected Byte: 0xA5		**/
 void test_i2c_slave_read(void)
 {
 	uint8_t rxSize = 2;	// receiving 2 bytes
@@ -110,30 +113,35 @@ void test_i2c_slave_read(void)
 }
 
 
-
+/** @brief 		I2C Read simulation
+ *	@details	Master sends 1 byte to slave to initiate read simulation. Master then receives back 2 bytes if the expected register was sent.
+ *			>>>	expected Register: 0xA5			**/
 void test_i2c_slave_read_and_write(void)
 {
-//	uint8_t* rxBuffer;
-//	uint8_t rxSize = I2C_RECEIVE_SIZE;
-//	uint8_t* txBuffer;
-//	uint8_t txSize = I2C_TRANSMIT_SIZE;
-//
-//	HAL_I2C_Slave_Receive(&hi2c1, rxBuffer, rxSize,TEST_TIMEOUT_DURATION);
-//
-//	// Read message
-//	uint32_t resp = 0;
-//	for(uint8_t i = 0; i<rxSize; i++){
-//		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
-//	}
-//
-//	// Send message
-//	if(resp == expectedWord){
-//		for(uint8_t i = 0; i<txSize; i++){
-//			txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
-//		}
-//
-//		HAL_I2C_Slave_Transmit(&hi2c1,txBuffer, txSize, TEST_TIMEOUT_DURATION);
-//	}
+	uint8_t txSize = 2;
+	uint8_t rxSize = 1;		// receiving 2 bytes
+	HAL_StatusTypeDef status;
+
+	status = HAL_BUSY;
+	while(status != HAL_OK){
+		status = HAL_I2C_Slave_Receive(&hi2c1, receiveBuffer, rxSize, HAL_MAX_DELAY);
+	}
+
+	/* receiveBuffer[0]: Register
+	 */
+
+
+	if(receiveBuffer[0] == expectedByte){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		transmitBuffer[0] = 0x11;
+		transmitBuffer[1] = 0x22;
+		status = HAL_BUSY;
+		while(status != HAL_OK){
+			status = HAL_I2C_Slave_Transmit(&hi2c1,transmitBuffer, txSize, HAL_MAX_DELAY);
+		}
+	}
+
+
 }
 
 

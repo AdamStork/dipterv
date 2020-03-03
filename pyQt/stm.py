@@ -971,7 +971,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if message_data.response.responseEnum == list(sequence.dict_response_write.values())[list(sequence.dict_response_write.keys()).index("I2C read failed")]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
-                    response = "I2C read: " + str(message_data.response.responseRead)
+                    response = "I2C read: " + "0x{:04X}".format(message_data.response.responseRead)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             if test_object.spi.operatingMode == list(sequence.dict_spi_operating_mode.values())[2]: # SPI Transmit-only response: OK/failed
@@ -980,7 +980,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if message_data.response.responseEnum == list(sequence.dict_response_write.values())[list(sequence.dict_response_write.keys()).index("SPI transmission failed")]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
-                    response = "SPI transmit/receive: " + str(message_data.response.responseRead)
+                    response = "SPI transmit/receive: " + "0x{:04X}".format(message_data.response.responseRead)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.USART_test:
             if test_object.usart.direction == list(sequence.dict_usart_direction.values())[0]:      # USART TX-only response: OK/failed

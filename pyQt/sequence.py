@@ -488,8 +488,7 @@ def make_string_from_test_object(test_object):
         string += "  R/W: " + list(dict_i2c_rw.keys())[list(dict_i2c_rw.values()).index(test_object.i2c.direction)]
         string += "  Addr: " + "0x{:02X}".format(test_object.i2c.address)
         string += "  Reg: " + "0x{:02X}".format(test_object.i2c.reg)
-        if test_object.i2c.direction == list(dict_i2c_rw.values())[0]:
-            string += "  writeValue: " + "0x{:04X}".format(test_object.i2c.writeValue)
+        string += "  writeValue: " + "0x{:04X}".format(test_object.i2c.writeValue)
         string += "  Size: " + str(test_object.i2c.size)
         string += "  Mode: " + list(dict_i2c_speedmode.keys())[list(dict_i2c_speedmode.values()).index(test_object.i2c.speedMode)]
         string += "  Speed: " + str(test_object.i2c.clockSpeed)

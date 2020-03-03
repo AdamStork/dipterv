@@ -21,8 +21,11 @@
 #include "i2c.h"
 
 /* USER CODE BEGIN 0 */
+#include "test.h"
+
 I2C_HandleTypeDef hi2c;
 uint8_t writeBuff[5];
+uint8_t readBuff[5];
 /* USER CODE END 0 */
 
 
@@ -227,34 +230,43 @@ void i2c_test(Command* message_in, Command* message_out)
 	}
 	// I2C read
 	else{
-		uint8_t* readBuff;
-		uint8_t readSize = message_in->i2c.size;
+		uint8_t readSize = message_in->i2c.size;	// Number of bytes expected to sent back by slave
+		writeBuff[0] = deviceRegister;
 
 		// Read out data via I2C
-		status = HAL_I2C_Master_Transmit(&hi2c, (uint16_t)deviceAddress, &deviceRegister, 1, TEST_TIMEOUT_DURATION);
-		status &= HAL_I2C_Master_Receive(&hi2c, (uint16_t)deviceAddress, readBuff, readSize, TEST_TIMEOUT_DURATION);
-		message_out->has_response = true;
-
-		if(status == HAL_OK){
-			uint32_t readValue_32 = 0;
-			uint8_t i;
-
-			for(i = 0; i<readSize; i++){
-				readValue_32 |= (readBuff[i] << (i*8));
+		status = HAL_BUSY;
+		while(status != HAL_OK){
+			status = HAL_I2C_Master_Transmit(&hi2c, (uint16_t)deviceAddress, writeBuff, 1, TEST_TIMEOUT_DURATION);
+			if(status == HAL_TIMEOUT){
+				i2c_error_handler(message_in, message_out);
+				return;
 			}
-			message_out->response.has_responseRead = true;
-			message_out->response.responseRead = readValue_32;
-		}
-		else{
-			message_out->response.has_responseEnum = true;
-			message_out->response.responseEnum = responseEnum_t_I2C_READ_FAIL;
 		}
 
+		status = HAL_BUSY;
+		while(status != HAL_OK){
+			status = HAL_I2C_Master_Receive(&hi2c, (uint16_t)deviceAddress, readBuff, readSize, TEST_TIMEOUT_DURATION);
+			if(status == HAL_TIMEOUT){
+				i2c_error_handler(message_in, message_out);
+				return;
+			}
+		}
+
+		uint32_t readValue_32 = 0;
+
+		for(uint8_t i = 0; i<readSize; i++){
+			readValue_32 |= (readBuff[i] << (i*8));
+		}
+		message_out->has_response = true;
+		message_out->response.has_responseRead = true;
+		message_out->response.responseRead = readValue_32;
 	}
 
 
 	// Deinit I2C peripheral
 //	HAL_I2C_MspDeInit(&hi2c_2);
+	buffer_init_zero(writeBuff, sizeof(writeBuff));
+	buffer_init_zero(readBuff, sizeof(readBuff));
 }
 
 
