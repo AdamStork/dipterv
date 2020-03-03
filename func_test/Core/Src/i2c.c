@@ -24,8 +24,8 @@
 #include "test.h"
 
 I2C_HandleTypeDef hi2c;
-uint8_t writeBuff[5];
-uint8_t readBuff[5];
+static uint8_t writeBuff[5];
+static uint8_t readBuff[5];
 /* USER CODE END 0 */
 
 

@@ -16,9 +16,9 @@
 #include "simple_message.pb.h"
 #include "link_layer.h"
 
-TestType testType =  TEST_I2C_SLAVE_READ;
+TestType testType;
 uint32_t expectedWord = 0xDEADBEEF;
-uint32_t expectedHalfWord = 0xA55A;
+uint32_t expectedHalfWord = 0xAABB;
 uint32_t expectedByte = 0xA5;
 uint32_t responseWord = 0xB00B1122;
 
@@ -29,9 +29,9 @@ uint32_t responseWord = 0xB00B1122;
 #define SPI_RECEIVE_SIZE	2
 #define SPI_TRANSMIT_SIZE	2
 
-uint8_t receiveBuffer[50];
-uint8_t transmitBuffer[50];
-uint8_t receiveBufferLen;
+uint8_t rxBuffer[50];
+uint8_t txBuffer[50];
+uint8_t rxBufferLen;
 link_layer_t linkLayer;
 uint8_t receiveByte;
 
@@ -48,6 +48,18 @@ void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize);
 /** @brief	Enter slave test mode. Tests can be executed by giving TestType	**/
 void enter_slave_test_mode(void)
 {
+//	testType = TEST_I2C_SLAVE_READ;
+//	testType = TEST_I2C_SLAVE_READ_AND_WRITE;
+	testType = TEST_SPI_SLAVE_FULL_DUPLEX;
+//	testType = TEST_SPI_SLAVE_HALF_DUPLEX;
+//	testType = TEST_SPI_SLAVE_RECEIVE_ONLY;
+//	testType = TEST_USART_SLAVE_RX_ONLY;
+//	testType = TEST_USART_SLAVE_TX_ONLY;
+//	testType = TEST_USART_SLAVE_RX_AND_TX;
+//	testType = TEST_UART_SLAVE_RX_ONLY;
+//	testType = TEST_UART_SLAVE_TX_ONLY;
+//	testType = TEST_UART_SLAVE_RX_AND_TX;
+
 	while(1){
 		switch(testType){
 		case TEST_I2C_SLAVE_READ:
@@ -100,13 +112,13 @@ void test_i2c_slave_read(void)
 	uint8_t rxSize = 2;	// receiving 2 bytes
 	HAL_StatusTypeDef status;
 
-	status = HAL_I2C_Slave_Receive(&hi2c1, receiveBuffer, rxSize,HAL_MAX_DELAY);
-	/* receiveBuffer[0]: Register
-	 * receiveBuffer[1]: Write value
+	status = HAL_I2C_Slave_Receive(&hi2c1, rxBuffer, rxSize,HAL_MAX_DELAY);
+	/* rxBuffer[0]: Register
+	 * rxBuffer[1]: Write value
 	 */
 
 	if(status == HAL_OK){
-		if(receiveBuffer[1] == expectedByte){
+		if(rxBuffer[1] == expectedByte){
 			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 		}
 	}
@@ -124,20 +136,19 @@ void test_i2c_slave_read_and_write(void)
 
 	status = HAL_BUSY;
 	while(status != HAL_OK){
-		status = HAL_I2C_Slave_Receive(&hi2c1, receiveBuffer, rxSize, HAL_MAX_DELAY);
+		status = HAL_I2C_Slave_Receive(&hi2c1, rxBuffer, rxSize, HAL_MAX_DELAY);
 	}
 
-	/* receiveBuffer[0]: Register
-	 */
+	/* rxBuffer[0]: Register */
 
 
-	if(receiveBuffer[0] == expectedByte){
+	if(rxBuffer[0] == expectedByte){
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-		transmitBuffer[0] = 0x11;
-		transmitBuffer[1] = 0x22;
+		txBuffer[0] = 0x11;
+		txBuffer[1] = 0x22;
 		status = HAL_BUSY;
 		while(status != HAL_OK){
-			status = HAL_I2C_Slave_Transmit(&hi2c1,transmitBuffer, txSize, HAL_MAX_DELAY);
+			status = HAL_I2C_Slave_Transmit(&hi2c1,txBuffer, txSize, HAL_MAX_DELAY);
 		}
 	}
 
@@ -147,75 +158,79 @@ void test_i2c_slave_read_and_write(void)
 
 
 /**********************			SPI test				******************************/
+/** @brief SPI Full duplex test. Slave receives 5 bytes from Master: command (1), dummyclock (1), value (2). Then sends back 2 byte response
+ * 	>>>	expected Command: 0xA5
+ * 	>>> expexted writeValue: 0xAABB		**/
 void test_spi_slave_full_duplex(void)
 {
-//	uint8_t* rxBuffer;
-//	uint8_t rxSize = I2C_RECEIVE_SIZE;
-//	uint8_t* txBuffer;
-//	uint8_t txSize = I2C_TRANSMIT_SIZE;
-//
-//	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
-//
-//	// Read message
-//	uint32_t resp = 0;
-//	for(uint8_t i = 0; i<rxSize; i++){
-//		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
-//	}
-//
-//	// Send message
-//	if(resp == expectedWord){
-//		for(uint8_t i = 0; i<txSize; i++){
-//			txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
-//		}
-//
-//		HAL_SPI_Transmit(&hspi2,txBuffer, txSize, TEST_TIMEOUT_DURATION);
-//	}
+	uint8_t rxSize = 5;
+	uint8_t txSize = 2;
+	uint16_t writeValue = 0;
+
+	HAL_StatusTypeDef status = HAL_BUSY;
+	while(status != HAL_OK){
+		status = HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
+	}
+
+
+	writeValue |= rxBuffer[2];
+	writeValue |= (rxBuffer[3] << 8);
+//	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
+	if(rxBuffer[0] == expectedByte){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		txBuffer[0] = 0x11;
+		txBuffer[1] = 0x22;
+		status = HAL_SPI_Transmit(&hspi2,txBuffer, txSize, HAL_MAX_DELAY);
+	}
 }
 
-
+/** @brief SPI Half duplex test. Slave receives 5 bytes from Master: command (1), dummyclock (1), value (2). Then sends back 2 byte response
+ * 	>>>	expected Command: 0xA5
+ * 	>>> expexted writeValue: 0xAABB		**/
 void test_spi_slave_half_duplex(void)
 {
-//	uint8_t* rxBuffer;
-//	uint8_t rxSize = I2C_RECEIVE_SIZE;
-//	uint8_t* txBuffer;
-//	uint8_t txSize = I2C_TRANSMIT_SIZE;
-//
-//	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
-//
-//	// Read message
-//	uint32_t resp = 0;
-//	for(uint8_t i = 0; i<rxSize; i++){
-//		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
-//	}
-//
-//	// Send message
-//	if(resp == expectedWord){
-//		for(uint8_t i = 0; i<txSize; i++){
-//			txBuffer[i] = (uint8_t)(responseWord >> (i*8)); // Byte: LSB first
-//		}
-//
-//		HAL_SPI_Transmit(&hspi2,txBuffer, txSize, TEST_TIMEOUT_DURATION);
-//	}
+	uint8_t rxSize = 5;
+	uint8_t txSize = 2;
+	uint16_t writeValue = 0;
+
+	HAL_StatusTypeDef status = HAL_BUSY;
+	while(status != HAL_OK){
+		status = HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
+	}
+
+
+	writeValue |= rxBuffer[2];
+	writeValue |= (rxBuffer[3] << 8);
+//	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
+	if(rxBuffer[0] == expectedByte){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		txBuffer[0] = 0x11;
+		txBuffer[1] = 0x22;
+		status = HAL_SPI_Transmit(&hspi2,txBuffer, txSize, HAL_MAX_DELAY);
+	}
 }
 
 
+/** @brief SPI Receive test. Slave receives 5 bytes from Master: command (1), dummyclock (1), value (2).
+ * 	>>>	expected Command: 0xA5
+ * 	>>> expected writeValue: 0xAABB		**/
 void test_spi_slave_receive_only(void)
 {
-//	uint8_t* rxBuffer;
-//	uint8_t rxSize = I2C_RECEIVE_SIZE;
-//
-//	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, TEST_TIMEOUT_DURATION);
-//
-//	// Read message
-//	uint32_t resp = 0;
-//	for(uint8_t i = 0; i<rxSize; i++){
-//		resp |= (rxBuffer[i] << (i*8)); // Byte: LSB first
-//	}
-//
-//	// Send message
-//	if(resp == expectedWord){
-//		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-//	}
+	uint8_t rxSize = 5;
+	uint16_t writeValue = 0;
+
+	HAL_StatusTypeDef status = HAL_BUSY;
+	while(status != HAL_OK){
+		status = HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
+	}
+
+
+	writeValue |= rxBuffer[2];
+	writeValue |= (rxBuffer[3] << 8);
+//	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
+	if(rxBuffer[0] == expectedByte){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	}
 }
 
 
@@ -229,7 +244,7 @@ void test_usart_slave_rx_only(void)
 	bool messageDecodeSuccessful = false;
 	SimpleMessage simplMsgIn = SimpleMessage_init_zero;
 	uint8_t invalidFrameCounter = 0;
-	buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 	HAL_StatusTypeDef status;
 
 	while(messageDecodeSuccessful != true){
@@ -238,9 +253,9 @@ void test_usart_slave_rx_only(void)
 
 		// Get frame and decode message
 		link_parse_byte(&linkLayer, receiveByte);
-		if(link_get_valid_frame(&linkLayer,receiveBuffer, &receiveBufferLen)){
-			messageDecodeSuccessful = decode_simplemessage(receiveBuffer, sizeof(receiveBuffer), &simplMsgIn);
-			buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+		if(link_get_valid_frame(&linkLayer,rxBuffer, &rxBufferLen)){
+			messageDecodeSuccessful = decode_simplemessage(rxBuffer, sizeof(rxBuffer), &simplMsgIn);
+			buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 		}
 		else{
 			invalidFrameCounter++;
@@ -268,11 +283,11 @@ void test_usart_slave_tx_only(void)
 	SimpleMessage message_out = SimpleMessage_init_zero;
 	uint8_t bytesWritten = 0;
 
-	buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
+	buffer_init_zero(txBuffer, sizeof(txBuffer));
 	message_out.msg = responseWord;
 
-	encode_simplemessage(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
-	link_write(&linkLayer,transmitBuffer,bytesWritten);
+	encode_simplemessage(txBuffer,sizeof(txBuffer), &message_out, &bytesWritten);
+	link_write(&linkLayer,txBuffer,bytesWritten);
 	HAL_USART_Transmit(&husart6,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
 }
 
@@ -283,7 +298,7 @@ void test_usart_slave_rx_and_tx(void)
 	bool messageDecodeSuccessful = false;
 	SimpleMessage simplMsgIn = SimpleMessage_init_zero;
 	uint8_t invalidFrameCounter = 0;
-	buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 	HAL_StatusTypeDef status;
 
 	while(messageDecodeSuccessful != true){
@@ -292,9 +307,9 @@ void test_usart_slave_rx_and_tx(void)
 
 		// Get frame and decode message
 		link_parse_byte(&linkLayer, receiveByte);
-		if(link_get_valid_frame(&linkLayer,receiveBuffer, &receiveBufferLen)){
-			messageDecodeSuccessful = decode_simplemessage(receiveBuffer, sizeof(receiveBuffer), &simplMsgIn);
-			buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+		if(link_get_valid_frame(&linkLayer,rxBuffer, &rxBufferLen)){
+			messageDecodeSuccessful = decode_simplemessage(rxBuffer, sizeof(rxBuffer), &simplMsgIn);
+			buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 		}
 		else{
 			invalidFrameCounter++;
@@ -315,11 +330,11 @@ void test_usart_slave_rx_and_tx(void)
 			SimpleMessage message_out = SimpleMessage_init_zero;
 			uint8_t bytesWritten = 0;
 
-			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
+			buffer_init_zero(txBuffer, sizeof(txBuffer));
 			message_out.msg = responseWord;
 
-			encode_simplemessage(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
-			link_write(&linkLayer,transmitBuffer,bytesWritten);
+			encode_simplemessage(txBuffer,sizeof(txBuffer), &message_out, &bytesWritten);
+			link_write(&linkLayer,txBuffer,bytesWritten);
 			HAL_USART_Transmit(&husart6,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
 		}
 	}
@@ -334,7 +349,7 @@ void test_uart_slave_rx_only(void)
 	bool messageDecodeSuccessful = false;
 	SimpleMessage simplMsgIn = SimpleMessage_init_zero;
 	uint8_t invalidFrameCounter = 0;
-	buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 	HAL_StatusTypeDef status;
 
 	while(messageDecodeSuccessful != true){
@@ -343,9 +358,9 @@ void test_uart_slave_rx_only(void)
 
 		// Get frame and decode message
 		link_parse_byte(&linkLayer, receiveByte);
-		if(link_get_valid_frame(&linkLayer,receiveBuffer, &receiveBufferLen)){
-			messageDecodeSuccessful = decode_simplemessage(receiveBuffer, sizeof(receiveBuffer), &simplMsgIn);
-			buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+		if(link_get_valid_frame(&linkLayer,rxBuffer, &rxBufferLen)){
+			messageDecodeSuccessful = decode_simplemessage(rxBuffer, sizeof(rxBuffer), &simplMsgIn);
+			buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 		}
 		else{
 			invalidFrameCounter++;
@@ -374,11 +389,11 @@ void test_uart_slave_tx_only(void)
 	SimpleMessage message_out = SimpleMessage_init_zero;
 	uint8_t bytesWritten = 0;
 
-	buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
+	buffer_init_zero(txBuffer, sizeof(txBuffer));
 	message_out.msg = responseWord;
 
-	encode_simplemessage(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
-	link_write(&linkLayer,transmitBuffer,bytesWritten);
+	encode_simplemessage(txBuffer,sizeof(txBuffer), &message_out, &bytesWritten);
+	link_write(&linkLayer,txBuffer,bytesWritten);
 	HAL_UART_Transmit(&huart1,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
 }
 
@@ -389,7 +404,7 @@ void test_uart_slave_rx_and_tx(void)
 	bool messageDecodeSuccessful = false;
 	SimpleMessage simplMsgIn = SimpleMessage_init_zero;
 	uint8_t invalidFrameCounter = 0;
-	buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 	HAL_StatusTypeDef status;
 
 	while(messageDecodeSuccessful != true){
@@ -398,9 +413,9 @@ void test_uart_slave_rx_and_tx(void)
 
 		// Get frame and decode message
 		link_parse_byte(&linkLayer, receiveByte);
-		if(link_get_valid_frame(&linkLayer,receiveBuffer, &receiveBufferLen)){
-			messageDecodeSuccessful = decode_simplemessage(receiveBuffer, sizeof(receiveBuffer), &simplMsgIn);
-			buffer_init_zero(receiveBuffer, sizeof(receiveBuffer));
+		if(link_get_valid_frame(&linkLayer,rxBuffer, &rxBufferLen)){
+			messageDecodeSuccessful = decode_simplemessage(rxBuffer, sizeof(rxBuffer), &simplMsgIn);
+			buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 		}
 		else{
 			invalidFrameCounter++;
@@ -421,11 +436,11 @@ void test_uart_slave_rx_and_tx(void)
 			SimpleMessage message_out = SimpleMessage_init_zero;
 			uint8_t bytesWritten = 0;
 
-			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
+			buffer_init_zero(txBuffer, sizeof(txBuffer));
 			message_out.msg = responseWord;
 
-			encode_simplemessage(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
-			link_write(&linkLayer,transmitBuffer,bytesWritten);
+			encode_simplemessage(txBuffer,sizeof(txBuffer), &message_out, &bytesWritten);
+			link_write(&linkLayer,txBuffer,bytesWritten);
 			HAL_UART_Transmit(&huart1,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
 		}
 	}

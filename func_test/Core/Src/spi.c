@@ -21,6 +21,9 @@
 #include "spi.h"
 
 /* USER CODE BEGIN 0 */
+SPI_HandleTypeDef hspi;
+static uint8_t txBuffer[50];
+static uint8_t rxBuffer[50];
 
 /* USER CODE END 0 */
 
@@ -188,12 +191,13 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
  *  @param  message_out: pointer to transmit message	**/
 void spi_test(Command* message_in, Command* message_out)
 {
-	SPI_HandleTypeDef hspi;
 	uint8_t command = message_in->spi.command;
 	uint8_t dummyClocks = message_in->spi.dummyClocks;
 	uint16_t writeValue = message_in->spi.writeValue;
 	uint8_t writeSize = message_in->spi.writeSize;
 	uint8_t slaveResponse = message_in->spi.slaveResponse;
+	uint8_t txSize = 1 + dummyClocks + writeSize;
+
 	HAL_StatusTypeDef status;
 	bool firstMSB = false;
 	bool success;
@@ -209,12 +213,11 @@ void spi_test(Command* message_in, Command* message_out)
 	}
 
 	// Fill txBuffer
-	uint8_t tx_buffer[sizeof(command) + dummyClocks+ writeSize];
-	tx_buffer[0] = command;
+	txBuffer[0] = command;
 	if(dummyClocks > 0){
 		uint8_t i;
 		for(i = 0; i < dummyClocks; i++){
-			tx_buffer[1+i] = 0;
+			txBuffer[1+i] = 0;
 		}
 	}
 	if(writeSize > 0){
@@ -222,13 +225,13 @@ void spi_test(Command* message_in, Command* message_out)
 		// MSB first
 		if(firstMSB){
 			for(i = 0; i < writeSize; i++){
-				tx_buffer[1+dummyClocks+i] = (uint8_t)(writeValue >> ((writeSize-1-i)*8));
+				txBuffer[1+dummyClocks+i] = (uint8_t)(writeValue >> ((writeSize-1-i)*8));
 			}
 		}
 		// LSB first
 		else{
 			for(i = 0; i < writeSize; i++){
-				tx_buffer[1+dummyClocks+i] = (uint8_t)(writeValue >> (i*8));
+				txBuffer[1+dummyClocks+i] = (uint8_t)(writeValue >> (i*8));
 			}
 		}
 
@@ -245,76 +248,85 @@ void spi_test(Command* message_in, Command* message_out)
 	message_out->commandType = CommandTypeEnum_SPI_test;
 
 	if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_FULL_DUPLEX_MASTER){
-		uint8_t rx_buffer[sizeof(tx_buffer) + slaveResponse];
-		status = HAL_SPI_TransmitReceive(&hspi,tx_buffer,rx_buffer,sizeof(rx_buffer), TEST_TIMEOUT_DURATION);
-		message_out->has_response = true;
-		if(status == HAL_OK){
-			uint8_t i;
-			uint32_t resp = 0;
+		uint8_t rxSize = txSize + slaveResponse;
+		status = HAL_BUSY;
+		while(status != HAL_OK){
+			status = HAL_SPI_TransmitReceive(&hspi,txBuffer,rxBuffer,rxSize, TEST_TIMEOUT_DURATION);
+			if(status == HAL_TIMEOUT){
+				spi_error_handler(message_out);
+				return;
+			}
+		}
+
+		uint32_t resp = 0;
+		// Motorola format only
+		if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
 			// MSB first
-			if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
-				if(firstMSB){
-					for(i = 0; i<slaveResponse; i++){
-						resp |= (rx_buffer[sizeof(tx_buffer)+i] << ((slaveResponse-1-i)*8));
-					}
-				}
-				else{
-					for(i = 0; i<slaveResponse; i++){
-						resp |= (rx_buffer[sizeof(tx_buffer)+i] << (i*8));
-					}
+			if(firstMSB){
+				for(uint8_t i = 0; i<slaveResponse; i++){
+					resp |= (rxBuffer[sizeof(txBuffer)+i] << ((slaveResponse-1-i)*8));
 				}
 			}
+			// LSB first
+			else{
+				for(uint8_t i = 0; i<slaveResponse; i++){
+					resp |= (rxBuffer[sizeof(txBuffer)+i] << (i*8));
+				}
+			}
+		}
 
-			message_out->response.has_responseRead = true;
-			message_out->response.responseRead = resp;
-		}
-		else{
-			message_out->response.has_responseEnum = true;
-			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
-		}
+		message_out->has_response = true;
+		message_out->response.has_responseRead = true;
+		message_out->response.responseRead = resp;
 	}
 
 	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_HALF_DUPLEX_MASTER){
-		uint8_t rx_buffer[slaveResponse];
-		status = HAL_SPI_TransmitReceive(&hspi,tx_buffer,rx_buffer,sizeof(rx_buffer), TEST_TIMEOUT_DURATION);
-		message_out->has_response = true;
-		if(status == HAL_OK){
-			uint8_t i;
-			uint32_t resp = 0;
+		uint8_t rxSize = slaveResponse;
+		status = HAL_BUSY;
+		while(status != HAL_OK){
+			status = HAL_SPI_TransmitReceive(&hspi,txBuffer,rxBuffer,rxSize, TEST_TIMEOUT_DURATION);
+			if(status == HAL_TIMEOUT){
+				spi_error_handler(message_out);
+				return;
+			}
+		}
+
+		uint32_t resp = 0;
+		// Motorola format only
+		if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
 			// MSB first
-			if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
-				if(firstMSB){
-					for(i = 0; i<slaveResponse; i++){
-						resp |= (rx_buffer[i] << ((slaveResponse-1-i)*8));
-					}
-				}
-				else{
-					for(i = 0; i<slaveResponse; i++){
-						resp |= (rx_buffer[i] << (i*8));
-					}
+			if(firstMSB){
+				for(uint8_t i = 0; i<slaveResponse; i++){
+					resp |= (rxBuffer[sizeof(txBuffer)+i] << ((slaveResponse-1-i)*8));
 				}
 			}
-			message_out->response.has_responseRead = true;
-			message_out->response.responseRead = resp;
+			// LSB first
+			else{
+				for(uint8_t i = 0; i<slaveResponse; i++){
+					resp |= (rxBuffer[sizeof(txBuffer)+i] << (i*8));
+				}
+			}
 		}
-		else{
-			message_out->response.has_responseEnum = true;
-			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
-		}
+
+		message_out->has_response = true;
+		message_out->response.has_responseRead = true;
+		message_out->response.responseRead = resp;
 
 	}
 
 	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER){
-		status = HAL_SPI_Transmit(&hspi, tx_buffer,sizeof(tx_buffer),TEST_TIMEOUT_DURATION);
+		status = HAL_BUSY;
+		while(status != HAL_OK){
+			status = HAL_SPI_Transmit(&hspi, txBuffer,txSize,TEST_TIMEOUT_DURATION);
+			if(status == HAL_TIMEOUT){
+				spi_error_handler(message_out);
+				return;
+			}
+		}
+
 		message_out->has_response = true;
-		if(status == HAL_OK){
-			message_out->response.has_responseEnum = true;
-			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_OK;
-		}
-		else{
-			message_out->response.has_responseEnum = true;
-			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
-		}
+		message_out->response.has_responseEnum = true;
+		message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_OK;
 	}
 	else{
 		// empty
@@ -435,6 +447,7 @@ bool spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
 	hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
 	hspi->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
 	hspi->Init.CRCPolynomial = 10;
+	HAL_SPI_MspInit(hspi);
 	if (HAL_SPI_Init(hspi) != HAL_OK){
 		return false;
 	}
