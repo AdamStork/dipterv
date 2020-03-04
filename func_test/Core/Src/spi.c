@@ -259,16 +259,16 @@ void spi_test(Command* message_in, Command* message_out)
 
 	if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_FULL_DUPLEX_MASTER){
 		uint8_t rxSize = txSize + slaveResponse;
-		status = HAL_BUSY;
-		while(status != HAL_OK){
-			uint8_t txByte = 0xA5;
-			status = HAL_SPI_Transmit(&hspi,&txByte, 1, TEST_TIMEOUT_DURATION);
+		uint8_t txByte = 0xA5;
+
+		status = HAL_SPI_Transmit(&hspi,&txByte, 1, TEST_TIMEOUT_DURATION);
 //			status = HAL_SPI_TransmitReceive(&hspi,txBuffer,rxBuffer,rxSize, TEST_TIMEOUT_DURATION);
-			if(status == HAL_TIMEOUT){
-				spi_error_handler(message_out);
-				return;
-			}
+		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
+		if(status == HAL_TIMEOUT){
+			spi_error_handler(message_out);
+			return;
 		}
+
 
 		uint32_t resp = 0;
 		// Motorola format only
@@ -294,14 +294,14 @@ void spi_test(Command* message_in, Command* message_out)
 
 	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_HALF_DUPLEX_MASTER){
 		uint8_t rxSize = slaveResponse;
-		status = HAL_BUSY;
-		while(status != HAL_OK){
-			status = HAL_SPI_TransmitReceive(&hspi,txBuffer,rxBuffer,rxSize, TEST_TIMEOUT_DURATION);
-			if(status == HAL_TIMEOUT){
-				spi_error_handler(message_out);
-				return;
-			}
+
+		status = HAL_SPI_TransmitReceive(&hspi,txBuffer,rxBuffer,rxSize, TEST_TIMEOUT_DURATION);
+		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
+		if(status == HAL_TIMEOUT){
+			spi_error_handler(message_out);
+			return;
 		}
+
 
 		uint32_t resp = 0;
 		// Motorola format only

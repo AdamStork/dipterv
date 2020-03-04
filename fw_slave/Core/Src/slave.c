@@ -163,26 +163,37 @@ void test_i2c_slave_read_and_write(void)
  * 	>>> expected writeValue: 0xAABB		**/
 void test_spi_slave_full_duplex(void)
 {
-	uint8_t rxSize = 5;
+//	uint8_t rxSize = 1;
+	uint8_t rxSize = 4;
 	uint8_t txSize = 2;
 	uint16_t writeValue = 0;
+	uint8_t rxByte;
+	uint8_t recBuf[50];
 
-	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
-	HAL_StatusTypeDef status = HAL_BUSY;
-	while(status != HAL_OK){
-		status = HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
-	}
+	MX_SPI2_Init();
+	HAL_SPI_MspInit(&hspi2);
 
+//	HAL_SPI_Receive(&hspi2,&rxByte, rxSize, HAL_MAX_DELAY);
+	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
+	while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
 
-	writeValue |= rxBuffer[2];
-	writeValue |= (rxBuffer[3] << 8);
-//	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
-	if(rxBuffer[0] == expectedByte){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	writeValue |= rxBuffer[3];
+	writeValue |= (rxBuffer[2] << 8);
+
+	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 		txBuffer[0] = 0x11;
 		txBuffer[1] = 0x22;
 		status = HAL_SPI_Transmit(&hspi2,txBuffer, txSize, HAL_MAX_DELAY);
+		while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
 	}
+
+//	if(rxByte == expectedByte){
+//		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+//	}
+
+	__HAL_SPI_DISABLE(&hspi2);
+	HAL_SPI_MspDeInit(&hspi2);
 }
 
 /** @brief SPI Half duplex test. Slave receives 5 bytes from Master: command (1), dummyclock (1), value (2). Then sends back 2 byte response
@@ -190,26 +201,37 @@ void test_spi_slave_full_duplex(void)
  * 	>>> expexted writeValue: 0xAABB		**/
 void test_spi_slave_half_duplex(void)
 {
-	uint8_t rxSize = 5;
+//	uint8_t rxSize = 1;
+	uint8_t rxSize = 4;
 	uint8_t txSize = 2;
 	uint16_t writeValue = 0;
+	uint8_t rxByte;
+	uint8_t recBuf[50];
 
-	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
-	HAL_StatusTypeDef status = HAL_BUSY;
-	while(status != HAL_OK){
-		status = HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
-	}
+	MX_SPI2_Init();
+	HAL_SPI_MspInit(&hspi2);
 
+//	HAL_SPI_Receive(&hspi2,&rxByte, rxSize, HAL_MAX_DELAY);
+	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
+	while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
 
-	writeValue |= rxBuffer[2];
-	writeValue |= (rxBuffer[3] << 8);
-//	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
-	if(rxBuffer[0] == expectedByte){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	writeValue |= rxBuffer[3];
+	writeValue |= (rxBuffer[2] << 8);
+
+	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 		txBuffer[0] = 0x11;
 		txBuffer[1] = 0x22;
 		status = HAL_SPI_Transmit(&hspi2,txBuffer, txSize, HAL_MAX_DELAY);
+		while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
 	}
+
+//	if(rxByte == expectedByte){
+//		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+//	}
+
+	__HAL_SPI_DISABLE(&hspi2);
+	HAL_SPI_MspDeInit(&hspi2);
 }
 
 
