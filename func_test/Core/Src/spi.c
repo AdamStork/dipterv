@@ -46,8 +46,9 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 		PA5     ------> SPI1_SCK
 		PA6     ------> SPI1_MISO
 		PA7     ------> SPI1_MOSI
+		PA4     ------> SPI1_NSS
 		*/
-		GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
+		GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -72,6 +73,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 		PC2     ------> SPI2_MISO
 		PC3     ------> SPI2_MOSI
 		PB10     ------> SPI2_SCK
+		PB12     ------> SPI2_NSS
 		*/
 		GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -80,7 +82,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 		GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
 		HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-		GPIO_InitStruct.Pin = GPIO_PIN_10;
+		GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_12;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -104,6 +106,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 		PC10     ------> SPI3_SCK
 		PC11     ------> SPI3_MISO
 		PC12     ------> SPI3_MOSI
+		PA15     ------> SPI3_NSS
 		*/
 		GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -111,6 +114,13 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 		GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
 		HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+		GPIO_InitStruct.Pin = GPIO_PIN_15;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+		GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 		/* USER CODE BEGIN SPI3_MspInit 1 */
 
@@ -251,7 +261,9 @@ void spi_test(Command* message_in, Command* message_out)
 		uint8_t rxSize = txSize + slaveResponse;
 		status = HAL_BUSY;
 		while(status != HAL_OK){
-			status = HAL_SPI_TransmitReceive(&hspi,txBuffer,rxBuffer,rxSize, TEST_TIMEOUT_DURATION);
+			uint8_t txByte = 0xA5;
+			status = HAL_SPI_Transmit(&hspi,&txByte, 1, TEST_TIMEOUT_DURATION);
+//			status = HAL_SPI_TransmitReceive(&hspi,txBuffer,rxBuffer,rxSize, TEST_TIMEOUT_DURATION);
 			if(status == HAL_TIMEOUT){
 				spi_error_handler(message_out);
 				return;
@@ -264,13 +276,13 @@ void spi_test(Command* message_in, Command* message_out)
 			// MSB first
 			if(firstMSB){
 				for(uint8_t i = 0; i<slaveResponse; i++){
-					resp |= (rxBuffer[sizeof(txBuffer)+i] << ((slaveResponse-1-i)*8));
+					resp |= (rxBuffer[txSize+i] << ((slaveResponse-1-i)*8));
 				}
 			}
 			// LSB first
 			else{
 				for(uint8_t i = 0; i<slaveResponse; i++){
-					resp |= (rxBuffer[sizeof(txBuffer)+i] << (i*8));
+					resp |= (rxBuffer[txSize+i] << (i*8));
 				}
 			}
 		}
@@ -297,13 +309,13 @@ void spi_test(Command* message_in, Command* message_out)
 			// MSB first
 			if(firstMSB){
 				for(uint8_t i = 0; i<slaveResponse; i++){
-					resp |= (rxBuffer[sizeof(txBuffer)+i] << ((slaveResponse-1-i)*8));
+					resp |= (rxBuffer[txSize+i] << ((slaveResponse-1-i)*8));
 				}
 			}
 			// LSB first
 			else{
 				for(uint8_t i = 0; i<slaveResponse; i++){
-					resp |= (rxBuffer[sizeof(txBuffer)+i] << (i*8));
+					resp |= (rxBuffer[txSize+i] << (i*8));
 				}
 			}
 		}
@@ -315,13 +327,13 @@ void spi_test(Command* message_in, Command* message_out)
 	}
 
 	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER){
-		status = HAL_BUSY;
-		while(status != HAL_OK){
-			status = HAL_SPI_Transmit(&hspi, txBuffer,txSize,TEST_TIMEOUT_DURATION);
-			if(status == HAL_TIMEOUT){
-				spi_error_handler(message_out);
-				return;
-			}
+
+		status = HAL_SPI_Transmit(&hspi, txBuffer,txSize,TEST_TIMEOUT_DURATION);
+		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
+
+		if(status == HAL_TIMEOUT){
+			spi_error_handler(message_out);
+			return;
 		}
 
 		message_out->has_response = true;
@@ -334,7 +346,7 @@ void spi_test(Command* message_in, Command* message_out)
 
 
 	// Deinit SPI peripheral
-	HAL_SPI_MspDeInit(&hspi);
+//	HAL_SPI_MspDeInit(&hspi);
 }
 
 
@@ -447,11 +459,12 @@ bool spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
 	hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
 	hspi->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
 	hspi->Init.CRCPolynomial = 10;
-	HAL_SPI_MspInit(hspi);
+
 	if (HAL_SPI_Init(hspi) != HAL_OK){
 		return false;
 	}
 
+	HAL_SPI_MspInit(hspi);
 	return true;
 }
 

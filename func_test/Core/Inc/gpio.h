@@ -42,6 +42,7 @@
  void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin);
  bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort);
  void gpio_error(Command* message_in, Command* message_out);
+ void MX_GPIO_Init(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

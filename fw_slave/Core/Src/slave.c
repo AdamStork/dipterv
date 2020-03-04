@@ -50,9 +50,9 @@ void enter_slave_test_mode(void)
 {
 //	testType = TEST_I2C_SLAVE_READ;
 //	testType = TEST_I2C_SLAVE_READ_AND_WRITE;
-	testType = TEST_SPI_SLAVE_FULL_DUPLEX;
+//	testType = TEST_SPI_SLAVE_FULL_DUPLEX;
 //	testType = TEST_SPI_SLAVE_HALF_DUPLEX;
-//	testType = TEST_SPI_SLAVE_RECEIVE_ONLY;
+	testType = TEST_SPI_SLAVE_RECEIVE_ONLY;
 //	testType = TEST_USART_SLAVE_RX_ONLY;
 //	testType = TEST_USART_SLAVE_TX_ONLY;
 //	testType = TEST_USART_SLAVE_RX_AND_TX;
@@ -160,13 +160,14 @@ void test_i2c_slave_read_and_write(void)
 /**********************			SPI test				******************************/
 /** @brief SPI Full duplex test. Slave receives 5 bytes from Master: command (1), dummyclock (1), value (2). Then sends back 2 byte response
  * 	>>>	expected Command: 0xA5
- * 	>>> expexted writeValue: 0xAABB		**/
+ * 	>>> expected writeValue: 0xAABB		**/
 void test_spi_slave_full_duplex(void)
 {
 	uint8_t rxSize = 5;
 	uint8_t txSize = 2;
 	uint16_t writeValue = 0;
 
+	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 	HAL_StatusTypeDef status = HAL_BUSY;
 	while(status != HAL_OK){
 		status = HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
@@ -193,6 +194,7 @@ void test_spi_slave_half_duplex(void)
 	uint8_t txSize = 2;
 	uint16_t writeValue = 0;
 
+	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 	HAL_StatusTypeDef status = HAL_BUSY;
 	while(status != HAL_OK){
 		status = HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
@@ -216,21 +218,32 @@ void test_spi_slave_half_duplex(void)
  * 	>>> expected writeValue: 0xAABB		**/
 void test_spi_slave_receive_only(void)
 {
-	uint8_t rxSize = 5;
+//	uint8_t rxSize = 1;
+	uint8_t rxSize = 4;
 	uint16_t writeValue = 0;
+	uint8_t rxByte;
+	uint8_t recBuf[50];
 
-	HAL_StatusTypeDef status = HAL_BUSY;
-	while(status != HAL_OK){
-		status = HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
+	MX_SPI2_Init();
+	HAL_SPI_MspInit(&hspi2);
+
+//	HAL_SPI_Receive(&hspi2,&rxByte, rxSize, HAL_MAX_DELAY);
+	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
+	while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
+
+	__HAL_SPI_DISABLE(&hspi2);
+
+	writeValue |= rxBuffer[3];
+	writeValue |= (rxBuffer[2] << 8);
+	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	}
 
+//	if(rxByte == expectedByte){
+//		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+//	}
 
-	writeValue |= rxBuffer[2];
-	writeValue |= (rxBuffer[3] << 8);
-//	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
-	if(rxBuffer[0] == expectedByte){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	}
+	HAL_SPI_MspDeInit(&hspi2);
 }
 
 
