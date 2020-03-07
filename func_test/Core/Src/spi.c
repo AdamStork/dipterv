@@ -207,6 +207,8 @@ void spi_test(Command* message_in, Command* message_out)
 	uint8_t writeSize = message_in->spi.writeSize;
 	uint8_t slaveResponse = message_in->spi.slaveResponse;
 	uint8_t txSize = 1 + dummyClocks + writeSize;
+	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
+	buffer_init_zero(txBuffer, sizeof(txBuffer));
 
 	HAL_StatusTypeDef status;
 	bool firstMSB = false;
@@ -258,12 +260,11 @@ void spi_test(Command* message_in, Command* message_out)
 	message_out->commandType = CommandTypeEnum_SPI_test;
 
 	if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_FULL_DUPLEX_MASTER){
-		uint8_t rxSize = txSize + slaveResponse;
-		uint8_t txByte = 0xA5;
+		uint8_t totalSize = txSize + slaveResponse;
 
-		status = HAL_SPI_Transmit(&hspi,&txByte, 1, TEST_TIMEOUT_DURATION);
-//			status = HAL_SPI_TransmitReceive(&hspi,txBuffer,rxBuffer,rxSize, TEST_TIMEOUT_DURATION);
+		status = HAL_SPI_TransmitReceive(&hspi, txBuffer,rxBuffer,totalSize,1000);
 		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
+
 		if(status == HAL_TIMEOUT){
 			spi_error_handler(message_out);
 			return;
@@ -346,6 +347,8 @@ void spi_test(Command* message_in, Command* message_out)
 
 
 	// Deinit SPI peripheral
+//	__HAL_SPI_DISABLE(&hspi);
+	HAL_SPI_DeInit(&hspi);
 //	HAL_SPI_MspDeInit(&hspi);
 }
 
