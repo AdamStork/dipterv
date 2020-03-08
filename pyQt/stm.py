@@ -391,6 +391,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.spi_write_size_select.setText("")
             self.spi_command_select.setEnabled(True)
             self.spi_command_select.setText("")
+            self.spi_dummyclocks_select.setEnabled(True)
+            self.spi_dummyclocks_select.setText("")
 
         elif self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[1]:  # Transmit (4Wire)
             self.spi_slave_response_select.setEnabled(False)
@@ -401,6 +403,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.spi_write_size_select.setText("")
             self.spi_command_select.setEnabled(True)
             self.spi_command_select.setText("")
+            self.spi_dummyclocks_select.setEnabled(False)
+            self.spi_dummyclocks_select.setText("0")
 
         elif self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[2]: # Receive (4Wire)
             self.spi_slave_response_select.setEnabled(True)
@@ -411,6 +415,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.spi_write_size_select.setText("0")
             self.spi_command_select.setEnabled(False)
             self.spi_command_select.setText("0x00")
+            self.spi_dummyclocks_select.setEnabled(False)
+            self.spi_dummyclocks_select.setText("0")
 
         elif self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[3]: # Half Duplex Transmit
             self.spi_slave_response_select.setEnabled(False)
@@ -421,6 +427,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.spi_write_size_select.setText("")
             self.spi_command_select.setEnabled(True)
             self.spi_command_select.setText("")
+            self.spi_dummyclocks_select.setEnabled(False)
+            self.spi_dummyclocks_select.setText("0")
 
         elif self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[4]: # Receive (4Wire)
             self.spi_slave_response_select.setEnabled(True)
@@ -431,6 +439,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.spi_write_size_select.setText("0")
             self.spi_command_select.setEnabled(False)
             self.spi_command_select.setText("0x00")
+            self.spi_dummyclocks_select.setEnabled(False)
+            self.spi_dummyclocks_select.setText("0")
 
 
     # Called when USART mode setting is changed
@@ -1018,7 +1028,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     response = "I2C read: " + "0x{:04X}".format(message_data.response.responseRead)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
-            if test_object.spi.operatingMode == list(sequence.dict_spi_operating_mode.values())[2]: # SPI Transmit-only response: OK/failed
+            if test_object.spi.operatingMode == list(sequence.dict_spi_operating_mode.values())[1]: # SPI Transmit-only response: OK/failed
+                response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
+            elif test_object.spi.operatingMode == list(sequence.dict_spi_operating_mode.values())[3]: # SPI Half duplex Transmit-only response: OK/failed
                 response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
             else:   # SPI transmit/receive response: data/failed
                 if message_data.response.responseEnum == list(sequence.dict_response_write.values())[list(sequence.dict_response_write.keys()).index("SPI transmission failed")]:

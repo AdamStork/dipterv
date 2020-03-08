@@ -51,8 +51,10 @@ void enter_slave_test_mode(void)
 //	testType = TEST_I2C_SLAVE_READ;
 //	testType = TEST_I2C_SLAVE_READ_AND_WRITE;
 //	testType = TEST_SPI_SLAVE_FULL_DUPLEX;
-	testType = TEST_SPI_SLAVE_HALF_DUPLEX;
+	testType = TEST_SPI_SLAVE_HALF_DUPLEX_TX;
+//	testType = TEST_SPI_SLAVE_HALF_DUPLEX_RX;
 //	testType = TEST_SPI_SLAVE_RECEIVE_ONLY;
+//	testType = TEST_SPI_SLAVE_TRANSMIT_ONLY;
 //	testType = TEST_USART_SLAVE_RX_ONLY;
 //	testType = TEST_USART_SLAVE_TX_ONLY;
 //	testType = TEST_USART_SLAVE_RX_AND_TX;
@@ -62,21 +64,28 @@ void enter_slave_test_mode(void)
 
 	while(1){
 		switch(testType){
+		// I2C
 		case TEST_I2C_SLAVE_READ:
 			test_i2c_slave_read();
 			break;
 		case TEST_I2C_SLAVE_READ_AND_WRITE:
 			test_i2c_slave_read_and_write();
 			break;
+
+		// SPI
 		case TEST_SPI_SLAVE_FULL_DUPLEX:
 			test_spi_slave_full_duplex();
 			break;
-		case TEST_SPI_SLAVE_HALF_DUPLEX:
-			test_spi_slave_half_duplex();
-			break;
 		case TEST_SPI_SLAVE_RECEIVE_ONLY:
+		case TEST_SPI_SLAVE_HALF_DUPLEX_RX:
 			test_spi_slave_receive_only();
 			break;
+		case TEST_SPI_SLAVE_TRANSMIT_ONLY:
+		case TEST_SPI_SLAVE_HALF_DUPLEX_TX:
+			test_spi_slave_transmit_only();
+			break;
+
+		// USART
 		case TEST_USART_SLAVE_RX_ONLY:
 			test_usart_slave_rx_only();
 			break;
@@ -86,6 +95,8 @@ void enter_slave_test_mode(void)
 		case TEST_USART_SLAVE_RX_AND_TX:
 			test_usart_slave_rx_and_tx();
 			break;
+
+		// UART
 		case TEST_UART_SLAVE_RX_ONLY:
 			test_uart_slave_rx_only();
 			break;
@@ -165,7 +176,6 @@ void test_spi_slave_full_duplex(void)
 {
 	uint8_t totalsize = 6;
 
-	HAL_StatusTypeDef status;
 	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 	buffer_init_zero(txBuffer, sizeof(txBuffer));
 
@@ -179,7 +189,7 @@ void test_spi_slave_full_duplex(void)
 	txBuffer[4] = 0x11;
 	txBuffer[5] = 0x22;
 
-	status = HAL_SPI_TransmitReceive(&hspi2,txBuffer,rxBuffer, totalsize, HAL_MAX_DELAY);
+	HAL_SPI_TransmitReceive(&hspi2,txBuffer,rxBuffer, totalsize, HAL_MAX_DELAY);
 	while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
 
 	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
@@ -187,45 +197,26 @@ void test_spi_slave_full_duplex(void)
 	HAL_SPI_DeInit(&hspi2);
 }
 
-/** @brief SPI Half duplex test. Slave receives 5 bytes from Master: command (1), dummyclock (1), value (2). Then sends back 2 byte response
- * 	>>>	expected Command: 0xA5
- * 	>>> expexted writeValue: 0xAABB		**/
-void test_spi_slave_half_duplex(void)
+
+/** @brief SPI Receive test. Slave receives 2 bytes to Master
+ * 	>>>	bytes sent: 0x2211	**/
+void test_spi_slave_transmit_only(void)
 {
-	uint8_t rxSize = 4;
 	uint8_t txSize = 2;
 	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
 	buffer_init_zero(txBuffer, sizeof(txBuffer));
-	uint16_t writeValue = 0;
 
 	MX_SPI2_Init();
 	HAL_SPI_MspInit(&hspi2);
 
-//	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
-//	while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
-
-
-
-//	HAL_SPI_DeInit(&hspi2);
-////	HAL_Delay(30);
-//
-//
 	txBuffer[0] = 0x11;
 	txBuffer[1] = 0x22;
-//	txBuffer[2] = 0x33;
-//	txBuffer[3] = 0x44;
-//	txBuffer[4] = 0x55;
-//	txBuffer[5] = 0x66;
-//
-//	MX_SPI2_Init();
-//	HAL_SPI_MspInit(&hspi2);
+
 	HAL_SPI_Transmit(&hspi2,txBuffer, txSize, HAL_MAX_DELAY);
 	while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
-//	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 
 	HAL_SPI_DeInit(&hspi2);
 }
-
 
 /** @brief SPI Receive test. Slave receives 5 bytes from Master: command (1), dummyclock (1), value (2).
  * 	>>>	expected Command: 0xA5
@@ -234,7 +225,8 @@ void test_spi_slave_receive_only(void)
 {
 	uint8_t rxSize = 4;
 	uint16_t writeValue = 0;
-//	uint8_t rxByte;
+	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
+	buffer_init_zero(txBuffer, sizeof(txBuffer));
 
 	MX_SPI2_Init();
 	HAL_SPI_MspInit(&hspi2);
@@ -247,7 +239,7 @@ void test_spi_slave_receive_only(void)
 	writeValue |= rxBuffer[3];
 	writeValue |= (rxBuffer[2] << 8);
 	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	}
 
 

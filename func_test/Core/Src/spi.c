@@ -295,67 +295,8 @@ void spi_test(Command* message_in, Command* message_out)
 		message_out->response.responseRead = resp;
 	}
 
-	// 3-wire SPI Half-duplex mode: Master MOSI <---> Slave MISO
-	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_HALF_DUPLEX_MASTER){
-		uint8_t rxSize = slaveResponse;
-
-//		status = HAL_SPI_Transmit(&hspi, txBuffer, txSize, TEST_TIMEOUT_DURATION);
-//		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
-//		if(status == HAL_TIMEOUT){
-//			spi_error_handler(message_out);
-//			return;
-//		}
-
-//		// Receive message if expected slave response bytes > 0
-//		if(slaveResponse > 0){
-//			// Re-Init SPI peripheral
-//			HAL_SPI_DeInit(&hspi);
-////			HAL_Delay(10);
-//			success = spi_init(message_in, &hspi);
-//			if(success == false){
-//				spi_error_handler(message_out);
-//				return;
-//			}
-//
-		status = HAL_SPI_Receive(&hspi, rxBuffer, rxSize, 1000);
-		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
-		if(status == HAL_TIMEOUT){
-			spi_error_handler(message_out);
-			return;
-		}
-//
-//
-//			uint32_t resp = 0;
-//			// Motorola format only
-//			if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
-//				// MSB first
-//				if(firstMSB){
-//					for(uint8_t i = 0; i<slaveResponse; i++){
-//						resp |= (rxBuffer[i] << ((slaveResponse-1-i)*8));
-//					}
-//				}
-//				// LSB first
-//				else{
-//					for(uint8_t i = 0; i<slaveResponse; i++){
-//						resp |= (rxBuffer[i] << (i*8));
-//					}
-//				}
-//			}
-//
-//			message_out->has_response = true;
-//			message_out->response.has_responseRead = true;
-//			message_out->response.responseRead = resp;
-//		}
-		// If no incoming message is expected, send back OK signal to PC
-			message_out->has_response = true;
-			message_out->response.has_responseEnum = true;
-			message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_OK;
-
-	}
-
 	// 4-wire SPI transmit only mode
-	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER){
-
+	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_TRANSMIT_4WIRE_MASTER){
 		status = HAL_SPI_Transmit(&hspi, txBuffer,txSize,TEST_TIMEOUT_DURATION);
 		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
 
@@ -368,6 +309,88 @@ void spi_test(Command* message_in, Command* message_out)
 		message_out->response.has_responseEnum = true;
 		message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_OK;
 	}
+
+	// 4-wire SPI receive only mode
+	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_RECEIVE_4WIRE_MASTER){
+		uint8_t rxSize = slaveResponse;
+
+		status = HAL_SPI_Receive(&hspi, rxBuffer, rxSize, 1000);
+		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
+		if(status == HAL_TIMEOUT){
+			spi_error_handler(message_out);
+			return;
+		}
+
+		uint32_t resp = 0;
+		// Motorola format only
+		if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
+			// MSB first
+			if(firstMSB){
+				for(uint8_t i = 0; i<slaveResponse; i++){
+					resp |= (rxBuffer[i] << ((slaveResponse-1-i)*8));
+				}
+			}
+			// LSB first
+			else{
+				for(uint8_t i = 0; i<slaveResponse; i++){
+					resp |= (rxBuffer[i] << (i*8));
+				}
+			}
+		}
+
+		message_out->has_response = true;
+		message_out->response.has_responseRead = true;
+		message_out->response.responseRead = resp;
+	}
+
+	// 3-wire SPI Half-duplex mode: Master MOSI <---> Slave MISO
+	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_HALF_DUPLEX_TX_MASTER){
+		status = HAL_SPI_Transmit(&hspi, txBuffer, txSize, TEST_TIMEOUT_DURATION);
+		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
+
+		if(status == HAL_TIMEOUT){
+			spi_error_handler(message_out);
+			return;
+		}
+
+		message_out->has_response = true;
+		message_out->response.has_responseEnum = true;
+		message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_OK;
+	}
+
+	// 3-wire SPI Half-duplex mode: Master MOSI <---> Slave MISO
+	else if(message_in->spi.operatingMode == spiOperatingMode_SPI_MODE_HALF_DUPLEX_RX_MASTER){
+		uint8_t rxSize = slaveResponse;
+
+		status = HAL_SPI_Receive(&hspi, rxBuffer, rxSize, 1000);
+		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
+		if(status == HAL_TIMEOUT){
+			spi_error_handler(message_out);
+			return;
+		}
+
+		uint32_t resp = 0;
+		// Motorola format only
+		if(message_in->spi.frameFormat == spiFrameFormat_SPI_FRAME_FORMAT_MOTOROLA){
+			// MSB first
+			if(firstMSB){
+				for(uint8_t i = 0; i<slaveResponse; i++){
+					resp |= (rxBuffer[i] << ((slaveResponse-1-i)*8));
+				}
+			}
+			// LSB first
+			else{
+				for(uint8_t i = 0; i<slaveResponse; i++){
+					resp |= (rxBuffer[i] << (i*8));
+				}
+			}
+		}
+
+		message_out->has_response = true;
+		message_out->response.has_responseRead = true;
+		message_out->response.responseRead = resp;
+	}
+
 	else{
 		// empty
 	}
@@ -404,11 +427,13 @@ bool spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
 		hspi->Init.Mode = SPI_MODE_MASTER;
 		hspi->Init.Direction = SPI_DIRECTION_2LINES;
 		break;
-	case spiOperatingMode_SPI_MODE_HALF_DUPLEX_MASTER:
+	case spiOperatingMode_SPI_MODE_HALF_DUPLEX_TX_MASTER:
+	case spiOperatingMode_SPI_MODE_HALF_DUPLEX_RX_MASTER:
 		hspi->Init.Mode = SPI_MODE_MASTER;
 		hspi->Init.Direction = SPI_DIRECTION_1LINE;
 		break;
-	case spiOperatingMode_SPI_MODE_TRANSMIT_ONLY_MASTER:
+	case spiOperatingMode_SPI_MODE_TRANSMIT_4WIRE_MASTER:
+	case spiOperatingMode_SPI_MODE_RECEIVE_4WIRE_MASTER:
 		hspi->Init.Mode = SPI_MODE_MASTER;
 		hspi->Init.Direction = SPI_DIRECTION_2LINES;
 		break;
