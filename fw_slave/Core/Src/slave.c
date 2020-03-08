@@ -50,8 +50,8 @@ void enter_slave_test_mode(void)
 {
 //	testType = TEST_I2C_SLAVE_READ;
 //	testType = TEST_I2C_SLAVE_READ_AND_WRITE;
-	testType = TEST_SPI_SLAVE_FULL_DUPLEX;
-//	testType = TEST_SPI_SLAVE_HALF_DUPLEX;
+//	testType = TEST_SPI_SLAVE_FULL_DUPLEX;
+	testType = TEST_SPI_SLAVE_HALF_DUPLEX;
 //	testType = TEST_SPI_SLAVE_RECEIVE_ONLY;
 //	testType = TEST_USART_SLAVE_RX_ONLY;
 //	testType = TEST_USART_SLAVE_TX_ONLY;
@@ -192,37 +192,38 @@ void test_spi_slave_full_duplex(void)
  * 	>>> expexted writeValue: 0xAABB		**/
 void test_spi_slave_half_duplex(void)
 {
-//	uint8_t rxSize = 1;
 	uint8_t rxSize = 4;
 	uint8_t txSize = 2;
+	buffer_init_zero(rxBuffer, sizeof(rxBuffer));
+	buffer_init_zero(txBuffer, sizeof(txBuffer));
 	uint16_t writeValue = 0;
-//	uint8_t rxByte;
-	HAL_StatusTypeDef status;
 
 	MX_SPI2_Init();
 	HAL_SPI_MspInit(&hspi2);
 
-//	HAL_SPI_Receive(&hspi2,&rxByte, rxSize, HAL_MAX_DELAY);
-	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
+//	HAL_SPI_Receive(&hspi2,rxBuffer, rxSize, HAL_MAX_DELAY);
+//	while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
+
+
+
+//	HAL_SPI_DeInit(&hspi2);
+////	HAL_Delay(30);
+//
+//
+	txBuffer[0] = 0x11;
+	txBuffer[1] = 0x22;
+//	txBuffer[2] = 0x33;
+//	txBuffer[3] = 0x44;
+//	txBuffer[4] = 0x55;
+//	txBuffer[5] = 0x66;
+//
+//	MX_SPI2_Init();
+//	HAL_SPI_MspInit(&hspi2);
+	HAL_SPI_Transmit(&hspi2,txBuffer, txSize, HAL_MAX_DELAY);
 	while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
+//	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 
-	writeValue |= rxBuffer[3];
-	writeValue |= (rxBuffer[2] << 8);
-
-	if((rxBuffer[0] == expectedByte) && (writeValue == expectedHalfWord)){
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-		txBuffer[0] = 0x11;
-		txBuffer[1] = 0x22;
-		status = HAL_SPI_Transmit(&hspi2,txBuffer, txSize, HAL_MAX_DELAY);
-		while(HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
-	}
-
-//	if(rxByte == expectedByte){
-//		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-//	}
-
-	__HAL_SPI_DISABLE(&hspi2);
-	HAL_SPI_MspDeInit(&hspi2);
+	HAL_SPI_DeInit(&hspi2);
 }
 
 

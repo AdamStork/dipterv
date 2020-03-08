@@ -62,9 +62,11 @@ dict_spi_clockmode = {
 }
 
 dict_spi_operating_mode = {
-    "Full Duplex Master": 0,
-    "Half Duplex Master": 1,
-    "Transmit Only Master": 2
+    "Full Duplex": 0,
+    "Tx only (4Wire)": 1,
+    "Rx only (4Wire)": 2,
+    "Half Duplex Tx": 3,
+    "Half Duplex Rx": 4,
 }
 
 dict_spi_frame_format = {

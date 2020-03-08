@@ -382,12 +382,56 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Called when SPI operating mode option is changed: enables/disable slave response (bytes) field
     def on_changed_spi_opmode(self):
-        if self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[2]:
-            self.spi_slave_response_select.setEnabled(False)
-            self.spi_slave_response_select.setText("0")
-        else:
+        if self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[0]:  # Full-duplex
             self.spi_slave_response_select.setEnabled(True)
             self.spi_slave_response_select.setText("")
+            self.spi_write_value_select.setEnabled(True)
+            self.spi_write_value_select.setText("")
+            self.spi_write_size_select.setEnabled(True)
+            self.spi_write_size_select.setText("")
+            self.spi_command_select.setEnabled(True)
+            self.spi_command_select.setText("")
+
+        elif self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[1]:  # Transmit (4Wire)
+            self.spi_slave_response_select.setEnabled(False)
+            self.spi_slave_response_select.setText("0")
+            self.spi_write_value_select.setEnabled(True)
+            self.spi_write_value_select.setText("")
+            self.spi_write_size_select.setEnabled(True)
+            self.spi_write_size_select.setText("")
+            self.spi_command_select.setEnabled(True)
+            self.spi_command_select.setText("")
+
+        elif self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[2]: # Receive (4Wire)
+            self.spi_slave_response_select.setEnabled(True)
+            self.spi_slave_response_select.setText("")
+            self.spi_write_value_select.setEnabled(False)
+            self.spi_write_value_select.setText("0x00")
+            self.spi_write_size_select.setEnabled(False)
+            self.spi_write_size_select.setText("0")
+            self.spi_command_select.setEnabled(False)
+            self.spi_command_select.setText("0x00")
+
+        elif self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[3]: # Half Duplex Transmit
+            self.spi_slave_response_select.setEnabled(False)
+            self.spi_slave_response_select.setText("0")
+            self.spi_write_value_select.setEnabled(True)
+            self.spi_write_value_select.setText("")
+            self.spi_write_size_select.setEnabled(True)
+            self.spi_write_size_select.setText("")
+            self.spi_command_select.setEnabled(True)
+            self.spi_command_select.setText("")
+
+        elif self.spi_operating_mode_select.currentData() == list(sequence.dict_spi_operating_mode.values())[4]: # Receive (4Wire)
+            self.spi_slave_response_select.setEnabled(True)
+            self.spi_slave_response_select.setText("")
+            self.spi_write_value_select.setEnabled(False)
+            self.spi_write_value_select.setText("0x00")
+            self.spi_write_size_select.setEnabled(False)
+            self.spi_write_size_select.setText("0")
+            self.spi_command_select.setEnabled(False)
+            self.spi_command_select.setText("0x00")
+
 
     # Called when USART mode setting is changed
     def on_changed_usart_mode(self):
@@ -545,7 +589,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spi_dummyclocks_label = QLabel("Dummy clocks (bytes)", self)
                 self.spi_write_value_label = QLabel("Write value", self)
                 self.spi_write_size_label = QLabel("Write size (bytes)", self)
-                self.spi_slave_response_label = QLabel("Slave resposne (bytes)", self)
+                self.spi_slave_response_label = QLabel("Slave response (bytes)", self)
                 self.spi_hardware_nss_label = QLabel("Hardware NSS",self)
                 self.spi_frame_format_label = QLabel("Frame format", self)
                 self.spi_data_size_label = QLabel("Data size", self)
