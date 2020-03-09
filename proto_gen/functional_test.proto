@@ -2,7 +2,7 @@ syntax = "proto2";
 
 // Command types
 enum CommandTypeEnum{
-  LED_test = 0;
+  Show_menu = 0;
   I2C_test = 1;
   SPI_test = 2;
   USART_test = 3;
