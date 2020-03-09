@@ -138,7 +138,7 @@ void HAL_USART_MspInit(USART_HandleTypeDef* usartHandle)
 	    */
 	    GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8;
 	    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	    GPIO_InitStruct.Pull = GPIO_PULLUP;
+	    GPIO_InitStruct.Pull = GPIO_NOPULL;
 	    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	    GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
 	    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -548,12 +548,12 @@ void usart_test(Command* message_in, Command* message_out)
 
 
 	// Deinit UART/USART
-//	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-//		HAL_UART_MspDeInit(&huart);
-//	}
-//	else{
-//		HAL_USART_MspDeInit(&husart);
-//	}
+	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+		HAL_UART_MspDeInit(&huart);
+	}
+	else{
+		HAL_USART_MspDeInit(&husart);
+	}
 
 }
 

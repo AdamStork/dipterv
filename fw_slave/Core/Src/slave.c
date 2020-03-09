@@ -51,12 +51,12 @@ void enter_slave_test_mode(void)
 //	testType = TEST_I2C_SLAVE_READ;
 //	testType = TEST_I2C_SLAVE_READ_AND_WRITE;
 //	testType = TEST_SPI_SLAVE_FULL_DUPLEX;
-	testType = TEST_SPI_SLAVE_HALF_DUPLEX_TX;
+//	testType = TEST_SPI_SLAVE_HALF_DUPLEX_TX;
 //	testType = TEST_SPI_SLAVE_HALF_DUPLEX_RX;
 //	testType = TEST_SPI_SLAVE_RECEIVE_ONLY;
 //	testType = TEST_SPI_SLAVE_TRANSMIT_ONLY;
 //	testType = TEST_USART_SLAVE_RX_ONLY;
-//	testType = TEST_USART_SLAVE_TX_ONLY;
+	testType = TEST_USART_SLAVE_TX_ONLY;
 //	testType = TEST_USART_SLAVE_RX_AND_TX;
 //	testType = TEST_UART_SLAVE_RX_ONLY;
 //	testType = TEST_UART_SLAVE_TX_ONLY;
@@ -252,7 +252,7 @@ void test_spi_slave_receive_only(void)
 /** @brief Receive message **/
 void test_usart_slave_rx_only(void)
 {
-	MX_USART6_Init();
+//	MX_USART6_Init();
 
 	bool messageDecodeSuccessful = false;
 	SimpleMessage simplMsgIn = SimpleMessage_init_zero;
@@ -263,6 +263,7 @@ void test_usart_slave_rx_only(void)
 	while(messageDecodeSuccessful != true){
 		// Receive frame byte-by-byte
 		status = HAL_USART_Receive(&husart6,&receiveByte, 1,HAL_MAX_DELAY);
+		while(HAL_USART_GetState(&husart6) != HAL_USART_STATE_READY);
 
 		// Get frame and decode message
 		link_parse_byte(&linkLayer, receiveByte);
@@ -302,6 +303,7 @@ void test_usart_slave_tx_only(void)
 	encode_simplemessage(txBuffer,sizeof(txBuffer), &message_out, &bytesWritten);
 	link_write(&linkLayer,txBuffer,bytesWritten);
 	HAL_USART_Transmit(&husart6,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
+	while(HAL_USART_GetState(&husart6) != HAL_USART_STATE_READY);
 }
 
 
@@ -317,6 +319,7 @@ void test_usart_slave_rx_and_tx(void)
 	while(messageDecodeSuccessful != true){
 		// Receive frame byte-by-byte
 		status = HAL_USART_Receive(&husart6,(uint8_t*)&receiveByte, 1,TEST_TIMEOUT_DURATION);
+		while(HAL_USART_GetState(&husart6) != HAL_USART_STATE_READY);
 
 		// Get frame and decode message
 		link_parse_byte(&linkLayer, receiveByte);
@@ -349,6 +352,7 @@ void test_usart_slave_rx_and_tx(void)
 			encode_simplemessage(txBuffer,sizeof(txBuffer), &message_out, &bytesWritten);
 			link_write(&linkLayer,txBuffer,bytesWritten);
 			HAL_USART_Transmit(&husart6,linkLayer.tx_buffer, linkLayer.tx_buffer_size, TEST_TIMEOUT_DURATION);
+			while(HAL_USART_GetState(&husart6) != HAL_USART_STATE_READY);
 		}
 	}
 }

@@ -218,7 +218,7 @@ void i2c_test(Command* message_in, Command* message_out)
 		}
 
 		// Send out data via I2C
-		status = HAL_I2C_Master_Transmit(&hi2c,(uint16_t)deviceAddress,writeBuff, writeSize+1, TEST_TIMEOUT_DURATION);
+		status = HAL_I2C_Master_Transmit(&hi2c,(uint16_t)deviceAddress,writeBuff, writeSize+1, TEST_TIMEOUT_DURATION);		// wait: IsDeviceReady
 		message_out->has_response = true;
 		message_out->response.has_responseEnum = true;
 		if(status == HAL_OK){
@@ -236,7 +236,7 @@ void i2c_test(Command* message_in, Command* message_out)
 		// Read out data via I2C
 		status = HAL_BUSY;
 		while(status != HAL_OK){
-			status = HAL_I2C_Master_Transmit(&hi2c, (uint16_t)deviceAddress, writeBuff, 1, TEST_TIMEOUT_DURATION);
+			status = HAL_I2C_Master_Transmit(&hi2c, (uint16_t)deviceAddress, writeBuff, 1, TEST_TIMEOUT_DURATION);		// wait: IsDeviceReady
 			if(status == HAL_TIMEOUT){
 				i2c_error_handler(message_in, message_out);
 				return;
@@ -245,7 +245,7 @@ void i2c_test(Command* message_in, Command* message_out)
 
 		status = HAL_BUSY;
 		while(status != HAL_OK){
-			status = HAL_I2C_Master_Receive(&hi2c, (uint16_t)deviceAddress, readBuff, readSize, TEST_TIMEOUT_DURATION);
+			status = HAL_I2C_Master_Receive(&hi2c, (uint16_t)deviceAddress, readBuff, readSize, TEST_TIMEOUT_DURATION);		// wait: IsDeviceReady
 			if(status == HAL_TIMEOUT){
 				i2c_error_handler(message_in, message_out);
 				return;
