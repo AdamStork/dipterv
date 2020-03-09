@@ -40,6 +40,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cfg_browse_button.clicked.connect(self.browse_cfg)
         self.cfg_load_button.clicked.connect(self.load_cfg)
         self.cfg_checkbox.stateChanged.connect(self.cfg_checkbox_state_changed)
+        self.scrollArea.verticalScrollBar().rangeChanged.connect(self.resizeScroll)
         # Fill command combo box
         self.fill_cmd_box()
         # Flags: avoid command reselection
@@ -1148,6 +1149,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 command_send_success = 'Port is not open'
             commandSendingLabel = QLabel(command_send_success)
             self.scroll_layout.addWidget(commandSendingLabel)
+
+    # Scroll down in scrollArea
+    def resizeScroll(self, min, maxi):
+        self.scrollArea.verticalScrollBar().setValue(maxi)
 
 
 
