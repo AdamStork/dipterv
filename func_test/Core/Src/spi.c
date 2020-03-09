@@ -289,6 +289,12 @@ void spi_test(Command* message_in, Command* message_out)
 				}
 			}
 		}
+		// TI mode protocol
+		else{
+			for(uint8_t i = 0; i<slaveResponse; i++){
+				resp |= (rxBuffer[txSize+i] << ((slaveResponse-1-i)*8));
+			}
+		}
 
 		message_out->has_response = true;
 		message_out->response.has_responseRead = true;

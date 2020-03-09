@@ -44,7 +44,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.fill_cmd_box()
         # Flags: avoid command reselection
         self.I2C_active = False
-        self.LED_active = False
+        self.MENU_active = False
         self.SPI_active = False
         self.USART_active = False
         self.GPIO_active = False
@@ -500,8 +500,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.options_layout.setColumnMinimumWidth(0,80)
 
         if cmdType == functional_test_pb2.CommandTypeEnum.Show_menu:
-            if self.LED_active == False:
-                self.LED_active = True
+            if self.MENU_active == False:
+                self.MENU_active = True
 
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.I2C_test:
@@ -997,7 +997,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 #                else:
 #                    self.clearLayout(item.layout())
 
-        self.LED_active = False
+        self.MENU_active = False
         self.I2C_active = False
         self.SPI_active = False
         self.GPIO_active = False
