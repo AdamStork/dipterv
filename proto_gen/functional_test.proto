@@ -353,6 +353,7 @@ enum responseEnum_t{
  ADC_READ_FAIL= 50;
  PWM_SET_OK = 60;
  PWM_SET_FAIL = 61;
+ INVALID_PERIPHERAL = 100;
 }
 
 message responseMessage{

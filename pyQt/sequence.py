@@ -81,7 +81,7 @@ dict_spi_data_size = {
 
 dict_spi_hardware_nss = {
     "Disable": 0,
-    "NSS Input": 1,
+#    "NSS Input": 1,
     "NSS Output": 2
 }
 

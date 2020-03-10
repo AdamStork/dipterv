@@ -22,10 +22,12 @@
 
 /* USER CODE BEGIN 0 */
 #include "test.h"
+#include "peripheral_config.h"
+
 SPI_HandleTypeDef hspi;
 static uint8_t txBuffer[50];
 static uint8_t rxBuffer[50];
-
+static bool invalidPeripheral = false;
 /* USER CODE END 0 */
 
 
@@ -34,6 +36,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 {
 
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
+#ifdef HAS_SPI1
 	if(spiHandle->Instance==SPI1)
 	{
 		/* USER CODE BEGIN SPI1_MspInit 0 */
@@ -60,7 +63,10 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 
 		/* USER CODE END SPI1_MspInit 1 */
 	}
-	else if(spiHandle->Instance==SPI2)
+#endif
+
+#ifdef HAS_SPI2
+	if(spiHandle->Instance==SPI2)
 	{
 		/* USER CODE BEGIN SPI2_MspInit 0 */
 
@@ -94,7 +100,10 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 
 		/* USER CODE END SPI2_MspInit 1 */
 	}
-	else if(spiHandle->Instance==SPI3)
+#endif
+
+#ifdef HAS_SPI3
+	if(spiHandle->Instance==SPI3)
 	{
 		/* USER CODE BEGIN SPI3_MspInit 0 */
 
@@ -127,6 +136,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 
 		/* USER CODE END SPI3_MspInit 1 */
 	}
+#endif
 }
 
 void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
@@ -415,13 +425,28 @@ bool spi_init(Command* message_in, SPI_HandleTypeDef* hspi)
 {
 	switch(message_in->spi.bus){
 	case spiBus_SPI1:
+#ifdef HAS_SPI1
 		hspi->Instance = SPI1;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	case spiBus_SPI2:
+#ifdef HAS_SPI2
 		hspi->Instance = SPI2;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	case spiBus_SPI3:
+#ifdef HAS_SPI3
 		hspi->Instance = SPI3;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	default:
 		return false;
@@ -535,7 +560,14 @@ void spi_error_handler(Command* message_out)
 	message_out->commandType = CommandTypeEnum_SPI_test;
 	message_out->has_response = true;
 	message_out->response.has_responseEnum = true;
-	message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
+
+	if(invalidPeripheral == true){
+		invalidPeripheral = false;
+		message_out->response.responseEnum = responseEnum_t_INVALID_PERIPHERAL;
+	}
+	else{
+		message_out->response.responseEnum = responseEnum_t_SPI_TRANSMISSION_FAIL;
+	}
 }
 
 
