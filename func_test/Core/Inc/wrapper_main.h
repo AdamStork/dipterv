@@ -1,15 +1,20 @@
 /**
- * @file 	state_machine.c
+ * @file 	state_machine.h
  * @author 	Adam Golya
- * @date   	19 10 2019
- * @brief 	State machine			**/
+ * @date   	13 03 2019
+ * @brief 	Wrapper main file header	**/
 
 
-#ifndef INC_TEST_H_
-#define INC_TEST_H_
+#ifndef INC_WRAPPER_MAIN_H_
+#define INC_WRAPPER_MAIN_H_
 #include <stdbool.h>
 #include "functional_test.pb.h"
 
+/** UART handle for communication with PC **/
+#define UART_HANDLE huart2
+
+
+/** State enum for state machine **/
 typedef enum{
 	STATE_WAIT,
 	STATE_PROCESS,
@@ -25,9 +30,9 @@ bool decode_message(uint8_t* pBuffer, uint8_t pBufferLen, Command* message_in);
 
 void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize);
 void command_reset(Command* message);
-void buffer_send(uint8_t* pBuffer, uint8_t pSize);
 
+/** Call this function in main.c before reaching while(1) **/
 void enter_processing_state(void);
 
 
-#endif /* INC_TEST_H_ */
+#endif /* INC_WRAPPER_MAIN_H_ */

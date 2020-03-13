@@ -5,7 +5,7 @@
  * @brief 	Wrapper for SPI testing 			**/
 
 /* Includes ------------------------------------------------------------------*/
-#include "test.h"
+#include <wrapper_main.h>
 #include "peripheral_config.h"
 #include "wrapper_spi.h"
 

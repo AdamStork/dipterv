@@ -1,16 +1,16 @@
 /**
- * @file 	state_machine.c
+ * @file 	wrapper_main.c
  * @author 	Adam Golya
  * @date   	19 10 2019
- * @brief 	State machine 			**/
+ * @brief 	Wrapper main file - state machine 	**/
 
 #include "pb_encode.h"
 #include "pb_decode.h"
-#include "test.h"
 #include "link_layer.h"
 #include "usart.h"
 #include "tim.h"
 
+#include "wrapper_main.h"
 #include "wrapper_i2c.h"
 #include "wrapper_spi.h"
 #include "wrapper_usart.h"
@@ -21,14 +21,11 @@
 
 bool frameReady = false;
 uint8_t receiveByte;
-//uint8_t transmitByte;
 uint8_t receiveBuffer[50];
 uint8_t transmitBuffer[50];
 uint8_t receiveBufferLen;
 link_layer_t linkLayer;
 StateType deviceState;
-
-
 
 
 
@@ -157,13 +154,6 @@ void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize)
 }
 
 
-/** @brief 	Send out buffer via UART
- *  @param	pBuffer: pointer to buffer
- *  @param	pSize: size of buffer**/
-void buffer_send(uint8_t* pBuffer, uint8_t pSize)
-{
-	HAL_UART_Transmit(&huart2,pBuffer, pSize, HAL_MAX_DELAY);
-}
 
 /** @brief  Resets command message to default
  *  @param	message: pointer to command message **/
@@ -252,6 +242,4 @@ void command_reset(Command* message)
 	// Reset autoConfig
 	message->has_autoConfig = false;
 	message->autoConfig = false;
-
-
 }

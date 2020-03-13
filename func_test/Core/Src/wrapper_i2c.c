@@ -5,7 +5,7 @@
  * @brief 	Wrapper for I2C testing 			**/
 
 /* Includes ------------------------------------------------------------------*/
-#include "test.h"
+#include <wrapper_main.h>
 #include "peripheral_config.h"
 #include "wrapper_i2c.h"
 

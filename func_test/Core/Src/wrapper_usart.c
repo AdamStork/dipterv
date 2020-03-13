@@ -5,7 +5,7 @@
  * @brief 	Wrapper for USART testing 			**/
 
 /* Includes ------------------------------------------------------------------*/
-#include "test.h"
+#include <wrapper_main.h>
 #include "link_layer.h"
 #include "simple_message.pb.h"
 #include "pb_encode.h"

@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
+#include <wrapper_main.h>
 #include "main.h"
 #include "adc.h"
 #include "i2c.h"
@@ -26,7 +27,6 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "test.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
