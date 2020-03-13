@@ -9,7 +9,7 @@
 #include "test.h"
 #include "link_layer.h"
 
-#include "i2c.h"
+#include "wrapper_i2c.h"
 #include "spi.h"
 #include "usart.h"
 #include "wrapper_gpio.h"
