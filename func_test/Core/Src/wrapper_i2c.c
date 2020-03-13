@@ -1,8 +1,8 @@
 /**
- * @file 	wrapper_pwm.h
+ * @file 	wrapper_i2c.c
  * @author 	Adam Golya
  * @date   	13 03 2020
- * @brief 	Wrapper for PWM testing 			**/
+ * @brief 	Wrapper for I2C testing 			**/
 
 /* Includes ------------------------------------------------------------------*/
 #include "test.h"

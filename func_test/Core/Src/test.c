@@ -10,7 +10,7 @@
 #include "link_layer.h"
 
 #include "wrapper_i2c.h"
-#include "spi.h"
+#include "wrapper_spi.h"
 #include "usart.h"
 #include "wrapper_gpio.h"
 #include "wrapper_adc.h"

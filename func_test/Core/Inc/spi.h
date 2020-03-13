@@ -27,7 +27,6 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-#include "functional_test.pb.h"
 /* USER CODE END Includes */
 
 
@@ -37,9 +36,7 @@
 
 
 /* USER CODE BEGIN Prototypes */
- bool spi_init(Command* message_in, SPI_HandleTypeDef* hspi);
- void spi_test(Command* message_in, Command* message_out);
- void spi_error_handler(Command* message_out);
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

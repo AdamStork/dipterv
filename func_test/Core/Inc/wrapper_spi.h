@@ -1,12 +1,12 @@
 /**
- * @file 	wrapper_i2c.h
+ * @file 	wrapper_spi.h
  * @author 	Adam Golya
  * @date   	13 03 2020
- * @brief 	Wrapper for I2C testing 			**/
+ * @brief 	Wrapper for SPI testing 			**/
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __wrapper_i2c_H
-#define __wrapper_i2c_H
+#ifndef __wrapper_spi_H
+#define __wrapper_spi_H
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -15,13 +15,13 @@
 #include "main.h"
 #include "functional_test.pb.h"
 
-bool i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c);
-void i2c_test(Command* message_in, Command* message_out);
-void i2c_error_handler(Command* message_in, Command* message_out);
+bool spi_init(Command* message_in, SPI_HandleTypeDef* hspi);
+void spi_test(Command* message_in, Command* message_out);
+void spi_error_handler(Command* message_out);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ wrapper_i2c_H */
+#endif /*__ wrapper_pwm_H */
 
 
