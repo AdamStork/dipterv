@@ -13,8 +13,8 @@
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
-#include "adc.h"
-#include "pwm.h"
+#include "wrapper_adc.h"
+#include "wrapper_pwm.h"
 #include "tim.h"
 
 

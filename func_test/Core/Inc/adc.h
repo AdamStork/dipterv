@@ -27,22 +27,14 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-#include "functional_test.pb.h"
-#include "gpio.h"
 /* USER CODE END Includes */
 
 
 /* USER CODE BEGIN Private defines */
-
 /* USER CODE END Private defines */
 
 
 /* USER CODE BEGIN Prototypes */
-bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_TypeDef* gpioPort, uint16_t gpioPin);
-void analog_read_test(Command* message_in, Command* message_out);
-void analog_read_deinit(ADC_HandleTypeDef* adcHandler, GPIO_TypeDef* gpioPort, uint16_t gpioPin);
-uint32_t analog_read_choose_channel(Command* message_in);
-void analog_read_error_handler(Command* message_out);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

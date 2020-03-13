@@ -1,24 +1,11 @@
 /**
-  ******************************************************************************
-  * File Name          : pwm.c
-  * Description        : This file provides code for the configuration
-  *                      of all used GPIO pins.
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
-  */
+ * @file 	wrapper_pwm.h
+ * @author 	Adam Golya
+ * @date   	13 03 2020
+ * @brief 	Wrapper for PWM testing 			**/
 
 /* Includes ------------------------------------------------------------------*/
-#include "pwm.h"
+#include "wrapper_pwm.h"
 
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
