@@ -21,7 +21,8 @@
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "peripheral_config.h"
+static bool invalidPeripheral = false;
 /* USER CODE END 0 */
 
 
@@ -123,14 +124,20 @@ void analog_read_test(Command* message_in, Command* message_out)
 bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_TypeDef* gpioPort, uint16_t gpioPin)
 {
 	// Configure ADC instance
-	if(message_in->analog_in.instance == adcInstance_ADC1){
+	switch(message_in->analog_in.instance == adcInstance_ADC1){
+	case adcInstance_ADC1:
+#ifdef HAS_ADC1
 		adcHandle->Instance = ADC1;
-	    __HAL_RCC_ADC1_CLK_ENABLE();
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
+		break;
+	default:
+		return false;
+		break;
 	}
-	else{
-		// Invalid ADC instance
-    	return false;
-	}
+
 
 	// Configure ADC clock prescaler
 	switch(message_in->analog_in.clockPrescaler){
@@ -204,14 +211,20 @@ bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 
 
 /** @brief	ADC error handler - set response
- *  @param	message_in: pointer to received message
  *  @param  message_out: pointer to output message **/
 void analog_read_error_handler(Command* message_out)
 {
 	message_out->commandType = CommandTypeEnum_Analog_read;
 	message_out->has_response = true;
 	message_out->response.has_responseEnum = true;
-	message_out->response.responseEnum = responseEnum_t_ADC_READ_FAIL;
+
+	if(invalidPeripheral == true){
+		invalidPeripheral = false;
+		message_out->response.responseEnum = responseEnum_t_INVALID_PERIPHERAL;
+	}
+	else{
+		message_out->response.responseEnum = responseEnum_t_ADC_READ_FAIL;
+	}
 }
 
 
@@ -221,11 +234,13 @@ void analog_read_error_handler(Command* message_out)
  *  @param	gpioPin: GPIO pin number [0-15]				**/
 void analog_read_deinit(ADC_HandleTypeDef* adcHandle,GPIO_TypeDef* gpioPort, uint16_t gpioPin)
 {
+#ifdef HAS_ADC1
 	if(adcHandle->Instance == ADC1){
 		__HAL_RCC_ADC1_CLK_DISABLE();
 		HAL_GPIO_DeInit(gpioPort, gpioPin);
 		HAL_ADC_DeInit(adcHandle);
 	}
+#endif
 }
 
 

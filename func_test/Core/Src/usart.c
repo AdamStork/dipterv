@@ -26,6 +26,7 @@
 #include "simple_message.pb.h"
 #include "pb_encode.h"
 #include "pb_decode.h"
+#include "peripheral_config.h"
 
 bool decode_simplemessage(uint8_t* pBuffer, uint8_t pBufferLen, SimpleMessage* message_in);
 bool encode_simplemessage(uint8_t* pBuffer, uint8_t pBufferLen, SimpleMessage* message_out, uint8_t* bytesWritten);
@@ -37,6 +38,7 @@ uint8_t rxBufferUARTLen;
 uint8_t rxByteUART;
 uint8_t txBufferUART[50];
 link_layer_t linkLayerInner;
+static bool invalidPeripheral = false;
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart2;
@@ -549,10 +551,12 @@ void usart_test(Command* message_in, Command* message_out)
 
 	// Deinit UART/USART
 	if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
-		HAL_UART_MspDeInit(&huart);
+//		HAL_UART_MspDeInit(&huart);
+		HAL_UART_DeInit(&huart);
 	}
 	else{
-		HAL_USART_MspDeInit(&husart);
+//		HAL_USART_MspDeInit(&husart);
+		HAL_USART_DeInit(&husart);
 	}
 
 }
@@ -604,13 +608,52 @@ bool usart_init(Command* message_in, USART_HandleTypeDef* husart)
 {
 	switch(message_in->usart.bus){
 	case usartBus_USART1:
+#ifdef HAS_USART1
 		husart->Instance = USART1;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	case usartBus_USART2:
+#ifdef HAS_USART2
 		husart->Instance = USART2;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
+		break;
+	case usartBus_USART3:
+#ifdef HAS_USART3
+		husart->Instance = USART3;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
+		break;
+	case usartBus_USART4:
+#ifdef HAS_USART4
+		husart->Instance = USART4;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
+		break;
+	case usartBus_USART5:
+#ifdef HAS_USART5
+		husart->Instance = USART5;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	case usartBus_USART6:
+#ifdef HAS_USART6
 		husart->Instance = USART6;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	default:
 		return false;
@@ -720,14 +763,53 @@ bool uart_init(Command* message_in, UART_HandleTypeDef* huart)
 {
 	switch(message_in->usart.bus){
 	case usartBus_USART1:
+#ifdef HAS_USART1
 		huart->Instance = USART1;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	case usartBus_USART2:
+#ifdef HAS_USART2
 		huart->Instance = USART2;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
+		break;
+	case usartBus_USART3:
+#ifdef HAS_USART3
+		huart->Instance = USART3;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
+		break;
+	case usartBus_USART4:
+#ifdef HAS_USART4
+		huart->Instance = USART4;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
+		break;
+	case usartBus_USART5:
+#ifdef HAS_USART5
+		huart->Instance = USART5;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	case usartBus_USART6:
+#ifdef HAS_USART6
 		huart->Instance = USART6;
 		break;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 	default:
 		return false;
 		break;
@@ -821,6 +903,12 @@ void usart_error_handler(Command* message_in, Command* message_out)
 	message_out->commandType = CommandTypeEnum_USART_test;
 	message_out->has_response = true;
 	message_out->response.has_responseEnum = true;
+	if(invalidPeripheral == true){
+		invalidPeripheral = false;
+		message_out->response.responseEnum = responseEnum_t_INVALID_PERIPHERAL;
+		return;
+	}
+
 	switch(message_in->usart.direction){
 	case usartDirection_USART_RX:
 		message_out->response.responseEnum = responseEnum_t_USART_RX_FAIL;

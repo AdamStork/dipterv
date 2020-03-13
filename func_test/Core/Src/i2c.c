@@ -22,10 +22,11 @@
 
 /* USER CODE BEGIN 0 */
 #include "test.h"
-
+#include "peripheral_config.h"
 I2C_HandleTypeDef hi2c;
 static uint8_t writeBuff[5];
 static uint8_t readBuff[5];
+static bool invalidPeripheral = false;
 /* USER CODE END 0 */
 
 
@@ -278,13 +279,28 @@ bool i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c)
 {
 	switch(message_in->i2c.bus){
 	case i2cBus_I2C1:
+#ifdef HAS_I2C1
 		hi2c->Instance = I2C1;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	case i2cBus_I2C2:
+#ifdef HAS_I2C2
 		hi2c->Instance = I2C2;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	case i2cBus_I2C3:
+#ifdef HAS_I2C3
 		hi2c->Instance = I2C3;
+#else
+		invalidPeripheral = true;
+		return false;
+#endif
 		break;
 	default:
 		return false;
@@ -332,7 +348,11 @@ void i2c_error_handler(Command* message_in, Command* message_out)
 	message_out->commandType = CommandTypeEnum_I2C_test;
 	message_out->has_response = true;
 	message_out->response.has_responseEnum = true;
-	if(message_in->i2c.direction == i2cDirection_I2C_write){
+	if(invalidPeripheral == true){
+		invalidPeripheral = false;
+		message_out->response.responseEnum = responseEnum_t_INVALID_PERIPHERAL;
+	}
+	else if(message_in->i2c.direction == i2cDirection_I2C_write){
 		message_out->response.responseEnum = responseEnum_t_I2C_WRITE_FAIL;
 	}
 	else{

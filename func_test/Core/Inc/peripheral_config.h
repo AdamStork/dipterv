@@ -23,6 +23,18 @@
 #define HAS_SPI2
 #define HAS_SPI3
 
+#define HAS_I2C1
+#define HAS_I2C2
+#define HAS_I2C3
+
+#define HAS_USART1
+#define HAS_USART2
+//#define HAS_USART3
+//#define HAS_USART4
+//#define HAS_USART5
+#define HAS_USART6
+
+#define HAS_ADC1
 
 
 
