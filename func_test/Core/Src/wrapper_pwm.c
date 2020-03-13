@@ -6,6 +6,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "wrapper_pwm.h"
+#include "wrapper_gpio.h"
 
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
@@ -14,7 +15,6 @@ GPIO_TypeDef *gpioPortPWM;
 uint16_t gpioPinPWM;
 uint32_t pwmCounter;
 uint8_t pwmDuty;
-
 
 
 /**********************			PWM test				******************************/

@@ -28,7 +28,7 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-#include "functional_test.pb.h"
+//#include "functional_test.pb.h"
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
@@ -37,12 +37,12 @@
 
 
 /* USER CODE BEGIN Prototypes */
- void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin);
- void gpio_test(Command* message_in, Command* message_out);
- void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin);
- bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort);
- void gpio_error(Command* message_in, Command* message_out);
- void MX_GPIO_Init(void);
+// void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin);
+// void gpio_test(Command* message_in, Command* message_out);
+// void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin);
+// bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort);
+// void gpio_error(Command* message_in, Command* message_out);
+// void MX_GPIO_Init(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

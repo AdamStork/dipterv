@@ -7,8 +7,10 @@
 
 #include "peripheral_config.h"
 #include "wrapper_adc.h"
-static bool invalidPeripheral = false;
+#include "wrapper_gpio.h"
 
+
+static bool invalidPeripheral = false;
 
 
 /**********************			Analog read 			******************************/

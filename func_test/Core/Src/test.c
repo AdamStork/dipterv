@@ -12,7 +12,7 @@
 #include "i2c.h"
 #include "spi.h"
 #include "usart.h"
-#include "gpio.h"
+#include "wrapper_gpio.h"
 #include "wrapper_adc.h"
 #include "wrapper_pwm.h"
 #include "tim.h"
