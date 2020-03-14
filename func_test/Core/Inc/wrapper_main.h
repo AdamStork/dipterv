@@ -10,9 +10,6 @@
 #include <stdbool.h>
 #include "functional_test.pb.h"
 
-/** UART handle for communication with PC **/
-#define UART_HANDLE huart2
-
 
 /** State enum for state machine **/
 typedef enum{
@@ -21,7 +18,6 @@ typedef enum{
 	STATE_DECODE,
 	STATE_TEST
 } StateType;
-
 
 
 

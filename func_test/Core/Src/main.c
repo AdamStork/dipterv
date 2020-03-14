@@ -20,11 +20,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <wrapper_main.h>
+#include <wrapper_timer.h>
 #include "main.h"
 #include "adc.h"
 #include "i2c.h"
 #include "spi.h"
-#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -99,8 +99,8 @@ int main(void)
 //  MX_ADC1_Init();
 //  MX_I2C1_Init();
 //  MX_SPI2_Init();
-  MX_TIM2_Init();
-  MX_TIM3_Init();
+//  MX_TIM2_Init();
+//  MX_TIM3_Init();
 //  HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
   /* USER CODE BEGIN 2 */
 

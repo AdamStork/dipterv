@@ -57,8 +57,8 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern TIM_HandleTypeDef htim2;
-extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htimFreq;
+extern TIM_HandleTypeDef htimAct;
 extern GPIO_TypeDef *gpioPortPWM;
 extern uint16_t gpioPinPWM;
 extern uint32_t pwmCounter;
@@ -212,7 +212,7 @@ void TIM2_IRQHandler(void)
   /* USER CODE BEGIN TIM2_IRQn 0 */
 
   /* USER CODE END TIM2_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim2);
+  HAL_TIM_IRQHandler(&htimFreq);
   /* USER CODE BEGIN TIM2_IRQn 1 */
   pwmCounter++;
   if(pwmCounter > PWM_DUTY_MAX){
@@ -236,10 +236,10 @@ void TIM3_IRQHandler(void)
   /* USER CODE BEGIN TIM3_IRQn 0 */
 
   /* USER CODE END TIM3_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim3);
+  HAL_TIM_IRQHandler(&htimAct);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-  HAL_TIM_OC_Stop_IT(&htim2,TIM_CHANNEL_1);
-  HAL_TIM_OC_Stop_IT(&htim3,TIM_CHANNEL_1);
+  HAL_TIM_OC_Stop_IT(&htimFreq,TIM_CHANNEL_1);
+  HAL_TIM_OC_Stop_IT(&htimAct,TIM_CHANNEL_1);
   HAL_GPIO_DeInit(gpioPortPWM, gpioPinPWM);
 
   /* USER CODE END TIM3_IRQn 1 */

@@ -1,5 +1,5 @@
 /**
- * @file 	wrapper_pwm.h
+ * @file 	wrapper_pwm.c
  * @author 	Adam Golya
  * @date   	13 03 2020
  * @brief 	Wrapper for PWM testing 			**/
@@ -8,8 +8,8 @@
 #include "wrapper_pwm.h"
 #include "wrapper_gpio.h"
 
-extern TIM_HandleTypeDef htim2;
-extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htimFreq;
+extern TIM_HandleTypeDef htimAct;
 extern bool invalidPeripheralGPIO;
 
 GPIO_TypeDef *gpioPortPWM;
@@ -69,25 +69,25 @@ bool pwm_init(Command* message_in)
     pwmCounter = 0;
     uint32_t Fosc_DIV_by_Prescaler = 1000000;
     pwmDuty = message_in->analog_out.dutyCycle;
-    htim2.Init.Period = ((Fosc_DIV_by_Prescaler/(message_in->analog_out.frequency))/PWM_DUTY_MAX) - 1;
+    htimFreq.Init.Period = ((Fosc_DIV_by_Prescaler/(message_in->analog_out.frequency))/PWM_DUTY_MAX) - 1;
 
-    if(HAL_TIM_Base_Init(&htim2) != HAL_OK){
+    if(HAL_TIM_Base_Init(&htimFreq) != HAL_OK){
     	return false;
     }
 
     // Init and start Timer3 if PWM time dependency is enabled (active for given time only)
 	if((message_in->analog_out.has_time == true) && (message_in->analog_out.dependency == pwmTimeDependency_PWM_TIME_DEPENDENCY_ENABLED)){
-		htim3.Init.Period = (message_in->analog_out.time) - 1; // Fosc_div_by_prescaler:1000;  Period 1000*[ms] - 1;
-	    if(HAL_TIM_Base_Init(&htim3) != HAL_OK){
+		htimAct.Init.Period = (message_in->analog_out.time) - 1; // Fosc_div_by_prescaler:1000;  Period 1000*[ms] - 1;
+	    if(HAL_TIM_Base_Init(&htimAct) != HAL_OK){
 	    	return false;
 	    }
 
-		if(HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1)){
+		if(HAL_TIM_OC_Start_IT(&htimAct, TIM_CHANNEL_1)){
 			return false;
 		}
 	}
 
-	if(HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1) != HAL_OK){
+	if(HAL_TIM_OC_Start_IT(&htimFreq, TIM_CHANNEL_1) != HAL_OK){
 		return false;
 	}
 
