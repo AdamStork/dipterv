@@ -36,6 +36,12 @@
 
 #define HAS_ADC1
 
+#define HAS_GPIO_PA0_PA7
+#define HAS_GPIO_PA8_PA15
+#define HAS_GPIO_PB0_PB7
+#define HAS_GPIO_PB8_PB15
+#define HAS_GPIO_PC0_PC7
+#define HAS_GPIO_PC8_PC15
 
 
 #ifdef __cplusplus

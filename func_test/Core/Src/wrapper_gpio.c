@@ -6,8 +6,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "wrapper_gpio.h"
+#include "peripheral_config.h"
 
-
+bool invalidPeripheralGPIO = false;
 
 /**********************			GPIO digital 			******************************/
 /** @brief	GPIO peripheral test
@@ -74,6 +75,12 @@ void gpio_error(Command* message_in, Command* message_out)
 	message_out->commandType = CommandTypeEnum_GPIO_digital;
 	message_out->has_response = true;
 	message_out->response.has_responseEnum = true;
+	if(invalidPeripheralGPIO == true){
+		invalidPeripheralGPIO = false;
+		message_out->response.responseEnum = responseEnum_t_INVALID_PERIPHERAL;
+		return;
+	}
+
 	if(message_in->gpio.direction == gpioDirection_GPIO_OUTPUT){
 		message_out->response.responseEnum = responseEnum_t_GPIO_SET_FAIL;
 	}
@@ -164,7 +171,7 @@ void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin)
 bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort)
 {
 	switch(pinEnum){
-
+#ifdef HAS_GPIO_PA0_PA7
 	case gpioPins_PA0:
 		*gpioPort = GPIOA;
 		*gpioPin = GPIO_PIN_0;
@@ -197,6 +204,12 @@ bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort)
 		*gpioPort = GPIOA;
 		*gpioPin = GPIO_PIN_7;
 		break;
+#else
+		invalidPeripheralGPIO = true;
+		return false;
+#endif
+
+#ifdef HAS_GPIO_PA8_PA15
 	case gpioPins_PA8:
 		*gpioPort = GPIOA;
 		*gpioPin = GPIO_PIN_8;
@@ -229,8 +242,13 @@ bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort)
 		*gpioPort = GPIOA;
 		*gpioPin = GPIO_PIN_15;
 		break;
+#else
+		invalidPeripheralGPIO = true;
+		return false;
+#endif
 
 
+#ifdef HAS_GPIO_PB0_PB7
 	case gpioPins_PB0:
 		*gpioPort = GPIOB;
 		*gpioPin = GPIO_PIN_0;
@@ -263,6 +281,12 @@ bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort)
 		*gpioPort = GPIOB;
 		*gpioPin = GPIO_PIN_7;
 		break;
+#else
+		invalidPeripheralGPIO = true;
+		return false;
+#endif
+
+#ifdef HAS_GPIO_PB8_PB15
 	case gpioPins_PB8:
 		*gpioPort = GPIOB;
 		*gpioPin = GPIO_PIN_8;
@@ -295,8 +319,12 @@ bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort)
 		*gpioPort = GPIOB;
 		*gpioPin = GPIO_PIN_15;
 		break;
+#else
+		invalidPeripheralGPIO = true;
+		return false;
+#endif
 
-
+#ifdef HAS_GPIO_PC0_PC7
 	case gpioPins_PC0:
 		*gpioPort = GPIOC;
 		*gpioPin = GPIO_PIN_1;
@@ -329,6 +357,12 @@ bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort)
 		*gpioPort = GPIOC;
 		*gpioPin = GPIO_PIN_7;
 		break;
+#else
+		invalidPeripheralGPIO = true;
+		return false;
+#endif
+
+#ifdef HAS_GPIO_PC8_PC15
 	case gpioPins_PC8:
 		*gpioPort = GPIOC;
 		*gpioPin = GPIO_PIN_8;
@@ -361,6 +395,10 @@ bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort)
 		*gpioPort = GPIOC;
 		*gpioPin = GPIO_PIN_15;
 		break;
+#else
+		invalidPeripheralGPIO = true;
+		return false;
+#endif
 
 	default:
 		return false;

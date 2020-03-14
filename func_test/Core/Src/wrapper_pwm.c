@@ -10,6 +10,7 @@
 
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
+extern bool invalidPeripheralGPIO;
 
 GPIO_TypeDef *gpioPortPWM;
 uint16_t gpioPinPWM;
@@ -100,7 +101,13 @@ void pwm_error_handler(Command* message_out)
 	message_out->commandType = CommandTypeEnum_Analog_write;
 	message_out->has_response = true;
 	message_out->response.has_responseEnum = true;
-	message_out->response.responseEnum = responseEnum_t_PWM_SET_FAIL;
+	if(invalidPeripheralGPIO == true){
+		invalidPeripheralGPIO = false;
+		message_out->response.responseEnum = responseEnum_t_INVALID_PERIPHERAL;
+	}
+	else{
+		message_out->response.responseEnum = responseEnum_t_PWM_SET_FAIL;
+	}
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
