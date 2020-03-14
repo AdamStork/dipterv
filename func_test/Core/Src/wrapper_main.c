@@ -4,11 +4,13 @@
  * @date   	19 10 2019
  * @brief 	Wrapper main file - state machine 	**/
 
-#include <wrapper_timer.h>
+
 #include "pb_encode.h"
 #include "pb_decode.h"
 #include "link_layer.h"
 #include "usart.h"
+#include "peripheral_config.h"
+
 #include "wrapper_main.h"
 #include "wrapper_i2c.h"
 #include "wrapper_spi.h"
@@ -16,10 +18,10 @@
 #include "wrapper_gpio.h"
 #include "wrapper_adc.h"
 #include "wrapper_pwm.h"
+#include "wrapper_timer.h"
 
 
-/** UART handle for communication with PC **/
-#define UART_HANDLE huart2
+
 
 
 bool frameReady = false;
