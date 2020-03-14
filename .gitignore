@@ -5,7 +5,7 @@
 .cproject
 language_settings.xml
 org.eclipse.cdt.core.prefs
-
+/fw_slave/Debug/
 
 pyQt/pyqt.pyproject.user
 
