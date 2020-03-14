@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -28,17 +28,21 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+//#include "functional_test.pb.h"
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+// void gpio_init(Command* message_in, GPIO_TypeDef* gpioPort, uint32_t gpioPin);
+// void gpio_test(Command* message_in, Command* message_out);
+// void gpio_deinit(GPIO_TypeDef* gpioPort, uint32_t gpioPin);
+// bool gpio_port_pin(gpioPins pinEnum, uint16_t* gpioPin, GPIO_TypeDef** gpioPort);
+// void gpio_error(Command* message_in, Command* message_out);
+// void MX_GPIO_Init(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>900</width>
-    <height>610</height>
+    <height>660</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>900</width>
-    <height>610</height>
+    <height>660</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>900</width>
-    <height>610</height>
+    <height>660</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -49,7 +49,7 @@
       <rect>
        <x>20</x>
        <y>20</y>
-       <width>241</width>
+       <width>251</width>
        <height>54</height>
       </rect>
      </property>
@@ -165,7 +165,7 @@
       <x>10</x>
       <y>190</y>
       <width>291</width>
-      <height>391</height>
+      <height>441</height>
      </rect>
     </property>
     <property name="title">
@@ -176,8 +176,8 @@
       <rect>
        <x>20</x>
        <y>20</y>
-       <width>241</width>
-       <height>361</height>
+       <width>251</width>
+       <height>411</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="cmd_layout">
@@ -217,6 +217,13 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="sequence_add_button">
+        <property name="text">
+         <string>Add to sequence</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0" colspan="2">
        <widget class="QGroupBox" name="options_GB">
         <property name="title">
@@ -230,19 +237,12 @@
           <rect>
            <x>10</x>
            <y>20</y>
-           <width>211</width>
-           <height>281</height>
+           <width>231</width>
+           <height>331</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="options_layout"/>
         </widget>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QPushButton" name="sequence_add_button">
-        <property name="text">
-         <string>Add to sequence</string>
-        </property>
        </widget>
       </item>
      </layout>
@@ -254,7 +254,7 @@
       <x>320</x>
       <y>340</y>
       <width>571</width>
-      <height>241</height>
+      <height>291</height>
      </rect>
     </property>
     <property name="title">
@@ -266,7 +266,7 @@
        <x>9</x>
        <y>20</y>
        <width>551</width>
-       <height>191</height>
+       <height>241</height>
       </rect>
      </property>
      <property name="verticalScrollBarPolicy">
@@ -284,7 +284,7 @@
         <x>0</x>
         <y>0</y>
         <width>532</width>
-        <height>189</height>
+        <height>239</height>
        </rect>
       </property>
       <widget class="QWidget" name="verticalLayoutWidget">
@@ -293,7 +293,7 @@
          <x>10</x>
          <y>9</y>
          <width>521</width>
-         <height>171</height>
+         <height>221</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="scroll_layout">
@@ -308,7 +308,7 @@
      <property name="geometry">
       <rect>
        <x>470</x>
-       <y>210</y>
+       <y>260</y>
        <width>91</width>
        <height>31</height>
       </rect>
@@ -341,7 +341,7 @@
       <rect>
        <x>20</x>
        <y>20</y>
-       <width>241</width>
+       <width>251</width>
        <height>54</height>
       </rect>
      </property>
@@ -484,7 +484,7 @@
       <x>-10</x>
       <y>0</y>
       <width>911</width>
-      <height>591</height>
+      <height>641</height>
      </rect>
     </property>
    </widget>

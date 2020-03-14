@@ -2,7 +2,7 @@ syntax = "proto2";
 
 // Command types
 enum CommandTypeEnum{
-  LED_test = 0;
+  Show_menu = 0;
   I2C_test = 1;
   SPI_test = 2;
   USART_test = 3;
@@ -40,11 +40,13 @@ enum i2cFastModeDutyCycle{
 message i2cMessage{
  required i2cBus bus = 1;
  required uint32 address = 2;
- required uint32 register = 3;
+ required uint32 reg = 3;
  required i2cDirection direction = 4; 	// 1: read, 0: write
  required i2cSpeedMode speedMode = 5;
  required uint32 clockSpeed = 6;
  optional i2cFastModeDutyCycle dutyCycle = 7;
+ required uint32 size = 8;
+ required uint32 writeValue = 9;
 }
 
 
@@ -73,8 +75,10 @@ enum spiBus{
 
 enum spiOperatingMode{
 	SPI_MODE_FULL_DUPLEX_MASTER = 0;
-	SPI_MODE_HALF_DUPLEX_MASTER = 1;
-	SPI_MODE_TRANSMIT_ONLY_MASTER = 2;	
+	SPI_MODE_TRANSMIT_4WIRE_MASTER = 1;	
+	SPI_MODE_RECEIVE_4WIRE_MASTER = 2;	
+	SPI_MODE_HALF_DUPLEX_TX_MASTER = 3;
+	SPI_MODE_HALF_DUPLEX_RX_MASTER = 4;
 }
 
 enum spiFrameFormat{
@@ -94,14 +98,17 @@ enum spiFirstBit{
 
 message spiMessage{
  required spiBus bus = 1;
- required uint32 command = 2;
- required uint32 dummyclocks = 3;
- required spiOperatingMode operatingMode = 4;
- required spiHardwareNSS hardwareNSS = 5;
- required spiFrameFormat frameFormat = 6;
- required spiDataSize dataSize = 7;
- optional spiFirstBit firstBit = 8;
- optional clockMode clockMode = 9;	//ide esetleg hintet megjeleniteni
+ required spiOperatingMode  operatingMode = 2;
+ required uint32 command = 3;
+ required uint32 dummyClocks = 4;
+ required uint32 writeValue = 5;
+ required uint32 writeSize = 6;
+ required uint32 slaveResponse = 7;
+ required spiHardwareNSS hardwareNSS = 8;
+ required spiFrameFormat frameFormat = 9;
+ required spiDataSize dataSize = 10;
+ optional spiFirstBit firstBit = 11;
+ optional clockMode clockMode = 12;	//ide esetleg hintet megjeleniteni
 }
 
 
@@ -167,9 +174,7 @@ enum gpioPins{
 	PC13 = 53;
 	PC14 = 54;
 	PC15 = 55;
-	Temp = 60;
-	Vrefint = 61;
-	Vbat = 62;
+	P_INVALID = 100;
 }
 
 
@@ -209,11 +214,34 @@ enum adcClockPrescaler{
 	ADC_PCLK2_DIVIDED_BY_8 = 2;
 }
 
+enum adcChannel{		
+	ADC_CHANNEL_IN0 = 0;
+	ADC_CHANNEL_IN1 = 1;
+	ADC_CHANNEL_IN2 = 2;
+	ADC_CHANNEL_IN3 = 3;
+	ADC_CHANNEL_IN4 = 4;
+	ADC_CHANNEL_IN5 = 5;
+	ADC_CHANNEL_IN6 = 6;
+	ADC_CHANNEL_IN7 = 7;
+	ADC_CHANNEL_IN8 = 8;
+	ADC_CHANNEL_IN9 = 9;
+	ADC_CHANNEL_IN10 = 10;
+	ADC_CHANNEL_IN11 = 11;
+	ADC_CHANNEL_IN12 = 12;
+	ADC_CHANNEL_IN13 = 13;	
+	ADC_CHANNEL_IN14 = 14;		
+	ADC_CHANNEL_IN15 = 15;	
+	ADC_CHANNEL_TEMP = 20;
+	ADC_CHANNEL_VREFINT = 21;
+	ADC_CHANNEL_VBAT = 22;	
+}
+
 message analogIN{		
  required adcInstance instance = 1;
- required gpioPins pin = 2;
- required adcResolution resolution = 3;
- required adcClockPrescaler clockPrescaler = 4;
+ required adcChannel channel = 2;
+ required gpioPins pin = 3;
+ required adcResolution resolution = 4;
+ required adcClockPrescaler clockPrescaler = 5;
 }
 
 enum pwmTimeDependency{		
@@ -221,10 +249,11 @@ enum pwmTimeDependency{
 	PWM_TIME_DEPENDENCY_ENABLED = 1;
 }
 
+
 // Analog OUT message
 message analogOUT{
  required gpioPins pin = 1;
- required uint32 frequency = 2;
+ required float frequency = 2;
  required uint32 dutyCycle = 3;
  required pwmTimeDependency dependency = 4;
  optional uint32 time = 5;
@@ -242,9 +271,9 @@ enum usartBus{
 }
 
 enum usartDirection{
-	USART_RX_AND_TX = 0;
+	USART_TX = 0;
 	USART_RX = 1;
-	USART_TX = 2;	
+	USART_TX_AND_RX = 2;	
 }
 
 enum usartWordLength{
@@ -306,20 +335,31 @@ message usartMessage{
 }
 
 
-enum successfulWrite{
- LED_SET = 0;
- I2C_WRITE_OK = 1;
- I2C_WRITE_FAIL = 2;
- SPI_WRITE_OK = 3;
- SPI_WRITE_FAIL = 4;
- GPIO_SET = 5;
- GPIO_RESET = 6;
- GPIO_WRITE_FAIL = 7;
- PWM_SET = 8;
- PWM_RESET = 9;
- PWM_WRITE_FAIL = 10;
+enum responseEnum_t{
+ INVALID_MESSAGE = 0;
+ I2C_WRITE_OK = 10;
+ I2C_WRITE_FAIL = 11;
+ I2C_READ_FAIL = 12;
+ SPI_TRANSMISSION_OK = 20;
+ SPI_TRANSMISSION_FAIL = 21;
+ USART_TX_OK = 30;
+ USART_TX_FAIL = 31;
+ USART_RX_FAIL = 32;
+ USART_TX_RX_FAIL = 33;
+ GPIO_SET_HIGH = 40;
+ GPIO_SET_LOW = 41;
+ GPIO_SET_FAIL = 42;
+ GPIO_READ_FAIL = 43;
+ ADC_READ_FAIL= 50;
+ PWM_SET_OK = 60;
+ PWM_SET_FAIL = 61;
+ INVALID_PERIPHERAL = 100;
 }
 
+message responseMessage{
+ optional uint32 responseRead = 1;
+ optional responseEnum_t responseEnum = 2;
+}
 
 
 // Main message
@@ -331,6 +371,6 @@ message Command{
  optional	digitalGPIO	gpio = 5;
  optional analogIN analog_in = 6;
  optional analogOUT	analog_out = 7;
- optional uint32 responseRead = 10;					// Register value
- optional successfulWrite responseWrite = 11;		// Write success
+ optional responseMessage response = 10;		
+ optional bool autoConfig = 11; //not available at sequence -- false
 }

@@ -18,6 +18,7 @@ dict_available_adc_instances = {}
 dict_available_usart_buses = {}
 dict_available_digital_pins = {}
 dict_available_analog_pins = {}
+dict_available_adc_channels = {}
 dict_mcu_info = {}
 
 
@@ -39,6 +40,7 @@ def process_config_file(path):
             print("Available ADC channels:", dict_available_adc_instances)
             print("Available GPIO digital pins:", dict_available_digital_pins)
             print("Available ADC pins:", dict_available_analog_pins)
+            print("Available ADC channels:", dict_available_adc_channels)
             print("MCU info:",dict_mcu_info)
             file.close()
         return True
@@ -93,9 +95,15 @@ def check_dataline_for_available_pins(data_line):
             dict_available_digital_pins[gpio_digital_key] = gpio_digital_value
 
         if possible_pin_type[:4] == "ADCx":
+            # Save pin
             gpio_analog_key = possible_pin
             gpio_analog_value = list(sequence.dict_gpio_analog_pins.values())[list(sequence.dict_gpio_analog_pins.keys()).index(possible_pin)]
             dict_available_analog_pins[gpio_analog_key] = gpio_analog_value
+            # Save channels
+            channel_words = possible_pin_type.split("_")
+            channel_key = channel_words[1]
+            channel_value = list(sequence.dict_adc_channels.values())[list(sequence.dict_adc_channels.keys()).index(channel_words[1])]
+            dict_available_adc_channels[channel_key] = channel_value
 
 
 # Check data line from file for MCU Family info
@@ -105,5 +113,3 @@ def check_dataline_for_mcu_info(data_line):
         new_words = words[1].split("=")
         if new_words[0] == "Family":
             dict_mcu_info[new_words[0]] = new_words[1]
-
-

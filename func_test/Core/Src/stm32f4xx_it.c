@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -21,7 +21,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_it.h"
-#include "link_layer.h"
+#include "wrapper_pwm.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -43,14 +43,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-//link_layer_t linkLayerRx;
-extern uint8_t receiveByte;
-extern uint8_t receiveBuffer[128];
-extern uint8_t receiveBufferLen;
-extern bool frameReady;
-
-extern link_layer_t linkLayer;
-
 
 /* USER CODE END PV */
 
@@ -65,8 +57,13 @@ extern link_layer_t linkLayer;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern DMA_HandleTypeDef hdma_usart2_rx;
-extern DMA_HandleTypeDef hdma_usart2_tx;
+extern TIM_HandleTypeDef htimFreq;
+extern TIM_HandleTypeDef htimAct;
+extern GPIO_TypeDef *gpioPortPWM;
+extern uint16_t gpioPinPWM;
+extern uint32_t pwmCounter;
+extern uint8_t pwmDuty;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -208,34 +205,44 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles DMA1 stream5 global interrupt.
+  * @brief This function handles TIM2 global interrupt.
   */
-void DMA1_Stream5_IRQHandler(void)
+void TIM2_IRQHandler(void)
 {
-  /* USER CODE BEGIN DMA1_Stream5_IRQn 0 */
+  /* USER CODE BEGIN TIM2_IRQn 0 */
 
-  /* USER CODE END DMA1_Stream5_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart2_rx);
-  /* USER CODE BEGIN DMA1_Stream5_IRQn 1 */
-  link_parse_byte(&linkLayer, receiveByte);
-  if(link_get_valid_frame(&linkLayer,receiveBuffer, &receiveBufferLen)){
-	  frameReady = true;
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htimFreq);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+  pwmCounter++;
+  if(pwmCounter > PWM_DUTY_MAX){
+	  pwmCounter = 0;
   }
-  /* USER CODE END DMA1_Stream5_IRQn 1 */
+
+  if(pwmCounter < pwmDuty){
+	  HAL_GPIO_WritePin(gpioPortPWM, gpioPinPWM, 1);
+  }
+  else{
+	  HAL_GPIO_WritePin(gpioPortPWM, gpioPinPWM, 0);
+  }
+  /* USER CODE END TIM2_IRQn 1 */
 }
 
 /**
-  * @brief This function handles DMA1 stream6 global interrupt.
+  * @brief This function handles TIM3 global interrupt.
   */
-void DMA1_Stream6_IRQHandler(void)
+void TIM3_IRQHandler(void)
 {
-  /* USER CODE BEGIN DMA1_Stream6_IRQn 0 */
+  /* USER CODE BEGIN TIM3_IRQn 0 */
 
-  /* USER CODE END DMA1_Stream6_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart2_tx);
-  /* USER CODE BEGIN DMA1_Stream6_IRQn 1 */
-  // todo:transmit framing
-  /* USER CODE END DMA1_Stream6_IRQn 1 */
+  /* USER CODE END TIM3_IRQn 0 */
+  HAL_TIM_IRQHandler(&htimAct);
+  /* USER CODE BEGIN TIM3_IRQn 1 */
+  HAL_TIM_OC_Stop_IT(&htimFreq,TIM_CHANNEL_1);
+  HAL_TIM_OC_Stop_IT(&htimAct,TIM_CHANNEL_1);
+  HAL_GPIO_DeInit(gpioPortPWM, gpioPinPWM);
+
+  /* USER CODE END TIM3_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
