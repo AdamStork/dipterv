@@ -42,7 +42,7 @@ void enter_processing_state(void)
 	while (1){
 		switch(deviceState){
 		case STATE_WAIT:
-			HAL_UART_Receive(&huart2,(uint8_t*)&receiveByte, 1,HAL_MAX_DELAY);
+			HAL_UART_Receive(&UART_HANDLE,(uint8_t*)&receiveByte, 1,HAL_MAX_DELAY);
 			deviceState = STATE_PROCESS;
 			break;
 		case STATE_PROCESS:
@@ -96,7 +96,7 @@ void enter_processing_state(void)
 			} /* switch(message_in.commandType) */
 			encode_message(transmitBuffer,sizeof(transmitBuffer), &message_out, &bytesWritten);
 			link_write(&linkLayer,transmitBuffer,bytesWritten);
-			HAL_UART_Transmit(&huart2, linkLayer.tx_buffer,linkLayer.tx_buffer_size, HAL_MAX_DELAY);
+			HAL_UART_Transmit(&UART_HANDLE, linkLayer.tx_buffer,linkLayer.tx_buffer_size, HAL_MAX_DELAY);
 
 			// reset buffers and messages
 			buffer_init_zero(transmitBuffer, sizeof(transmitBuffer));
