@@ -446,8 +446,8 @@ def make_test_object_from_options(UI):
     else:
         return None
 
-    if UI.use_config_file:
-        cmd.autoConfig = True
+#    if UI.use_config_file:
+#        cmd.autoConfig = True
     return cmd
 
 

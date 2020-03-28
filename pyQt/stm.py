@@ -131,7 +131,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Add command to test list and sequence list
     def add_seq(self, rowObject):
-        if self.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.Show_menu:
+        if self.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.Show_empty:
             return
         test_object = sequence.make_test_object_from_options(self)                                      # Make test object from selected options
         sequence.add_test_object_to_test_list(test_object, self.test_list)                              # Add test object to test list
@@ -301,7 +301,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Fill combobox with commands
     def fill_cmd_box(self):
-        self.cmd_box.addItem("Click to select...",functional_test_pb2.CommandTypeEnum.Show_menu)
+        self.cmd_box.addItem("Click to select...",functional_test_pb2.CommandTypeEnum.Show_empty)
         self.cmd_box.addItem("I2C test",functional_test_pb2.CommandTypeEnum.I2C_test)
         self.cmd_box.addItem("SPI test",functional_test_pb2.CommandTypeEnum.SPI_test)
         self.cmd_box.addItem("USART test", functional_test_pb2.USART_test)
@@ -500,7 +500,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding) # Row Spacer if needed
         self.options_layout.setColumnMinimumWidth(0,80)
 
-        if cmdType == functional_test_pb2.CommandTypeEnum.Show_menu:
+        if cmdType == functional_test_pb2.CommandTypeEnum.Show_empty:
             if self.MENU_active == False:
                 self.MENU_active = True
 
