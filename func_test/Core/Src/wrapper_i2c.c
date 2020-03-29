@@ -68,6 +68,7 @@ void i2c_test(Command* message_in, Command* message_out)
 		while(status != HAL_OK){
 			status = HAL_I2C_Master_Transmit(&hi2c, (uint16_t)deviceAddress, writeBuff, 1, TEST_TIMEOUT_DURATION);		// wait: IsDeviceReady
 			if(status == HAL_TIMEOUT){
+//				HAL_I2C_MspDeInit(&hi2c);
 				i2c_error_handler(message_in, message_out);
 				return;
 			}
@@ -77,6 +78,7 @@ void i2c_test(Command* message_in, Command* message_out)
 		while(status != HAL_OK){
 			status = HAL_I2C_Master_Receive(&hi2c, (uint16_t)deviceAddress, readBuff, readSize, TEST_TIMEOUT_DURATION);		// wait: IsDeviceReady
 			if(status == HAL_TIMEOUT){
+//				HAL_I2C_MspDeInit(&hi2c);
 				i2c_error_handler(message_in, message_out);
 				return;
 			}
