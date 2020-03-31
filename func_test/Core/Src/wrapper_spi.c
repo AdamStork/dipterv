@@ -88,6 +88,7 @@ void spi_test(Command* message_in, Command* message_out)
 		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
 
 		if(status == HAL_TIMEOUT){
+			HAL_SPI_DeInit(&hspi);
 			spi_error_handler(message_out);
 			return;
 		}
@@ -127,6 +128,7 @@ void spi_test(Command* message_in, Command* message_out)
 		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
 
 		if(status == HAL_TIMEOUT){
+			HAL_SPI_DeInit(&hspi);
 			spi_error_handler(message_out);
 			return;
 		}
@@ -143,6 +145,7 @@ void spi_test(Command* message_in, Command* message_out)
 		status = HAL_SPI_Receive(&hspi, rxBuffer, rxSize, 1000);
 		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
 		if(status == HAL_TIMEOUT){
+			HAL_SPI_DeInit(&hspi);
 			spi_error_handler(message_out);
 			return;
 		}
@@ -175,6 +178,7 @@ void spi_test(Command* message_in, Command* message_out)
 		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
 
 		if(status == HAL_TIMEOUT){
+			HAL_SPI_DeInit(&hspi);
 			spi_error_handler(message_out);
 			return;
 		}
@@ -191,6 +195,7 @@ void spi_test(Command* message_in, Command* message_out)
 		status = HAL_SPI_Receive(&hspi, rxBuffer, rxSize, 1000);
 		while(HAL_SPI_GetState(&hspi) != HAL_SPI_STATE_READY);
 		if(status == HAL_TIMEOUT){
+			HAL_SPI_DeInit(&hspi);
 			spi_error_handler(message_out);
 			return;
 		}
@@ -218,7 +223,9 @@ void spi_test(Command* message_in, Command* message_out)
 	}
 
 	else{
-		// empty
+		HAL_SPI_DeInit(&hspi);
+		spi_error_handler(message_out);
+		return;
 	}
 
 
