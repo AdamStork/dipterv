@@ -40,6 +40,7 @@ void analog_read_test(Command* message_in, Command* message_out)
 
 	// ADC test
 	if(HAL_ADC_Start(&adcHandle) != HAL_OK){
+		analog_read_deinit(&adcHandle, gpioPort, gpioPin);
 		analog_read_error_handler(message_out);
     	return;
 	}
