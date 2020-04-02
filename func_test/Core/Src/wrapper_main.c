@@ -246,8 +246,4 @@ void command_reset(Command* message)
 	message->response.has_responseEnum = false;
 	message->response.responseRead = 0;
 	message->response.responseEnum = _responseEnum_t_MIN;
-
-	// Reset autoConfig
-	message->has_autoConfig = false;
-	message->autoConfig = false;
 }
