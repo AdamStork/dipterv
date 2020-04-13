@@ -35,7 +35,7 @@ StateType deviceState;
 
 
 /** @brief Receive command via UART, and perform chosen test **/
-void enter_processing_state(void)
+void enter_state_machine(void)
 {
 	Command message_in = Command_init_zero;
 	Command message_out = Command_init_zero;

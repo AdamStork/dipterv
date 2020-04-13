@@ -28,7 +28,7 @@ void buffer_init_zero(uint8_t* pBuffer, uint8_t pSize);
 void command_reset(Command* message);
 
 /** Call this function in main.c before reaching while(1) **/
-void enter_processing_state(void);
+void enter_state_machine(void);
 
 
 #endif /* INC_WRAPPER_MAIN_H_ */
