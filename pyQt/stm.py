@@ -60,7 +60,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.slaveSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-4]"))                        # 1-digit decimal validator for SPI slave response size
         self.dummyValidator  = QRegExpValidator(QRegExp("[0-9]|(1[0-5])"))                          # 2-digit decimal validator for SPI dummy clocks
         self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9]{1,5}"))                         # Max 5-digit decimal validator for PWM time dependency field
-        self.baudValidator  = QRegExpValidator(QRegExp("[0-9]{4,6}"))                           # Max 6-digit decimal validator for USART baudrate
+        self.baudValidator  = QRegExpValidator(QRegExp("[0-9]{4,7}"))                           # Max 7-digit decimal validator for USART baudrate
         self.dutyValidator = QRegExpValidator(QRegExp("0|100|[1-9][0-9]?"))                     # Max. 3-digit validator for PWM duty cycle [0-100]
         self.freqValidator = QRegExpValidator(QRegExp("0|0\.[0-9]|[1-9][0-9]{0,2}\.?[0-9]"))    # Max. 4-digit validator for freqency [0-1000], limits checked
         self.valueValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f]{2,4}"))                   # Max. 2 bytes validator for I2C/SPI write value
