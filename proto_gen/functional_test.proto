@@ -209,9 +209,10 @@ enum adcResolution{
 }
 
 enum adcClockPrescaler{		
-	ADC_PCLK2_DIVIDED_BY_4 = 0;
-	ADC_PCLK2_DIVIDED_BY_6 = 1;
-	ADC_PCLK2_DIVIDED_BY_8 = 2;
+	ADC_PCLK2_DIVIDED_BY_2 = 0;
+	ADC_PCLK2_DIVIDED_BY_4 = 1;
+	ADC_PCLK2_DIVIDED_BY_6 = 2;
+	ADC_PCLK2_DIVIDED_BY_8 = 3;
 }
 
 enum adcChannel{		

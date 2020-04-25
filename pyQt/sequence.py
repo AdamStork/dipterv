@@ -219,9 +219,10 @@ dict_adc_res = {
 }
 
 dict_adc_clock_prescaler = {
-    "PCLK2/4": 0,
-    "PCLK2/6": 1,
-    "PCLK2/8": 2,
+    "PCLK2/2": 0,
+    "PCLK2/4": 1,
+    "PCLK2/6": 2,
+    "PCLK2/8": 3,
 }
 
 

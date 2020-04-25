@@ -98,8 +98,11 @@ bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 
 	// Configure ADC clock prescaler
 	switch(message_in->analog_in.clockPrescaler){
-	case adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_4:
+	case adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_2:
 		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
+		break;
+	case adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_4:
+		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
 		break;
 	case adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_6:
 		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV6;
@@ -108,6 +111,7 @@ bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
 		break;
 	default:
+		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
 		break;
 	}
 
