@@ -46,7 +46,9 @@ void analog_read_test(Command* message_in, Command* message_out)
     	return;
 	}
 
+	HAL_ADC_PollForConversion(&adcHandle,1);
 	uint32_t adcValue = HAL_ADC_GetValue(&adcHandle);
+	HAL_ADC_Stop(&adcHandle);
 
 
 	// Set response
