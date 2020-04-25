@@ -1079,17 +1079,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return response
 
 
-#            last_widget = scroll_layout.itemAt(scroll_layout.count()-1).widget()
-#            print(last_widget)
-#            QtCore.QTimer.singleShot(0, partial(scroll.ensureWidgetVisible, last_widget))
-#            self.show()
-#            vbar = self.scrollArea.verticalScrollBar()
-#            vbar.setValue(vbar.maximum())
-#            self.show()
-#            self.scrollArea.ensureWidgetVisible(label)
-#            vbar = self.scrollArea.verticalScrollBar()
-#            vbar.setValue(vbar.maximum())
-
     # Connect to a serial port
     def connect(self):
         try:
