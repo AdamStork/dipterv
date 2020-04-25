@@ -189,7 +189,7 @@ dict_adc_channels = {
 }
 
 
-dict_gpio_analog_pins = {   # pin values represent the ADC channel IN[0..15] values
+dict_gpio_analog_pins = {   # pin values represent the ADC channel IN[0..15] values. Used only to decode channel-pin pairs.
     "PA0": 0,
     "PA1": 1,
     "PA2": 2,
@@ -416,10 +416,9 @@ def make_test_object_from_options(UI):
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.Analog_read:
         cmd.analog_in.instance = UI.adc_instance_select.currentData()
         cmd.analog_in.channel = UI.adc_channel_select.currentData()
-        cmd.analog_in.pin = list(dict_gpio_analog_pins.values())[list(dict_gpio_analog_pins.keys()).index(UI.adc_pin_select.text())]
+        cmd.analog_in.pin = list(dict_gpio_digital_pins.values())[list(dict_gpio_digital_pins.keys()).index(UI.adc_pin_select.text())]  # Use digital GPIO key-value instead of Analog.
         cmd.analog_in.resolution = UI.adc_resolution_select.currentData()
         cmd.analog_in.clockPrescaler = UI.adc_clock_prescaler_select.currentData()
-        print("Analog pin:",cmd.analog_in.pin)
 
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.Analog_write:
         cmd.analog_out.pin = UI.gpio_pin_select.currentData()
@@ -541,7 +540,7 @@ def make_string_from_test_object(test_object):
         string += "Analog_read"
         string += "  Instance: " + list(dict_adc_instances.keys())[list(dict_adc_instances.values()).index(test_object.analog_in.instance)]
         string += "  Channel: " + list(dict_adc_channels.keys())[list(dict_adc_channels.values()).index(test_object.analog_in.channel)]
-        string += "  Pin: " + list(dict_gpio_analog_pins.keys())[list(dict_gpio_analog_pins.values()).index(test_object.analog_in.pin)]
+        string += "  Pin: " + list(dict_gpio_digital_pins.keys())[list(dict_gpio_digital_pins.values()).index(test_object.analog_in.pin)]  # Use Digital GPIO key-value instead of Analog.
         string += "  Resolution: " + list(dict_adc_res.keys())[list(dict_adc_res.values()).index(test_object.analog_in.resolution)]
         string += "  Prescaler: " + list(dict_adc_clock_prescaler.keys())[list(dict_adc_clock_prescaler.values()).index(test_object.analog_in.clockPrescaler)]
 
