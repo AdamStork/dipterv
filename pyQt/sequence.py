@@ -596,11 +596,12 @@ def make_test_object_from_string(string):
             if test_object.i2c.speedMode == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, add duty cycle as well
                 test_object.i2c.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[9])]
         else:
-            test_object.i2c.size = int(optionValue[5])
-            test_object.i2c.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[6])]
-            test_object.i2c.clockSpeed = int(optionValue[7])
+            test_object.i2c.writeValue = int("0x0000",16)
+            test_object.i2c.size = int(optionValue[6])
+            test_object.i2c.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[7])]
+            test_object.i2c.clockSpeed = int(optionValue[8])
             if test_object.i2c.speedMode == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, add duty cycle as well
-                test_object.i2c.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[8])]
+                test_object.i2c.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[9])]
         return test_object
 
     elif words[0] == list_cmd_types[1]:

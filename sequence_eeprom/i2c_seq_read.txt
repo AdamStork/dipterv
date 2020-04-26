@@ -1,0 +1,4 @@
+I2C  Bus: I2C1  R/W: Read  Addr: 0x50  Reg: 0x0200  Reg size: 2  writeValue: 0x0000  Size: 1  Mode: Standard  Speed: 100000
+I2C  Bus: I2C1  R/W: Read  Addr: 0x50  Reg: 0x0201  Reg size: 2  writeValue: 0x0000  Size: 1  Mode: Standard  Speed: 100000
+I2C  Bus: I2C1  R/W: Read  Addr: 0x50  Reg: 0x0202  Reg size: 2  writeValue: 0x0000  Size: 1  Mode: Standard  Speed: 100000
+I2C  Bus: I2C1  R/W: Read  Addr: 0x50  Reg: 0x0203  Reg size: 2  writeValue: 0x0000  Size: 1  Mode: Standard  Speed: 100000
