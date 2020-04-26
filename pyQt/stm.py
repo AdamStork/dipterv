@@ -338,8 +338,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.i2c_duty_cycle_select.setParent(None)
         else:
             self.i2c_clock_speed_select.setText("400000")           # Set default value to 400000 in case standard mode selected
-            self.options_layout.addWidget(self.i2c_duty_cycle_label,8,0)
-            self.options_layout.addWidget(self.i2c_duty_cycle_select,8,2)
+            self.options_layout.addWidget(self.i2c_duty_cycle_label,9,0)
+            self.options_layout.addWidget(self.i2c_duty_cycle_select,9,2)
 
     def on_changed_i2c_rw(self):
         if self.i2c_rw_select.currentData() == list(sequence.dict_i2c_rw.values())[0]:
@@ -512,17 +512,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_rw_label = QLabel("R/W", self)
                 self.i2c_addr_label = QLabel("Address", self)
                 self.i2c_reg_label = QLabel("Register", self)
+                self.i2c_reg_size_label = QLabel("Reg. size (bytes)", self)
                 self.i2c_write_value_label = QLabel("Write value", self)
                 self.i2c_size_label = QLabel("Size (bytes)", self)
                 self.i2c_speed_mode_label = QLabel("Speed mode",self)
                 self.i2c_clock_speed_label = QLabel("Clock speed",self)
                 self.i2c_duty_cycle_label = QLabel("Duty cycle", self)
 
-
                 self.i2c_bus_select = QComboBox(self)
                 self.i2c_rw_select = QComboBox(self)
                 self.i2c_addr_select = QLineEdit(self)
                 self.i2c_reg_select = QLineEdit(self)
+                self.i2c_reg_size_select = QLineEdit(self)
                 self.i2c_write_value_select = QLineEdit(self)
                 self.i2c_size_select = QLineEdit(self)
                 self.i2c_speed_mode_select = QComboBox(self)
@@ -560,6 +561,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_write_value_select.setValidator(self.valueValidator)
                 self.i2c_write_value_select.setPlaceholderText("0x00..0xFFFF")
 
+                self.i2c_reg_size_select.setPlaceholderText("1..2")
+                self.i2c_reg_size_select.setValidator(self.byteSizeValidatorI2CWrite)
+
 
                 # Connect signals and call functions explicitly
                 self.i2c_speed_mode_select.activated[str].connect(self.on_changed_i2c_speed_mode)
@@ -572,22 +576,24 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.i2c_rw_label,1,0)
                 self.options_layout.addWidget(self.i2c_addr_label,2,0)
                 self.options_layout.addWidget(self.i2c_reg_label,3,0)
-                self.options_layout.addWidget(self.i2c_write_value_label,4,0)
-                self.options_layout.addWidget(self.i2c_size_label,5,0)
-                self.options_layout.addWidget(self.i2c_speed_mode_label,6,0)
-                self.options_layout.addWidget(self.i2c_clock_speed_label,7,0)
+                self.options_layout.addWidget(self.i2c_reg_size_label,4,0)
+                self.options_layout.addWidget(self.i2c_write_value_label,5,0)
+                self.options_layout.addWidget(self.i2c_size_label,6,0)
+                self.options_layout.addWidget(self.i2c_speed_mode_label,7,0)
+                self.options_layout.addWidget(self.i2c_clock_speed_label,8,0)
 
                 self.options_layout.addWidget(self.i2c_bus_select,0,2)
                 self.options_layout.addWidget(self.i2c_rw_select,1,2)
                 self.options_layout.addWidget(self.i2c_addr_select,2,2)
                 self.options_layout.addWidget(self.i2c_reg_select,3,2)
-                self.options_layout.addWidget(self.i2c_write_value_select,4,2)
-                self.options_layout.addWidget(self.i2c_size_select,5,2)
-                self.options_layout.addWidget(self.i2c_speed_mode_select,6,2)
-                self.options_layout.addWidget(self.i2c_clock_speed_select,7,2)
+                self.options_layout.addWidget(self.i2c_reg_size_select,4,2)
+                self.options_layout.addWidget(self.i2c_write_value_select,5,2)
+                self.options_layout.addWidget(self.i2c_size_select,6,2)
+                self.options_layout.addWidget(self.i2c_speed_mode_select,7,2)
+                self.options_layout.addWidget(self.i2c_clock_speed_select,8,2)
 
                 # Layout settings
-                self.options_layout.addItem(self.spacerItem,9,0)
+                self.options_layout.addItem(self.spacerItem,10,0)
                 self.options_layout.setColumnMinimumWidth(1,30)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:

@@ -47,6 +47,7 @@ message i2cMessage{
  optional i2cFastModeDutyCycle dutyCycle = 7;
  required uint32 size = 8;
  required uint32 writeValue = 9;
+ required uint32 registerSize = 10;
 }
 
 

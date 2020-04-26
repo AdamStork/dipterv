@@ -26,7 +26,7 @@ void i2c_test(Command* message_in, Command* message_out)
 	uint16_t deviceRegister = message_in->i2c.reg;
 	HAL_StatusTypeDef status;
 	bool success;
-	uint8_t registerSize = i2c_check_register_size(deviceRegister);
+	uint8_t registerSize = message_in->i2c.registerSize;
 
 	// Init I2C peripheral
 	success = i2c_init(message_in, &hi2c);
@@ -218,20 +218,5 @@ void i2c_error_handler(Command* message_in, Command* message_out)
 	}
 	else{
 		message_out->response.responseEnum = responseEnum_t_I2C_READ_FAIL;
-	}
-}
-
-/** @brief	Check I2C device register size: 1 or 2 bytes
- * @return	1: if length is 1 byte, 2: if length is 2 bytes
- */
-uint8_t i2c_check_register_size(uint16_t deviceRegister)
-{
-	uint8_t msb = (deviceRegister >> 8);
-
-	if(msb == 0){
-		return 1;
-	}
-	else{
-		return 2;
 	}
 }
