@@ -11,6 +11,7 @@
 
 
 static bool invalidPeripheral = false;
+ADC_HandleTypeDef adcHandle;
 
 
 /**********************			Analog read 			******************************/
@@ -21,7 +22,7 @@ void analog_read_test(Command* message_in, Command* message_out)
 {
 	GPIO_TypeDef *gpioPort;
 	uint16_t gpioPin;
-	ADC_HandleTypeDef adcHandle;
+
 	bool success;
 
 	// choose GPIO port and pin
@@ -40,17 +41,35 @@ void analog_read_test(Command* message_in, Command* message_out)
 
 	// ADC test
 	if(HAL_ADC_Start(&adcHandle) != HAL_OK){
+		analog_read_deinit(&adcHandle, gpioPort, gpioPin);
 		analog_read_error_handler(message_out);
     	return;
 	}
 
+	HAL_ADC_PollForConversion(&adcHandle,1);
 	uint32_t adcValue = HAL_ADC_GetValue(&adcHandle);
+	HAL_ADC_Stop(&adcHandle);
+
 
 	// Set response
 	message_out->commandType = CommandTypeEnum_Analog_read;
 	message_out->has_response = true;
 	message_out->response.has_responseRead = true;
-	message_out->response.responseRead = 3300*adcValue/4096;
+	switch(message_in->analog_in.resolution){
+	case adcResolution_ADC_12_BITS:
+		message_out->response.responseRead = 3300*adcValue/4096;
+		break;
+	case adcResolution_ADC_10_BITS:
+		message_out->response.responseRead = 3300*adcValue/1024;
+		break;
+	case adcResolution_ADC_8_BITS:
+		message_out->response.responseRead = 3300*adcValue/256;
+		break;
+	case adcResolution_ADC_6_BITS:
+		message_out->response.responseRead = 3300*adcValue/64;
+		break;
+	}
+
 
 	// ADC deinit
 	analog_read_deinit(&adcHandle, gpioPort, gpioPin);
@@ -81,6 +100,9 @@ bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 
 	// Configure ADC clock prescaler
 	switch(message_in->analog_in.clockPrescaler){
+	case adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_2:
+		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
+		break;
 	case adcClockPrescaler_ADC_PCLK2_DIVIDED_BY_4:
 		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
 		break;
@@ -91,6 +113,7 @@ bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
 		break;
 	default:
+		adcHandle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
 		break;
 	}
 
@@ -123,9 +146,12 @@ bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
 	adcHandle->Init.NbrOfConversion = 1;
 	adcHandle->Init.DMAContinuousRequests = DISABLE;
 	adcHandle->Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+
+
 	if (HAL_ADC_Init(adcHandle) != HAL_OK){
 		return false;
 	}
+
 
 	// Pin configuration
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -133,7 +159,6 @@ bool analog_read_init(Command* message_in, ADC_HandleTypeDef* adcHandle, GPIO_Ty
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(gpioPort, &GPIO_InitStruct);
-
 
 	// Define ADC Channel handler
 	ADC_ChannelConfTypeDef sConfig = {0};

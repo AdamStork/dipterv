@@ -140,7 +140,7 @@ void usart_test(Command* message_in, Command* message_out)
 	}
 
 	// USART/UART TX + RX
-	else{
+	else if(message_in->usart.direction == usartDirection_USART_TX_AND_RX){
 		bool messageDecodeSuccessful = false;
 		SimpleMessage simplMsgIn = SimpleMessage_init_zero;
 		SimpleMessage simplMsgOut = SimpleMessage_init_zero;
@@ -219,6 +219,18 @@ void usart_test(Command* message_in, Command* message_out)
 			message_out->response.responseEnum = responseEnum_t_USART_TX_RX_FAIL;
 		}
 
+	}
+	else{
+		// Deinit UART/USART
+		if(message_in->usart.mode == usartMode_USART_MODE_ASYNCHRONOUS){
+	//		HAL_UART_MspDeInit(&huart);
+			HAL_UART_DeInit(&huart);
+		}
+		else{
+	//		HAL_USART_MspDeInit(&husart);
+			HAL_USART_DeInit(&husart);
+		}
+		usart_error_handler(message_in, message_out);
 	}
 
 

@@ -35,7 +35,7 @@ StateType deviceState;
 
 
 /** @brief Receive command via UART, and perform chosen test **/
-void enter_processing_state(void)
+void enter_state_machine(void)
 {
 	Command message_in = Command_init_zero;
 	Command message_out = Command_init_zero;
@@ -246,8 +246,4 @@ void command_reset(Command* message)
 	message->response.has_responseEnum = false;
 	message->response.responseRead = 0;
 	message->response.responseEnum = _responseEnum_t_MIN;
-
-	// Reset autoConfig
-	message->has_autoConfig = false;
-	message->autoConfig = false;
 }

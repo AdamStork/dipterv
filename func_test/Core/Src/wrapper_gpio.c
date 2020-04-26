@@ -57,7 +57,8 @@ void gpio_test(Command* message_in, Command* message_out)
 		message_out->response.responseRead = gpioReadState;
 	}
 	else{
-		//empty
+		gpio_deinit(gpioPort, gpioPin);
+		gpio_error(message_in, message_out);
 	}
 
 	// Deinitialize GPIO in case of GPIO read

@@ -47,6 +47,7 @@ message i2cMessage{
  optional i2cFastModeDutyCycle dutyCycle = 7;
  required uint32 size = 8;
  required uint32 writeValue = 9;
+ required uint32 registerSize = 10;
 }
 
 
@@ -209,9 +210,10 @@ enum adcResolution{
 }
 
 enum adcClockPrescaler{		
-	ADC_PCLK2_DIVIDED_BY_4 = 0;
-	ADC_PCLK2_DIVIDED_BY_6 = 1;
-	ADC_PCLK2_DIVIDED_BY_8 = 2;
+	ADC_PCLK2_DIVIDED_BY_2 = 0;
+	ADC_PCLK2_DIVIDED_BY_4 = 1;
+	ADC_PCLK2_DIVIDED_BY_6 = 2;
+	ADC_PCLK2_DIVIDED_BY_8 = 3;
 }
 
 enum adcChannel{		

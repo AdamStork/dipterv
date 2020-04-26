@@ -1,6 +1,8 @@
-#    Python file for sequence builder - test object and list handling
-#    Author: Adam Golya
-#   #######################################
+#   @author   Adam Golya
+#   @brief    Python file for sequence builder
+#   @details  test_object (message) and list handling
+#   ##############################################################################
+
 
 import functional_test_pb2
 
@@ -189,7 +191,7 @@ dict_adc_channels = {
 }
 
 
-dict_gpio_analog_pins = {   # pin values represent the ADC channel IN[0..15] values
+dict_gpio_analog_pins = {   # pin values represent the ADC channel IN[0..15] values. Used only to decode channel-pin pairs.
     "PA0": 0,
     "PA1": 1,
     "PA2": 2,
@@ -219,9 +221,10 @@ dict_adc_res = {
 }
 
 dict_adc_clock_prescaler = {
-    "PCLK2/4": 0,
-    "PCLK2/6": 1,
-    "PCLK2/8": 2,
+    "PCLK2/2": 0,
+    "PCLK2/4": 1,
+    "PCLK2/6": 2,
+    "PCLK2/8": 3,
 }
 
 
@@ -332,6 +335,11 @@ def make_test_object_from_options(UI):
             UI.i2c_reg_select.setText("0x00")
         else:
             cmd.i2c.reg = int(UI.i2c_reg_select.text(),16)           # Convert to int
+        if is_empty(UI.i2c_reg_size_select.text()):
+            cmd.i2c.registerSize = 1
+            UI.i2c_reg_size_select.setText("1")
+        else:
+            cmd.i2c.registerSize = int(UI.i2c_reg_size_select.text())
         if is_empty(UI.i2c_write_value_select.text()):
             cmd.i2c.writeValue = 0
             UI.i2c_write_value_select.setText("0x00")
@@ -416,10 +424,9 @@ def make_test_object_from_options(UI):
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.Analog_read:
         cmd.analog_in.instance = UI.adc_instance_select.currentData()
         cmd.analog_in.channel = UI.adc_channel_select.currentData()
-        cmd.analog_in.pin = list(dict_gpio_analog_pins.values())[list(dict_gpio_analog_pins.keys()).index(UI.adc_pin_select.text())]
+        cmd.analog_in.pin = list(dict_gpio_digital_pins.values())[list(dict_gpio_digital_pins.keys()).index(UI.adc_pin_select.text())]  # Use digital GPIO key-value instead of Analog.
         cmd.analog_in.resolution = UI.adc_resolution_select.currentData()
         cmd.analog_in.clockPrescaler = UI.adc_clock_prescaler_select.currentData()
-        print("Analog pin:",cmd.analog_in.pin)
 
     elif UI.cmd_box.currentData() == functional_test_pb2.CommandTypeEnum.Analog_write:
         cmd.analog_out.pin = UI.gpio_pin_select.currentData()
@@ -489,7 +496,8 @@ def make_string_from_test_object(test_object):
         string += "  Bus: " + list(dict_i2c_bus.keys())[list(dict_i2c_bus.values()).index(test_object.i2c.bus)]
         string += "  R/W: " + list(dict_i2c_rw.keys())[list(dict_i2c_rw.values()).index(test_object.i2c.direction)]
         string += "  Addr: " + "0x{:02X}".format(test_object.i2c.address)
-        string += "  Reg: " + "0x{:02X}".format(test_object.i2c.reg)
+        string += "  Reg: " + "0x{:04X}".format(test_object.i2c.reg)
+        string += "  Reg size: " + str(test_object.i2c.registerSize)
         string += "  writeValue: " + "0x{:04X}".format(test_object.i2c.writeValue)
         string += "  Size: " + str(test_object.i2c.size)
         string += "  Mode: " + list(dict_i2c_speedmode.keys())[list(dict_i2c_speedmode.values()).index(test_object.i2c.speedMode)]
@@ -541,7 +549,7 @@ def make_string_from_test_object(test_object):
         string += "Analog_read"
         string += "  Instance: " + list(dict_adc_instances.keys())[list(dict_adc_instances.values()).index(test_object.analog_in.instance)]
         string += "  Channel: " + list(dict_adc_channels.keys())[list(dict_adc_channels.values()).index(test_object.analog_in.channel)]
-        string += "  Pin: " + list(dict_gpio_analog_pins.keys())[list(dict_gpio_analog_pins.values()).index(test_object.analog_in.pin)]
+        string += "  Pin: " + list(dict_gpio_digital_pins.keys())[list(dict_gpio_digital_pins.values()).index(test_object.analog_in.pin)]  # Use Digital GPIO key-value instead of Analog.
         string += "  Resolution: " + list(dict_adc_res.keys())[list(dict_adc_res.values()).index(test_object.analog_in.resolution)]
         string += "  Prescaler: " + list(dict_adc_clock_prescaler.keys())[list(dict_adc_clock_prescaler.values()).index(test_object.analog_in.clockPrescaler)]
 
@@ -581,19 +589,21 @@ def make_test_object_from_string(string):
         test_object.i2c.direction = list(dict_i2c_rw.values())[list(dict_i2c_rw.keys()).index(optionValue[1])]
         test_object.i2c.address = int(optionValue[2],16)
         test_object.i2c.reg = int(optionValue[3],16)
+        test_object.i2c.registerSize = int(optionValue[4])
         if test_object.i2c.direction == list(dict_i2c_rw.values())[0]: # If 'Write' is selected, add writeValue also
-            test_object.i2c.writeValue = int(optionValue[4],16)
-            test_object.i2c.size = int(optionValue[5])
-            test_object.i2c.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[6])]
-            test_object.i2c.clockSpeed = int(optionValue[7])
+            test_object.i2c.writeValue = int(optionValue[5],16)
+            test_object.i2c.size = int(optionValue[6])
+            test_object.i2c.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[7])]
+            test_object.i2c.clockSpeed = int(optionValue[8])
             if test_object.i2c.speedMode == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, add duty cycle as well
-                test_object.i2c.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[8])]
+                test_object.i2c.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[9])]
         else:
-            test_object.i2c.size = int(optionValue[4])
-            test_object.i2c.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[5])]
-            test_object.i2c.clockSpeed = int(optionValue[6])
+            test_object.i2c.writeValue = int("0x0000",16)
+            test_object.i2c.size = int(optionValue[6])
+            test_object.i2c.speedMode = list(dict_i2c_speedmode.values())[list(dict_i2c_speedmode.keys()).index(optionValue[7])]
+            test_object.i2c.clockSpeed = int(optionValue[8])
             if test_object.i2c.speedMode == list(dict_i2c_speedmode.values())[1]:  # If 'Fast mode' is selected, add duty cycle as well
-                test_object.i2c.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[7])]
+                test_object.i2c.dutyCycle = list(dict_i2c_duty_cycle.values())[list(dict_i2c_duty_cycle.keys()).index(optionValue[9])]
         return test_object
 
     elif words[0] == list_cmd_types[1]:

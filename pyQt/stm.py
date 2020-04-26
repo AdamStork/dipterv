@@ -1,3 +1,8 @@
+#   @author   Adam Golya
+#   @brief    Python file for STM32 functional tester
+#   #######################################
+
+
 import time, os, sys, serial
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtWidgets import *
@@ -60,7 +65,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.slaveSizeValidatorSPI  = QRegExpValidator(QRegExp("[0-4]"))                        # 1-digit decimal validator for SPI slave response size
         self.dummyValidator  = QRegExpValidator(QRegExp("[0-9]|(1[0-5])"))                          # 2-digit decimal validator for SPI dummy clocks
         self.pwmTimeValidator = QRegExpValidator(QRegExp("[0-9]{1,5}"))                         # Max 5-digit decimal validator for PWM time dependency field
-        self.baudValidator  = QRegExpValidator(QRegExp("[0-9]{4,6}"))                           # Max 6-digit decimal validator for USART baudrate
+        self.baudValidator  = QRegExpValidator(QRegExp("[0-9]{4,7}"))                           # Max 7-digit decimal validator for USART baudrate
         self.dutyValidator = QRegExpValidator(QRegExp("0|100|[1-9][0-9]?"))                     # Max. 3-digit validator for PWM duty cycle [0-100]
         self.freqValidator = QRegExpValidator(QRegExp("0|0\.[0-9]|[1-9][0-9]{0,2}\.?[0-9]"))    # Max. 4-digit validator for freqency [0-1000], limits checked
         self.valueValidator = QRegExpValidator(QRegExp("0x[0-9A-Fa-f]{2,4}"))                   # Max. 2 bytes validator for I2C/SPI write value
@@ -338,8 +343,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.i2c_duty_cycle_select.setParent(None)
         else:
             self.i2c_clock_speed_select.setText("400000")           # Set default value to 400000 in case standard mode selected
-            self.options_layout.addWidget(self.i2c_duty_cycle_label,8,0)
-            self.options_layout.addWidget(self.i2c_duty_cycle_select,8,2)
+            self.options_layout.addWidget(self.i2c_duty_cycle_label,9,0)
+            self.options_layout.addWidget(self.i2c_duty_cycle_select,9,2)
 
     def on_changed_i2c_rw(self):
         if self.i2c_rw_select.currentData() == list(sequence.dict_i2c_rw.values())[0]:
@@ -512,17 +517,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_rw_label = QLabel("R/W", self)
                 self.i2c_addr_label = QLabel("Address", self)
                 self.i2c_reg_label = QLabel("Register", self)
+                self.i2c_reg_size_label = QLabel("Reg. size (bytes)", self)
                 self.i2c_write_value_label = QLabel("Write value", self)
                 self.i2c_size_label = QLabel("Size (bytes)", self)
                 self.i2c_speed_mode_label = QLabel("Speed mode",self)
                 self.i2c_clock_speed_label = QLabel("Clock speed",self)
                 self.i2c_duty_cycle_label = QLabel("Duty cycle", self)
 
-
                 self.i2c_bus_select = QComboBox(self)
                 self.i2c_rw_select = QComboBox(self)
                 self.i2c_addr_select = QLineEdit(self)
                 self.i2c_reg_select = QLineEdit(self)
+                self.i2c_reg_size_select = QLineEdit(self)
                 self.i2c_write_value_select = QLineEdit(self)
                 self.i2c_size_select = QLineEdit(self)
                 self.i2c_speed_mode_select = QComboBox(self)
@@ -554,11 +560,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_addr_select.setValidator(self.byteValidator)
                 self.i2c_addr_select.setPlaceholderText("0x00")
 
-                self.i2c_reg_select.setValidator(self.byteValidator)
-                self.i2c_reg_select.setPlaceholderText("0x00")
+                self.i2c_reg_select.setValidator(self.valueValidator)
+                self.i2c_reg_select.setPlaceholderText("0x00..0xFFFF")
 
                 self.i2c_write_value_select.setValidator(self.valueValidator)
                 self.i2c_write_value_select.setPlaceholderText("0x00..0xFFFF")
+
+                self.i2c_reg_size_select.setPlaceholderText("1..2")
+                self.i2c_reg_size_select.setValidator(self.byteSizeValidatorI2CWrite)
 
 
                 # Connect signals and call functions explicitly
@@ -572,22 +581,24 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.options_layout.addWidget(self.i2c_rw_label,1,0)
                 self.options_layout.addWidget(self.i2c_addr_label,2,0)
                 self.options_layout.addWidget(self.i2c_reg_label,3,0)
-                self.options_layout.addWidget(self.i2c_write_value_label,4,0)
-                self.options_layout.addWidget(self.i2c_size_label,5,0)
-                self.options_layout.addWidget(self.i2c_speed_mode_label,6,0)
-                self.options_layout.addWidget(self.i2c_clock_speed_label,7,0)
+                self.options_layout.addWidget(self.i2c_reg_size_label,4,0)
+                self.options_layout.addWidget(self.i2c_write_value_label,5,0)
+                self.options_layout.addWidget(self.i2c_size_label,6,0)
+                self.options_layout.addWidget(self.i2c_speed_mode_label,7,0)
+                self.options_layout.addWidget(self.i2c_clock_speed_label,8,0)
 
                 self.options_layout.addWidget(self.i2c_bus_select,0,2)
                 self.options_layout.addWidget(self.i2c_rw_select,1,2)
                 self.options_layout.addWidget(self.i2c_addr_select,2,2)
                 self.options_layout.addWidget(self.i2c_reg_select,3,2)
-                self.options_layout.addWidget(self.i2c_write_value_select,4,2)
-                self.options_layout.addWidget(self.i2c_size_select,5,2)
-                self.options_layout.addWidget(self.i2c_speed_mode_select,6,2)
-                self.options_layout.addWidget(self.i2c_clock_speed_select,7,2)
+                self.options_layout.addWidget(self.i2c_reg_size_select,4,2)
+                self.options_layout.addWidget(self.i2c_write_value_select,5,2)
+                self.options_layout.addWidget(self.i2c_size_select,6,2)
+                self.options_layout.addWidget(self.i2c_speed_mode_select,7,2)
+                self.options_layout.addWidget(self.i2c_clock_speed_select,8,2)
 
                 # Layout settings
-                self.options_layout.addItem(self.spacerItem,9,0)
+                self.options_layout.addItem(self.spacerItem,10,0)
                 self.options_layout.setColumnMinimumWidth(1,30)
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
@@ -1025,7 +1036,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if message_data.response.responseEnum == list(sequence.dict_response_write.values())[list(sequence.dict_response_write.keys()).index("I2C read failed")]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
-                    response = "I2C read: " + "0x{:04X}".format(message_data.response.responseRead)
+                    if test_object.i2c.size == 1:
+                        response = "I2C read: " + "0x{:02X}".format(message_data.response.responseRead)
+                    else:
+                        response = "I2C read: " + "0x{:04X}".format(message_data.response.responseRead)
+
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             if test_object.spi.operatingMode == list(sequence.dict_spi_operating_mode.values())[1]: # SPI Transmit-only response: OK/failed
@@ -1078,17 +1093,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ser.flush()
         return response
 
-
-#            last_widget = scroll_layout.itemAt(scroll_layout.count()-1).widget()
-#            print(last_widget)
-#            QtCore.QTimer.singleShot(0, partial(scroll.ensureWidgetVisible, last_widget))
-#            self.show()
-#            vbar = self.scrollArea.verticalScrollBar()
-#            vbar.setValue(vbar.maximum())
-#            self.show()
-#            self.scrollArea.ensureWidgetVisible(label)
-#            vbar = self.scrollArea.verticalScrollBar()
-#            vbar.setValue(vbar.maximum())
 
     # Connect to a serial port
     def connect(self):
