@@ -337,7 +337,7 @@ def make_test_object_from_options(UI):
             cmd.i2c.registerSize = 1
             UI.i2c_reg_size_select.setText("1")
         else:
-            cmd.i2c.size = int(UI.i2c_size_select.text())
+            cmd.i2c.registerSize = int(UI.i2c_reg_size_select.text())
         if is_empty(UI.i2c_write_value_select.text()):
             cmd.i2c.writeValue = 0
             UI.i2c_write_value_select.setText("0x00")
