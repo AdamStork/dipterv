@@ -1,6 +1,8 @@
-#    Python file for sequence builder - test object and list handling
-#    Author: Adam Golya
-#   #######################################
+#   @author   Adam Golya
+#   @brief    Python file for sequence builder
+#   @details  test_object (message) and list handling
+#   ##############################################################################
+
 
 import functional_test_pb2
 

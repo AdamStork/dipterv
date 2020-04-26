@@ -1,4 +1,8 @@
-#    Python file for reading in and processing CubeMX configuration file
+#   @author   Adam Golya
+#   @brief    Python file for reading in and processing CubeMX configuration file
+#   ##############################################################################
+
+
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -6,10 +10,11 @@ from PyQt5.QtGui import *
 
 import sequence
 
-#Function list:
+# Function list:
 #    process_config_file(path)
 #    check_dataline_for_available_buses(data_line)
 #    check_data_line_for_available_pins(data_line)
+#    check_dataline_for_mcu_info(data_line)
 
 
 dict_available_i2c_buses = {}

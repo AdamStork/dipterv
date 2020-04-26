@@ -1,3 +1,3 @@
 {
-    "files": ["link_layer.py","sequence.py","stm_gui.ui","config.py","functional_test_pb2.py","stm.py","tests.py"]
+    "files": ["stm.py","link_layer.py","functional_test_pb2.py","sequence.py","stm_gui.ui","config.py"]
 }

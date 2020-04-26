@@ -1,3 +1,8 @@
+#   @author   Adam Golya
+#   @brief    Python file for STM32 functional tester
+#   #######################################
+
+
 import time, os, sys, serial
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtWidgets import *
