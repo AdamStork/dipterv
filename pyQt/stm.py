@@ -1031,7 +1031,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if message_data.response.responseEnum == list(sequence.dict_response_write.values())[list(sequence.dict_response_write.keys()).index("I2C read failed")]:
                     response = list(sequence.dict_response_write.keys())[list(sequence.dict_response_write.values()).index(message_data.response.responseEnum)]
                 else:
-                    response = "I2C read: " + "0x{:04X}".format(message_data.response.responseRead)
+                    if test_object.i2c.size == 1:
+                        response = "I2C read: " + "0x{:02X}".format(message_data.response.responseRead)
+                    else:
+                        response = "I2C read: " + "0x{:04X}".format(message_data.response.responseRead)
+
 
         elif cmdType == functional_test_pb2.CommandTypeEnum.SPI_test:
             if test_object.spi.operatingMode == list(sequence.dict_spi_operating_mode.values())[1]: # SPI Transmit-only response: OK/failed
