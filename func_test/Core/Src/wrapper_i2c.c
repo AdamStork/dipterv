@@ -23,9 +23,10 @@ static bool invalidPeripheral = false;
 void i2c_test(Command* message_in, Command* message_out)
 {
 	uint8_t deviceAddress = (message_in->i2c.address) << 1; // use 8-bit address
-	uint8_t deviceRegister = message_in->i2c.reg;
+	uint16_t deviceRegister = message_in->i2c.reg;
 	HAL_StatusTypeDef status;
 	bool success;
+	uint8_t registerSize = i2c_check_register_size(deviceRegister);
 
 	// Init I2C peripheral
 	success = i2c_init(message_in, &hi2c);
@@ -42,13 +43,29 @@ void i2c_test(Command* message_in, Command* message_out)
 
 		// Place writeValue into buffer
 		uint32_t writeValue_32 = message_in->i2c.writeValue;
-		writeBuff[0] = deviceRegister;
-		for(uint8_t i = 0; i<writeSize; i++){
-			writeBuff[1+i] = (uint8_t)(writeValue_32 >> (i*8));
+
+		if(registerSize == 1){
+			writeBuff[0] = (uint8_t)deviceRegister;
+			for(uint8_t i = 0; i<writeSize; i++){
+				writeBuff[1+i] = (uint8_t)(writeValue_32 >> (i*8));
+			}
+		}
+		else{ // registerSize = 2
+			writeBuff[0] = (deviceRegister >> 8); 	// deviceRegister MSB
+			writeBuff[1] = (uint8_t)deviceRegister;	// deviceRegister LSB
+			for(uint8_t i = 0; i<writeSize; i++){
+				writeBuff[2+i] = (uint8_t)(writeValue_32 >> (i*8));
+			}
 		}
 
+
 		// Send out data via I2C
-		status = HAL_I2C_Master_Transmit(&hi2c,(uint16_t)deviceAddress,writeBuff, writeSize+1, TEST_TIMEOUT_DURATION);		// wait: IsDeviceReady
+		if(registerSize == 1){
+			status = HAL_I2C_Master_Transmit(&hi2c,(uint16_t)deviceAddress,writeBuff, writeSize+1, TEST_TIMEOUT_DURATION);
+		}
+		else{
+			status = HAL_I2C_Master_Transmit(&hi2c,(uint16_t)deviceAddress,writeBuff, writeSize+2, TEST_TIMEOUT_DURATION);
+		}
 		message_out->has_response = true;
 		message_out->response.has_responseEnum = true;
 		if(status == HAL_OK){
@@ -61,12 +78,25 @@ void i2c_test(Command* message_in, Command* message_out)
 	// I2C read
 	else{
 		uint8_t readSize = message_in->i2c.size;	// Number of bytes expected to sent back by slave
-		writeBuff[0] = deviceRegister;
+		if(registerSize == 1){
+			writeBuff[0] = (uint8_t)deviceRegister;
+		}
+		else{ // registerSize = 2
+			writeBuff[0] = (deviceRegister >> 8); 	// deviceRegister MSB
+			writeBuff[1] = (uint8_t)deviceRegister;	// deviceRegister LSB
+		}
+
 
 		// Read out data via I2C
 		status = HAL_BUSY;
 		while(status != HAL_OK){
-			status = HAL_I2C_Master_Transmit(&hi2c, (uint16_t)deviceAddress, writeBuff, 1, TEST_TIMEOUT_DURATION);		// wait: IsDeviceReady
+			if(registerSize == 1){
+				status = HAL_I2C_Master_Transmit(&hi2c, (uint16_t)deviceAddress, writeBuff, 1, TEST_TIMEOUT_DURATION);		// wait: IsDeviceReady
+			}
+			else{
+				status = HAL_I2C_Master_Transmit(&hi2c, (uint16_t)deviceAddress, writeBuff, 2, TEST_TIMEOUT_DURATION);		// wait: IsDeviceReady
+			}
+
 			if(status == HAL_TIMEOUT){
 //				HAL_I2C_MspDeInit(&hi2c);
 				i2c_error_handler(message_in, message_out);
@@ -191,3 +221,17 @@ void i2c_error_handler(Command* message_in, Command* message_out)
 	}
 }
 
+/** @brief	Check I2C device register size: 1 or 2 bytes
+ * @return	1: if length is 1 byte, 2: if length is 2 bytes
+ */
+uint8_t i2c_check_register_size(uint16_t deviceRegister)
+{
+	uint8_t msb = (deviceRegister >> 8);
+
+	if(msb == 0){
+		return 1;
+	}
+	else{
+		return 2;
+	}
+}

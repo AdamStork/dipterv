@@ -554,8 +554,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.i2c_addr_select.setValidator(self.byteValidator)
                 self.i2c_addr_select.setPlaceholderText("0x00")
 
-                self.i2c_reg_select.setValidator(self.byteValidator)
-                self.i2c_reg_select.setPlaceholderText("0x00")
+                self.i2c_reg_select.setValidator(self.valueValidator)
+                self.i2c_reg_select.setPlaceholderText("0x00..0xFFFF")
 
                 self.i2c_write_value_select.setValidator(self.valueValidator)
                 self.i2c_write_value_select.setPlaceholderText("0x00..0xFFFF")

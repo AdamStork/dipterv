@@ -18,6 +18,7 @@
 bool i2c_init(Command* message_in, I2C_HandleTypeDef* hi2c);
 void i2c_test(Command* message_in, Command* message_out);
 void i2c_error_handler(Command* message_in, Command* message_out);
+uint8_t i2c_check_register_size(uint16_t deviceRegister);
 
 #ifdef __cplusplus
 }
